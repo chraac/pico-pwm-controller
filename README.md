@@ -19,7 +19,7 @@ A PWM fan controller runs on raspberry-pico
         -v /path/to/your/pico:/pico \
         -v /path/to/your/project:/project \
         chraac/pico-builder:latest \
-        bash -c 'cd $PROJECT_PATH && mkdir -p build && cd build && cmake .. && make'
+        bash -c 'mkdir -p $PROJECT_PATH/build && cd $PROJECT_PATH/build && cmake .. && make'
     ```
 
 1. Copy the build/exec/pwm_controller.uf2 into RPI-RP2 drive
