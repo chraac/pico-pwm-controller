@@ -1,27 +1,27 @@
 
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
+#include "hardware/clocks.h"
 
-int main() {
-    /// \tag::setup_pwm[]
+constexpr uint PWM_FREQ_KHZ = 25;
+constexpr uint PWM1_PIN = 0;
+constexpr uint PWM2_PIN = 7;
+constexpr uint PWM3_PIN = 27;
+constexpr uint PWM4_PIN = 17;
 
-    // Tell GPIO 0 and 1 they are allocated to the PWM
-    gpio_set_function(0, GPIO_FUNC_PWM);
-    gpio_set_function(1, GPIO_FUNC_PWM);
+int main()
+{
+    stdio_init_all();
 
-    // Find out which PWM slice is connected to GPIO 0 (it's slice 0)
-    uint slice_num = pwm_gpio_to_slice_num(0);
+    auto config = pwm_get_default_config();
+    auto sys_clk = clock_get_hz(clk_sys) / 1000;
+    pwm_config_set_clkdiv(&config, float(sys_clk) / float(PWM_FREQ_KHZ));
+    pwm_config_set_clkdiv_mode(&config, PWM_DIV_FREE_RUNNING);
+    pwm_config_set_wrap(&config, 100);
 
-    // Set period of 4 cycles (0 to 3 inclusive)
-    pwm_set_wrap(slice_num, 3);
-    // Set channel A output high for one cycle before dropping
-    pwm_set_chan_level(slice_num, PWM_CHAN_A, 1);
-    // Set initial B output high for three cycles before dropping
-    pwm_set_chan_level(slice_num, PWM_CHAN_B, 3);
-    // Set the PWM running
-    pwm_set_enabled(slice_num, true);
-    /// \end::setup_pwm[]
-
-    // Note we could also use pwm_set_gpio_level(gpio, x) which looks up the
-    // correct slice and channel for a given GPIO.
+    auto slice_num = pwm_gpio_to_slice_num(PWM1_PIN);
+    pwm_init(slice_num, &config, true);
+    gpio_set_function(PWM1_PIN, GPIO_FUNC_PWM);
+    pwm_set_gpio_level(PWM1_PIN, 50);
+    return 0;
 }
