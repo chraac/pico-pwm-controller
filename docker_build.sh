@@ -15,5 +15,6 @@ docker run --rm -it \
     -v $PICO_BASE_PATH:/pico \
     -v $PROJECT_PATH:/project \
     -w=/project \
+    -e PICO_SDK_PATH=/pico/pico-sdk \
     chraac/pico-builder:latest \
     bash -c 'mkdir -p build && cd build && cmake .. && make'
