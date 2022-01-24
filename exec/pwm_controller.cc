@@ -1,7 +1,6 @@
 
 #include "pico/stdlib.h"
-#include "hardware/pwm.h"
-#include "hardware/clocks.h"
+#include "pwm_helper.hh"
 
 constexpr uint kPwmFreqKhz = 25;
 constexpr uint kPwmTop = 999;
@@ -9,6 +8,8 @@ constexpr uint kPwm1Pin = 0;
 constexpr uint kPwm2Pin = 7;
 constexpr uint kPwm3Pin = 27;
 constexpr uint kPwm4Pin = 17;
+
+using namespace utility;
 
 /*
  * For more detail, see: https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf, Page 553
@@ -37,19 +38,19 @@ int main()
     pwm_config_set_freq(config, kPwmFreqKhz, kPwmTop);
 
     // PWM1
-    init_pwm_with_cfg(kPwm1Pin, config);
-    init_pwm_with_cfg(kPwm2Pin, config);
-    init_pwm_with_cfg(kPwm3Pin, config);
-    init_pwm_with_cfg(kPwm4Pin, config);
+    auto pwm1 = PwmHelper(kPwm1Pin, config);
+    auto pwm2 = PwmHelper(kPwm2Pin, config);
+    auto pwm3 = PwmHelper(kPwm3Pin, config);
+    auto pwm4 = PwmHelper(kPwm4Pin, config);
 
-    pwm_set_gpio_level(kPwm1Pin, 250);
-    pwm_set_gpio_level(kPwm2Pin, 500);
-    pwm_set_gpio_level(kPwm3Pin, 750);
-    pwm_set_gpio_level(kPwm4Pin, 999);
+    pwm1.SetDutyCycle(25);
+    pwm2.SetDutyCycle(50);
+    pwm3.SetDutyCycle(75);
+    pwm4.SetDutyCycle(100);
 
     for (size_t i = 0;; i = (i + 1) % 4)
     {
-        pwm_set_gpio_level(kPwm1Pin, i * 250);
+        pwm1.SetDutyCycle(i * 25);
         sleep_ms(2000);
     }
 
