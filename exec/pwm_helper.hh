@@ -36,7 +36,7 @@ namespace utility
 
         void SetDutyCycle(uint32_t num, uint32_t denom = 100) noexcept
         {
-            const auto max_cyc = _pwm_config.top + 1;
+            const auto max_cyc = _pwm_config.top;
             pwm_set_gpio_level(_gpio_pin, num * max_cyc / denom);
         }
 
