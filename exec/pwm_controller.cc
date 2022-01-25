@@ -19,7 +19,7 @@ namespace
 {
     uint32_t IncreaseAndGet(uint32_t &val)
     {
-        val = (val + 1) % 101;
+        val = (val + 3) % 101;
         return val;
     }
 }
