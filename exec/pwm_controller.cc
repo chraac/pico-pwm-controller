@@ -15,6 +15,15 @@ constexpr uint kButton4Pin = 16;
 
 using namespace utility;
 
+namespace
+{
+    uint32_t IncreaseAndGet(uint32_t &val)
+    {
+        val = (val + 1) % 101;
+        return val;
+    }
+}
+
 int main()
 {
     stdio_init_all();
@@ -41,11 +50,25 @@ int main()
     {
         if (btn1.IsPressed())
         {
-            cycle1 = (cycle1 + 1) % 101;
-            pwm1.SetDutyCycle(cycle1);
+            pwm1.SetDutyCycle(IncreaseAndGet(cycle1));
         }
 
-        sleep_ms(100);
+        if (btn2.IsPressed())
+        {
+            pwm2.SetDutyCycle(IncreaseAndGet(cycle2));
+        }
+
+        if (btn3.IsPressed())
+        {
+            pwm3.SetDutyCycle(IncreaseAndGet(cycle3));
+        }
+
+        if (btn4.IsPressed())
+        {
+            pwm4.SetDutyCycle(IncreaseAndGet(cycle4));
+        }
+
+        sleep_ms(200);
     }
 
     return 0;
