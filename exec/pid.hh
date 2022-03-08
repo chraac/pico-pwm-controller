@@ -21,7 +21,7 @@ namespace utility {
         ValueType calculate(ValueType target, ValueType current) {
             if (target == current) {
                 _pre_error = 0;
-                return
+                return target;
             }
 
             // Proportional term
