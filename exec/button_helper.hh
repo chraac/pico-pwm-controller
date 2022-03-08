@@ -28,7 +28,7 @@ namespace utility
     private:
         const uint _gpio_pin;
 
-        DISALLOW_COPY(SystemClock);
-        DISALLOW_MOVE(SystemClock);
+        DISALLOW_COPY(ButtonHelper);
+        DISALLOW_MOVE(ButtonHelper);
     };
 }
