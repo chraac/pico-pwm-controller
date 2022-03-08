@@ -27,5 +27,8 @@ namespace utility
 
     private:
         const uint _gpio_pin;
+
+        DISALLOW_COPY(SystemClock);
+        DISALLOW_MOVE(SystemClock);
     };
 }
