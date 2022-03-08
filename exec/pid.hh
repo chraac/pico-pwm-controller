@@ -9,7 +9,7 @@ namespace utility {
     public:
         typedef uint32_t ValueType;
         typedef float FloatType;
-        Pid(const ValueType min, const ValueType max, const ValueType dt, FloatType kp, FloatType, ki, FloatType kd) noexcept
+        Pid(const ValueType min, const ValueType max, const ValueType dt, FloatType kp, FloatType ki, FloatType kd) noexcept
             : _min(min)
             , _max(max)
             , _dt(dt)
