@@ -2,6 +2,7 @@
 #include "pico/stdlib.h"
 #include "pwm_helper.hh"
 #include "button_helper.hh"
+#include "pid.hh"
 
 constexpr uint kPwmFreqKhz = 25;
 constexpr uint kPwm1Pin = 0;
