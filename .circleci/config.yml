@@ -1,0 +1,22 @@
+version: 2.1
+
+jobs:
+  "Build":
+    docker:
+      - image: chraac/pico-builder:latest
+    steps:
+      - checkout
+      - run:
+          name: "Checkout pico sdk"
+          command: "git clone -b 1.3.0 https://github.com/raspberrypi/pico-sdk.git /pico/pico-sdk"
+      - run:
+          name: "Build with pico sdk"
+          command: "mkdir -p build && cd build && cmake .. && make"
+          environment: 
+            PICO_BASE_PATH: '/pico'
+            PICO_SDK_PATH: '/pico/pico-sdk'
+
+workflows:
+  pico-pwm-controller-workflow:
+    jobs:
+      - Build
