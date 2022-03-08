@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include <cstdint>
 #include "hardware/gpio.h"
+#include "base_types.hh"
 
 namespace utility
 {
