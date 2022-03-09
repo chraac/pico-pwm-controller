@@ -7,7 +7,7 @@ namespace utility {
 
     class Pid {
     public:
-        typedef uint32_t ValueType;
+        typedef int32_t ValueType;
         typedef float FloatType;
         Pid(const ValueType min, const ValueType max, const ValueType dt, FloatType kp, FloatType ki, FloatType kd) noexcept
             : _min(min)
