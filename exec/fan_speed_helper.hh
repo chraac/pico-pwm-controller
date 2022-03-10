@@ -32,16 +32,16 @@ namespace utility {
         }
 
     private:
-        static void GpioEventHandler(uint gpio, uint32_t events)) {
+        static void GpioEventHandler(uint gpio, uint32_t events) {
             if (events && GPIO_IRQ_EDGE_RISE) {
                 ++_event_count[gpio];
             }
         }
 
-        static uint _event_count[kGpioPinCount] = {};
+        static uint32_t _event_count[kGpioPinCount] = {};
 
-        const uint64_t _last_time_us = 0;
         const uint _gpio_pin;
+        uint64_t _last_time_us = 0;
 
         DISALLOW_COPY(FanSpeedHelper);
         DISALLOW_MOVE(FanSpeedHelper); 
