@@ -5,7 +5,6 @@
 
 namespace utility
 {
-
     constexpr uint kPwmTop = 999;
 
     class PwmHelper
