@@ -47,6 +47,6 @@ namespace utility {
         DISALLOW_MOVE(FanSpeedHelper); 
     };
 
-    static uint32_t FanSpeedHelper::_event_count[] = {};
+    uint32_t FanSpeedHelper::_event_count[] = {};
 
 }
