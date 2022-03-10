@@ -3,6 +3,7 @@
 #include "pwm_helper.hh"
 #include "button_helper.hh"
 #include "pid.hh"
+#include "fan_speed_helper.hh"
 
 using namespace utility;
 
