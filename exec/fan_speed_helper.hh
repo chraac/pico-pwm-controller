@@ -48,6 +48,6 @@ namespace utility {
         DISALLOW_MOVE(FanSpeedHelper); 
     };
 
-    uint32_t FanSpeedHelper::_event_count[] = {};
+    std::atomic_uint32_t FanSpeedHelper::_event_count[] = {};
 
 }
