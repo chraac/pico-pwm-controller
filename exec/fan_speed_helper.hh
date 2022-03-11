@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include "hardware/gpio.h"
 #include "hardware/timer.h"
 #include "base_types.hh"
@@ -18,8 +19,7 @@ namespace utility {
 
         uint32_t GetFanSpeedRpm() noexcept {
             const auto now_us = time_us_64();
-            const auto count = _event_count[_gpio_pin];
-            _event_count[_gpio_pin] = 0;
+            const auto count = _event_count[_gpio_pin].exchange(0);
             const auto interval_us = (now_us - _last_time_us);
             _last_time_us = now_us;
 
@@ -39,7 +39,7 @@ namespace utility {
             }
         }
 
-        static uint32_t _event_count[kGpioPinCount];
+        static std::atomic_uint32_t _event_count[kGpioPinCount];
 
         const uint _gpio_pin;
         uint64_t _last_time_us = time_us_64();
