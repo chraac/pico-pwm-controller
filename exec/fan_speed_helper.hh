@@ -1,6 +1,7 @@
 #pragma once
 
 #include "hardware/gpio.h"
+#include "hardware/timer.h"
 #include "base_types.hh"
 
 namespace utility {
@@ -15,12 +16,8 @@ namespace utility {
                 true, &FanSpeedHelper::GpioEventHandler);
         }
 
-        uint32_t GetFanSpeedRpm(uint64_t now_us) noexcept {
-            if (_last_time_us == 0) {
-                _last_time_us = now_us;
-                return 0;
-            }
-
+        uint32_t GetFanSpeedRpm() noexcept {
+            const auto now_us = time_us_64();
             const auto count = _event_count[_gpio_pin];
             _event_count[_gpio_pin] = 0;
             const auto interval_us = (now_us - _last_time_us);
@@ -29,6 +26,10 @@ namespace utility {
             // fan speed [rpm] = frequency [Hz] × 60 ÷ 2
             // See also: https://noctua.at/pub/media/wysiwyg/Noctua_PWM_specifications_white_paper.pdf
             return uint64_t(count) * 30 * 1000000 / interval_us;
+        }
+
+        void Reset() noexcept {
+            _last_time_us = time_us_64();
         }
 
     private:
@@ -41,7 +42,7 @@ namespace utility {
         static uint32_t _event_count[kGpioPinCount];
 
         const uint _gpio_pin;
-        uint64_t _last_time_us = 0;
+        uint64_t _last_time_us = time_us_64();
 
         DISALLOW_COPY(FanSpeedHelper);
         DISALLOW_MOVE(FanSpeedHelper); 
