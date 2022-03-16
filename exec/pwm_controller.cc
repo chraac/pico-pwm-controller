@@ -4,6 +4,7 @@
 #include "button_helper.hh"
 #include "pid.hh"
 #include "fan_speed_helper.hh"
+#include "logger.hh"
 
 using namespace utility;
 
@@ -43,8 +44,10 @@ namespace
 
 int main()
 {
-    stdio_init_all();
+    stdio_usb_init();
     clocks_init();
+
+    log_debug("main.init.finished");
 
     auto pwm1 = PwmHelper(kPwm1Pin, kPwmFreqKhz);
     auto pwm2 = PwmHelper(kPwm2Pin, kPwmFreqKhz);
@@ -63,6 +66,8 @@ int main()
     pwm2.SetDutyCycle(cycle2);
     pwm3.SetDutyCycle(cycle3);
     pwm4.SetDutyCycle(cycle4);
+    
+    log_debug("main.entering.loop");
     while (true)
     {
         if (btn1.IsPressed())
