@@ -4,7 +4,7 @@
 #include "hardware/gpio.h"
 #include "hardware/timer.h"
 #include "base_types.hh"
-#include "critical_secton_helper.hh"
+#include "critical_section_helper.hh"
 
 namespace utility {
 
