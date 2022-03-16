@@ -4,6 +4,7 @@
 #include "hardware/gpio.h"
 #include "hardware/timer.h"
 #include "base_types.hh"
+#include "critical_secton_helper.hh"
 
 namespace utility {
 
@@ -19,7 +20,11 @@ namespace utility {
 
         uint32_t GetFanSpeedRpm() noexcept {
             const auto now_us = time_us_64();
-            const auto count = _event_count[_gpio_pin].exchange(0);
+            const auto count;
+            _event_count_critical_section.Lock();
+            count = _event_count[_gpio_pin];
+            _event_count[_gpio_pin] = 0;
+            _event_count_critical_section.Unlock();
             const auto interval_us = (now_us - _last_time_us);
             _last_time_us = now_us;
 
@@ -35,11 +40,14 @@ namespace utility {
     private:
         static void GpioEventHandler(uint gpio, uint32_t events) {
             if (events & GPIO_IRQ_EDGE_RISE) {
+                _event_count_critical_section.Lock();
                 ++_event_count[gpio];
+                _event_count_critical_section.Unlock();
             }
         }
 
-        static std::atomic_uint32_t _event_count[kGpioPinCount];
+        static uint32_t _event_count[kGpioPinCount];
+        static CriticalSection _event_count_critical_section;
 
         const uint _gpio_pin;
         uint64_t _last_time_us = time_us_64();
@@ -48,6 +56,6 @@ namespace utility {
         DISALLOW_MOVE(FanSpeedHelper); 
     };
 
-    std::atomic_uint32_t FanSpeedHelper::_event_count[] = {};
+    uint32_t FanSpeedHelper::_event_count[] = {};
 
 }
