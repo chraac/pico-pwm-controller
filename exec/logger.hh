@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pico/stdlib.h"
+#include "pico/stdio.h"
 #include "base_types.hh"
 
 #define log_info(format,args...) printf(format, ## args)
