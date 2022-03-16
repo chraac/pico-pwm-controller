@@ -11,7 +11,7 @@ jobs:
           command: "git clone -b 1.3.0 https://github.com/raspberrypi/pico-sdk.git /pico/pico-sdk"
       - run:
           name: "Update sdk submodule"
-          command: "git submodule update --init /pico/pico-sdk"
+          command: "cd /pico/pico-sdk && git submodule update --init"
       - run:
           name: "Build with pico sdk"
           command: "mkdir -p build && cd build && cmake .. && make"
