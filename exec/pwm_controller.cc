@@ -65,9 +65,9 @@ int main()
     while (true)
     {
         auto rpm6 = fan_speed6.GetFanSpeedRpm();
-        log_debug("main.fanspeed6.%d.rpm", rpm6);
+        log_debug("main.fanspeed6.%d.rpm", int(rpm6));
         auto cycle1 = pid1.calculate(kTargetRpm, rpm6);
-        log_debug("main.cycle1.%d", cycle1);
+        log_debug("main.cycle1.%d", int(cycle1));
         pwm1.SetDutyCycle(cycle1);
         fan_speed6.Reset();
         sleep_ms(1000);
