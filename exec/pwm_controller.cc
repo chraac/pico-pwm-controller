@@ -1,6 +1,5 @@
 
 #include "pico/stdlib.h"
-#include "pico/stdio_usb.h"
 #include "pwm_helper.hh"
 #include "button_helper.hh"
 #include "pid.hh"
