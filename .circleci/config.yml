@@ -19,7 +19,7 @@ jobs:
             PICO_BASE_PATH: '/pico'
             PICO_SDK_PATH: '/pico/pico-sdk'
       - store_artifacts:
-          path: build/exec/pwm_controller.*
+          path: build/exec
 
 workflows:
   pico-pwm-controller-workflow:
