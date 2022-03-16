@@ -20,7 +20,7 @@ namespace utility {
 
         uint32_t GetFanSpeedRpm() noexcept {
             const auto now_us = time_us_64();
-            const auto count;
+            const uint32_t count;
             _event_count_critical_section.Lock();
             count = _event_count[_gpio_pin];
             _event_count[_gpio_pin] = 0;

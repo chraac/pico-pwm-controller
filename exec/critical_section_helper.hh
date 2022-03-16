@@ -27,6 +27,6 @@ namespace utility {
 
         DISALLOW_COPY(CriticalSection);
         DISALLOW_MOVE(CriticalSection); 
-    }
+    };
 }
 
