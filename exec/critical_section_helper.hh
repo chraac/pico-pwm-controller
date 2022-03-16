@@ -4,6 +4,7 @@
 #include "base_types.hh"
 
 namespace utility {
+    
     class CriticalSection {
     public:
         CriticalSection() noexcept {
@@ -28,5 +29,6 @@ namespace utility {
         DISALLOW_COPY(CriticalSection);
         DISALLOW_MOVE(CriticalSection); 
     };
+
 }
 
