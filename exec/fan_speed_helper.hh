@@ -57,5 +57,6 @@ namespace utility {
     };
 
     uint32_t FanSpeedHelper::_event_count[] = {};
+    CriticalSection FanSpeedHelper::_event_count_critical_section;
 
 }

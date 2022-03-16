@@ -17,7 +17,7 @@ else()
     target_compile_definitions(pwm_controller PUBLIC NDEBUG)
 endif()
 
-target_link_libraries(pwm_controller pico_stdlib pico_sync_critical_section hardware_pwm)
+target_link_libraries(pwm_controller pico_stdlib hardware_pwm)
 
 # create map/bin/hex file etc.
 pico_add_extra_outputs(pwm_controller)
