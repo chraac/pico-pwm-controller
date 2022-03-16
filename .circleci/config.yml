@@ -18,6 +18,9 @@ jobs:
           environment: 
             PICO_BASE_PATH: '/pico'
             PICO_SDK_PATH: '/pico/pico-sdk'
+      - store_artifacts:
+          path: /root/project/build
+          destination: pwm_controller.elf
 
 workflows:
   pico-pwm-controller-workflow:
