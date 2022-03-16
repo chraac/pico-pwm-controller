@@ -31,15 +31,10 @@ namespace
     constexpr uint kRpmPin10 = 20;
     constexpr uint kRpmPin11 = 19;
     constexpr uint kRpmPin12 = 18;
+    constexpr auto kTargetRpm = 2000;
     constexpr auto kP = 2.F;
     constexpr auto kI = .001F;
     constexpr auto kD = 15.F;
-    
-    uint32_t IncreaseAndGet(uint32_t &val)
-    {
-        val = (val + 3) % 101;
-        return val;
-    }
 }
 
 int main()
@@ -53,44 +48,29 @@ int main()
     auto pwm2 = PwmHelper(kPwm2Pin, kPwmFreqKhz);
     auto pwm3 = PwmHelper(kPwm3Pin, kPwmFreqKhz);
     auto pwm4 = PwmHelper(kPwm4Pin, kPwmFreqKhz);
-    auto btn1 = ButtonHelper(kButton1Pin);
-    auto btn2 = ButtonHelper(kButton2Pin);
-    auto btn3 = ButtonHelper(kButton3Pin);
-    auto btn4 = ButtonHelper(kButton4Pin);
 
-    uint32_t cycle1 = 25;
     uint32_t cycle2 = 50;
     uint32_t cycle3 = 75;
     uint32_t cycle4 = 100;
-    pwm1.SetDutyCycle(cycle1);
+    pwm1.SetDutyCycle(100);
     pwm2.SetDutyCycle(cycle2);
     pwm3.SetDutyCycle(cycle3);
     pwm4.SetDutyCycle(cycle4);
+
+    auto pid1 = Pid(20, 100, 1, kP, kI, kD);
+
+    auto fan_speed6 = FanSpeedHelper(kRpmPin6); 
     
     log_debug("main.entering.loop");
     while (true)
     {
-        if (btn1.IsPressed())
-        {
-            pwm1.SetDutyCycle(IncreaseAndGet(cycle1));
-        }
-
-        if (btn2.IsPressed())
-        {
-            pwm2.SetDutyCycle(IncreaseAndGet(cycle2));
-        }
-
-        if (btn3.IsPressed())
-        {
-            pwm3.SetDutyCycle(IncreaseAndGet(cycle3));
-        }
-
-        if (btn4.IsPressed())
-        {
-            pwm4.SetDutyCycle(IncreaseAndGet(cycle4));
-        }
-
-        sleep_ms(200);
+        auto rpm6 = fan_speed6.GetFanSpeedRpm();
+        log_debug("main.fanspeed6.%d.rpm", rpm6);
+        auto cycle1 = pid1.calculate(kTargetRpm, rpm6);
+        log_debug("main.cycle1.%d", cycle1);
+        pwm1.SetDutyCycle(cycle1);
+        fan_speed6.Reset();
+        sleep_ms(1000);
     }
 
     return 0;
