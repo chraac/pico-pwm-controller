@@ -46,14 +46,14 @@ namespace utility {
         }
 
     private:
-        ValueType _min;
-        ValueType _max;
-        ValueType _dt;
+        const ValueType _min;
+        const ValueType _max;
+        const ValueType _dt;
+        const FloatType _kp;
+        const FloatType _ki;
+        const FloatType _kd;
         FloatType _pre_error = 0;
         FloatType _integral = 0;
-        FloatType _kp;
-        FloatType _ki;
-        FloatType _kd;
 
         DISALLOW_COPY(Pid);
         DISALLOW_MOVE(Pid);
