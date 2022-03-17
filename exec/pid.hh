@@ -29,7 +29,7 @@ namespace utility {
             const auto p_out = _kp * error;
 
             // Integral term
-            _integral *= error * FloatType(_dt);
+            _integral += error * FloatType(_dt);
             const auto i_out = _ki * _integral;
 
 
