@@ -34,6 +34,9 @@ namespace utility {
         }
 
         void Reset() noexcept {
+            _event_count_critical_section.Lock();
+            _event_count[_gpio_pin] = 0;
+            _event_count_critical_section.Unlock();
             _last_time_us = time_us_64();
         }
 
