@@ -19,11 +19,6 @@ namespace utility {
         }
 
         ValueType calculate(ValueType target, ValueType current) {
-            if (target == current) {
-                _last_error = 0;
-                return target;
-            }
-
             // Proportional term
             const auto error = FloatType(target - current);
             const auto p_out = _kp * error;
