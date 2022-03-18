@@ -12,14 +12,14 @@ t = np.linspace(0, time_length, time_sample)
 
 # Noctua fan speed module
 # https://noctua.at/pub/media/wysiwyg/Noctua_PWM_specifications_white_paper.pdf
-def model_2000rpm(i, denom=100):
-    i = i / denom
-    if i <= 20:
+def model_2000rpm(pwm_cycle, denom=100):
+    pwm_cycle = pwm_cycle / denom
+    if pwm_cycle <= 20:
         return 450
-    elif i <= 60:
-        return int((i - 20) * 22.5 + 450)
-    elif i <= 100:
-        return int((i - 60) * 16.25 + 1350)
+    elif pwm_cycle <= 60:
+        return int((pwm_cycle - 20) * 22.5 + 450)
+    elif pwm_cycle <= 100:
+        return int((pwm_cycle - 60) * 16.25 + 1350)
     else:
         return 2000
 
