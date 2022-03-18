@@ -15,10 +15,9 @@ namespace
     constexpr uint kPwm2Pin = 7;
     constexpr uint kPwm3Pin = 27;
     constexpr uint kPwm4Pin = 17;
-    constexpr uint kButton1Pin = 13;
-    constexpr uint kButton2Pin = 14;
-    constexpr uint kButton3Pin = 15;
-    constexpr uint kButton4Pin = 16;
+    constexpr uint kButton1Pin = 14;
+    constexpr uint kButton2Pin = 15;
+    constexpr uint kButton3Pin = 16;
     constexpr uint kRpmPin1 = 1;
     constexpr uint kRpmPin2 = 2;
     constexpr uint kRpmPin3 = 3;
@@ -32,9 +31,10 @@ namespace
     constexpr uint kRpmPin11 = 19;
     constexpr uint kRpmPin12 = 18;
     constexpr auto kTargetRpm = 2000;
-    constexpr auto kP = .02F;
-    constexpr auto kI = .005F;
-    constexpr auto kD = .01F;
+    constexpr auto kStartCycle = 2000;
+    constexpr auto kP = 2.F;
+    constexpr auto kI = .65F;
+    constexpr auto kD = 1.0625F;
 }
 
 int main()
@@ -49,17 +49,20 @@ int main()
     auto pwm3 = PwmHelper(kPwm3Pin, kPwmFreqKhz);
     auto pwm4 = PwmHelper(kPwm4Pin, kPwmFreqKhz);
 
-    uint32_t cycle2 = 50;
-    uint32_t cycle3 = 75;
-    uint32_t cycle4 = 100;
-    pwm1.SetDutyCycle(100);
-    pwm2.SetDutyCycle(cycle2);
-    pwm3.SetDutyCycle(cycle3);
-    pwm4.SetDutyCycle(cycle4);
+    pwm1.SetDutyCycle(kStartCycle);
+    pwm2.SetDutyCycle(kStartCycle);
+    pwm3.SetDutyCycle(kStartCycle);
+    pwm4.SetDutyCycle(kStartCycle);
 
-    auto pid1 = Pid(20, 100, 1, kP, kI, kD);
+    auto pid1 = Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD);
+    auto pid2 = Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD);
+    auto pid3 = Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD);
+    auto pid4 = Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD);
 
+    auto fan_speed3 = FanSpeedHelper(kRpmPin3); 
     auto fan_speed6 = FanSpeedHelper(kRpmPin6); 
+    auto fan_speed9 = FanSpeedHelper(kRpmPin9); 
+    auto fan_speed12 = FanSpeedHelper(kRpmPin12); 
     
     log_debug("main.entering.loop");
     while (true)
@@ -69,8 +72,9 @@ int main()
         auto cycle1 = pid1.calculate(kTargetRpm, rpm6);
         log_debug("main.cycle1.%d", int(cycle1));
         pwm1.SetDutyCycle(cycle1);
+
         fan_speed6.Reset();
-        sleep_ms(1000);
+        sleep_ms(200);
     }
 
     return 0;

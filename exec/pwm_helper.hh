@@ -5,12 +5,13 @@
 
 namespace utility
 {
-    constexpr uint kPwmTop = 999;
+    constexpr uint kDefaultPwmTop = 9999;
+    constexpr uint kDefaultCycleDenom = kDefaultPwmTop + 1;
 
     class PwmHelper
     {
     public:
-        PwmHelper(const uint gpio_pin, const uint32_t freq_khz, const uint32_t top = kPwmTop) noexcept
+        PwmHelper(const uint gpio_pin, const uint32_t freq_khz, const uint32_t top = kDefaultPwmTop) noexcept
             : _gpio_pin(gpio_pin), _pwm_config(pwm_get_default_config())
         {
             // For more detail, see: https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf, Page 553
@@ -31,7 +32,7 @@ namespace utility
             gpio_set_function(_gpio_pin, GPIO_FUNC_PWM);
         }
 
-        void SetDutyCycle(uint32_t num, uint32_t denom = 100) noexcept
+        void SetDutyCycle(uint32_t num, uint32_t denom = kDefaultCycleDenom) noexcept
         {
             const auto max_cyc = _pwm_config.top;
             pwm_set_gpio_level(_gpio_pin, num * max_cyc / denom);
