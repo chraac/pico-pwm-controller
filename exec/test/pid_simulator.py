@@ -1,27 +1,41 @@
+import collections
+
 import matplotlib.pyplot as plt
 import numpy as np
 
-target_rpm = 1800
-Kp = 2  # proportion
-Ki = 0.7  # integration
-Kd = 0.75  # diff
-time_sample = 100
+target_rpm = 2000
+Kp = 0.5  # proportion
+Ki = 0.3  # integration
+Kd = 0.01  # diff
+time_sample = 200
 time_length = time_sample
 t = np.linspace(0, time_length, time_sample)
 
 
+class fan_model_base:
+    def __init__(self, dic):
+        assert len(dic) > 0
+        dic = collections.OrderedDict(sorted(dic.items()))
+        self._keys = list(dic.keys())
+        self._values = list(dic.values())
+
+    def get_rpm(self, pwm_cyc):
+        return int(np.interp(pwm_cyc, self._keys, self._values))
+
+
 # Noctua fan speed module
 # https://noctua.at/pub/media/wysiwyg/Noctua_PWM_specifications_white_paper.pdf
-def model_2000rpm(pwm_cycle, denom=100):
-    pwm_cycle = pwm_cycle / denom
-    if pwm_cycle <= 20:
-        return 450
-    elif pwm_cycle <= 60:
-        return int((pwm_cycle - 20) * 22.5 + 450)
-    elif pwm_cycle <= 100:
-        return int((pwm_cycle - 60) * 16.25 + 1350)
-    else:
-        return 2000
+class noctua_fan(fan_model_base):
+    def __init__(self):
+        super(noctua_fan, self).__init__({20: 450, 60: 1350, 100: 2000})
+
+
+# Nidec D1225C fan
+# http://www.nidec-servo.com/en/digital/pdf/D1225C_hi.pdf
+class nidec_fan(fan_model_base):
+    def __init__(self):
+        super(nidec_fan, self).__init__(
+            {10: 1000, 20: 2200, 30: 3000, 40: 3600, 50: 4200, 60: 4500, 70: 4700, 80: 4900, 100: 5400})
 
 
 class pid:
@@ -46,11 +60,13 @@ class pid:
 
 output = []
 out_plt = np.linspace(target_rpm, target_rpm, time_sample)
-pid_controller = pid(min_val=2000, max_val=10000, dt=1, kp=Kp, ki=Ki, kd=Kd)
+pid_controller = pid(min_val=0, max_val=10000, dt=1, kp=Kp, ki=Ki, kd=Kd)
+#fan_model = noctua_fan()
+fan_model = nidec_fan()
 
 for i in range(0, time_sample):
     cycle = pid_controller.calculate(target_rpm, output[-1] if len(output) > 0 else 0)
-    rpm = model_2000rpm(cycle)
+    rpm = fan_model.get_rpm(cycle / 100)
     print("iteration:{} ,cycle:{},rpm:{}".format(i, cycle, rpm))
     output.append(rpm)
 
