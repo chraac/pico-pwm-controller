@@ -32,9 +32,9 @@ namespace
     constexpr uint kRpmPin12 = 18;
     constexpr auto kTargetRpm = 2000;
     constexpr auto kStartCycle = 2000;
-    constexpr auto kP = 2.F;
-    constexpr auto kI = .7F;
-    constexpr auto kD = .75F;
+    constexpr auto kP = .5F;
+    constexpr auto kI = .3F;
+    constexpr auto kD = .02F;
 }
 
 int main()

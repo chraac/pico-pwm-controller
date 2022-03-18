@@ -6,7 +6,7 @@ import numpy as np
 target_rpm = 2000
 Kp = 0.5  # proportion
 Ki = 0.3  # integration
-Kd = 0.01  # diff
+Kd = 0.02  # diff
 time_sample = 200
 time_length = time_sample
 t = np.linspace(0, time_length, time_sample)
