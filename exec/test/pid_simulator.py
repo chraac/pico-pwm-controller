@@ -1,13 +1,18 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+target_rpm = 1800
+Kp = 2  # proportion
+Ki = 0.7  # integration
+Kd = 0.75  # diff
 time_sample = 100
 time_length = time_sample
 t = np.linspace(0, time_length, time_sample)
 
 
-# The system model
-def system_model(i, denom=100):
+# Noctua fan speed module
+# https://noctua.at/pub/media/wysiwyg/Noctua_PWM_specifications_white_paper.pdf
+def model_2000rpm(i, denom=100):
     i = i / denom
     if i <= 20:
         return 450
@@ -17,12 +22,6 @@ def system_model(i, denom=100):
         return int((i - 60) * 16.25 + 1350)
     else:
         return 2000
-
-
-target_rpm = 1000
-Kp = 2  # average
-Ki = 0.7  # integration
-Kd = 0.75  # diff
 
 
 class pid:
@@ -51,11 +50,11 @@ pid_controller = pid(min_val=2000, max_val=10000, dt=1, kp=Kp, ki=Ki, kd=Kd)
 
 for i in range(0, time_sample):
     cycle = pid_controller.calculate(target_rpm, output[-1] if len(output) > 0 else 0)
-    rpm = system_model(cycle)
+    rpm = model_2000rpm(cycle)
     print("iteration:{} ,cycle:{},rpm:{}".format(i, cycle, rpm))
     output.append(rpm)
 
-plt.figure('pid_controller_direct_mem')
+plt.figure('pid')
 plt.xlim(0, time_length)
 plt.ylim(0, 2 * target_rpm)
 plt.plot(t, output)
