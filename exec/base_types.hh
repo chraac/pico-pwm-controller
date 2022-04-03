@@ -19,8 +19,8 @@ class Singleton {
     typedef _Ty TypeName;
 
     static TypeName &GetInstance() {
-        static TypeName s_instance;
-        return s_instance;
+        static TypeName instance;
+        return instance;
     }
 
    protected:

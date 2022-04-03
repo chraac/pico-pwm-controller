@@ -14,7 +14,7 @@ constexpr uint32_t kGpioPinCount = 30;
 
 class FanSpeedHelper {
    public:
-    FanSpeedHelper(const uint gpio_pin) noexcept : _gpio_pin(gpio_pin) {
+    FanSpeedHelper(const uint gpio_pin) noexcept : gpio_pin_(gpio_pin) {
         gpio_set_irq_enabled_with_callback(gpio_pin, GPIO_IRQ_EDGE_RISE, true,
                                            &FanSpeedHelper::GpioEventHandler);
     }
@@ -22,12 +22,12 @@ class FanSpeedHelper {
     uint32_t GetFanSpeedRpm() noexcept {
         const auto now_us = time_us_64();
         uint32_t count;
-        _event_count_critical_section.Lock();
-        count = _event_count[_gpio_pin];
-        _event_count[_gpio_pin] = 0;
-        _event_count_critical_section.Unlock();
-        const auto interval_us = (now_us - _last_time_us);
-        _last_time_us = now_us;
+        event_count_critical_section_.Lock();
+        count = event_count_[gpio_pin_];
+        event_count_[gpio_pin_] = 0;
+        event_count_critical_section_.Unlock();
+        const auto interval_us = (now_us - last_time_us_);
+        last_time_us_ = now_us;
 
         // fan speed [rpm] = frequency [Hz] × 60 ÷ 2
         // See also:
@@ -36,32 +36,32 @@ class FanSpeedHelper {
     }
 
     void Reset() noexcept {
-        _event_count_critical_section.Lock();
-        _event_count[_gpio_pin] = 0;
-        _event_count_critical_section.Unlock();
-        _last_time_us = time_us_64();
+        event_count_critical_section_.Lock();
+        event_count_[gpio_pin_] = 0;
+        event_count_critical_section_.Unlock();
+        last_time_us_ = time_us_64();
     }
 
    private:
     static void GpioEventHandler(uint gpio, uint32_t events) {
         if (events & GPIO_IRQ_EDGE_RISE) {
-            _event_count_critical_section.Lock();
-            ++_event_count[gpio];
-            _event_count_critical_section.Unlock();
+            event_count_critical_section_.Lock();
+            ++event_count_[gpio];
+            event_count_critical_section_.Unlock();
         }
     }
 
-    static uint32_t _event_count[kGpioPinCount];
-    static CriticalSection _event_count_critical_section;
+    static uint32_t event_count_[kGpioPinCount];
+    static CriticalSection event_count_critical_section_;
 
-    const uint _gpio_pin;
-    uint64_t _last_time_us = time_us_64();
+    const uint gpio_pin_;
+    uint64_t last_time_us_ = time_us_64();
 
     DISALLOW_COPY(FanSpeedHelper);
     DISALLOW_MOVE(FanSpeedHelper);
 };
 
-uint32_t FanSpeedHelper::_event_count[] = {};
-CriticalSection FanSpeedHelper::_event_count_critical_section;
+uint32_t FanSpeedHelper::event_count_[] = {};
+CriticalSection FanSpeedHelper::event_count_critical_section_;
 
 }  // namespace utility

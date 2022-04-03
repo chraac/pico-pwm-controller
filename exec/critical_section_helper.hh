@@ -8,18 +8,18 @@ namespace utility {
 
 class CriticalSection {
    public:
-    CriticalSection() noexcept { critical_section_init(&_critical_section); }
+    CriticalSection() noexcept { critical_section_init(&critical_section_); }
 
-    ~CriticalSection() noexcept { critical_section_deinit(&_critical_section); }
+    ~CriticalSection() noexcept { critical_section_deinit(&critical_section_); }
 
     void Lock() noexcept {
-        critical_section_enter_blocking(&_critical_section);
+        critical_section_enter_blocking(&critical_section_);
     }
 
-    void Unlock() noexcept { critical_section_exit(&_critical_section); }
+    void Unlock() noexcept { critical_section_exit(&critical_section_); }
 
    private:
-    critical_section_t _critical_section;
+    critical_section_t critical_section_;
 
     DISALLOW_COPY(CriticalSection);
     DISALLOW_MOVE(CriticalSection);

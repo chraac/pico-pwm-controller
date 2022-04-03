@@ -12,38 +12,38 @@ class Pid {
     typedef float FloatType;
     Pid(const ValueType min, const ValueType max, const ValueType dt,
         FloatType kp, FloatType ki, FloatType kd) noexcept
-        : _min(min), _max(max), _dt(dt), _kp(kp), _ki(ki), _kd(kd) {}
+        : min_(min), max_(max), dt_(dt), kp_(kp), ki_(ki), kd_(kd) {}
 
     ValueType calculate(ValueType target, ValueType current) {
         // Proportional term
         const auto error = FloatType(target - current);
-        const auto p_out = _kp * error;
+        const auto p_out = kp_ * error;
 
         // Integral term
-        _integral += error * FloatType(_dt);
-        const auto i_out = _ki * _integral;
+        integral_ += error * FloatType(dt_);
+        const auto i_out = ki_ * integral_;
 
         // Derivative term
-        const auto derivative = (error - _last_error) / FloatType(_dt);
-        const auto d_out = _kd * derivative;
+        const auto derivative = (error - last_error_) / FloatType(dt_);
+        const auto d_out = kd_ * derivative;
 
-        _last_error = error;
+        last_error_ = error;
 
         // Calculate total output
-        auto output = std::max(ValueType(p_out + i_out + d_out), _min);
-        output = std::min(output, _max);
+        auto output = std::max(ValueType(p_out + i_out + d_out), min_);
+        output = std::min(output, max_);
         return output;
     }
 
    private:
-    const ValueType _min;
-    const ValueType _max;
-    const ValueType _dt;
-    const FloatType _kp;
-    const FloatType _ki;
-    const FloatType _kd;
-    FloatType _last_error = 0;
-    FloatType _integral = 0;
+    const ValueType min_;
+    const ValueType max_;
+    const ValueType dt_;
+    const FloatType kp_;
+    const FloatType ki_;
+    const FloatType kd_;
+    FloatType last_error_ = 0;
+    FloatType integral_ = 0;
 
     DISALLOW_COPY(Pid);
     DISALLOW_MOVE(Pid);
