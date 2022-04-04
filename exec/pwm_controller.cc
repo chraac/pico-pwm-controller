@@ -41,7 +41,7 @@ int main() {
     stdio_usb_init();
     clocks_init();
 
-    log_debug("main.init.finished");
+    log_debug("main.init.finished\n");
 
     auto pwm1 = PwmHelper(kPwm1Pin, kPwmFreqKhz);
     auto pwm2 = PwmHelper(kPwm2Pin, kPwmFreqKhz);
@@ -63,13 +63,13 @@ int main() {
     auto fan_speed9 = FanSpeedHelper(kRpmPin9);
     auto fan_speed12 = FanSpeedHelper(kRpmPin12);
 
-    log_debug("main.entering.loop");
+    log_debug("main.entering.loop\n");
     while (true) {
         auto rpm6 = fan_speed6.GetFanSpeedRpm();
-        log_debug("main.fanspeed6.%d.rpm", int(rpm6));
+        log_debug("main.fanspeed6.%d.rpm\n", int(rpm6));
         auto cycle1 = pid1.calculate(kTargetRpm, rpm6);
-        log_debug("main.cycle1.%d", int(cycle1));
-        pwm1.SetDutyCycle(cycle1);
+        log_debug("main.cycle1.%d\n", int(cycle1));
+        pwm2.SetDutyCycle(cycle1);
 
         fan_speed6.Reset();
         sleep_ms(200);
