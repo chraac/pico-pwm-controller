@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hardware/pwm.h"
+#include <hardware/pwm.h>
 #include "system_clock.hh"
 
 namespace utility {
