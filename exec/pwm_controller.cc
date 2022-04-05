@@ -64,17 +64,17 @@ class FanSpeedManager {
         auto max_speed = std::max(speed1, std::max(speed2, speed3));
         if (max_speed >= kTargetRpm && max_speed <= kMaxTargetRpm) {
             log_debug("next.gpio.%d.skip\n", int(pwm_.GetGpioPin()));
-            speed1.Reset();
-            speed2.Reset();
-            speed3.Reset();
+            speed1_.Reset();
+            speed2_.Reset();
+            speed3_.Reset();
             return false;
         }
 
         auto cycle = pid_.calculate(kTargetRpm, max_speed);
         pwm_.SetDutyCycle(cycle);
-        speed1.Reset();
-        speed2.Reset();
-        speed3.Reset();
+        speed1_.Reset();
+        speed2_.Reset();
+        speed3_.Reset();
         log_debug("next.gpio.%d.cycle.%d\n", int(pwm_.GetGpioPin()),
                   int(cycle));
         return true;
