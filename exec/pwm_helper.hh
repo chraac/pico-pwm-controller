@@ -40,6 +40,8 @@ class PwmHelper {
         pwm_set_gpio_level(gpio_pin_, num * max_cyc / denom);
     }
 
+    uint GetGpioPin() const noexcept { return gpio_pin_; }
+
    private:
     const uint gpio_pin_;
     pwm_config pwm_config_;
