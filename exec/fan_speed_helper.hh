@@ -1,9 +1,9 @@
 #pragma once
 
-#include <atomic>
-
 #include <hardware/gpio.h>
 #include <hardware/timer.h>
+
+#include <atomic>
 
 #include "base_types.hh"
 #include "critical_section_helper.hh"
@@ -41,6 +41,8 @@ class FanSpeedHelper {
         event_count_critical_section_.Unlock();
         last_time_us_ = time_us_64();
     }
+
+    uint GetGpioPin() const noexcept { return gpio_pin_; }
 
    private:
     static void GpioEventHandler(uint gpio, uint32_t events) {
