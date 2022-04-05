@@ -99,7 +99,7 @@ int main() {
 
     log_debug("main.init.finished\n");
 
-    auto fan_manager2 = FanSpeedManager(kPwm1Pin, kRpmPin4, kRpmPin5, kRpmPin6);
+    auto fan_manager2 = FanSpeedManager(kPwm2Pin, kRpmPin4, kRpmPin5, kRpmPin6);
 
     log_debug("main.entering.loop\n");
     for (;; sleep_ms(200)) {
