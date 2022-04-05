@@ -64,7 +64,7 @@ int main() {
     auto fan_speed12 = FanSpeedHelper(kRpmPin12);
 
     log_debug("main.entering.loop\n");
-    while (true) {
+    for (;; sleep_ms(200)) {
         auto rpm6 = fan_speed6.GetFanSpeedRpm();
         log_debug("main.fanspeed6.%d.rpm\n", int(rpm6));
         auto cycle1 = pid1.calculate(kTargetRpm, rpm6);
@@ -72,7 +72,6 @@ int main() {
         pwm2.SetDutyCycle(cycle1);
 
         fan_speed6.Reset();
-        sleep_ms(200);
     }
 
     return 0;
