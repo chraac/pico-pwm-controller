@@ -85,7 +85,7 @@ class FanSpeedManager {
     FanSpeedHelper speed1_;
     FanSpeedHelper speed2_;
     FanSpeedHelper speed3_;
-    auto pid_ = Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD);
+    Pid pid_ = Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD);
 
     DISALLOW_COPY(FanSpeedManager);
     DISALLOW_MOVE(FanSpeedManager);
