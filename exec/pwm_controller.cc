@@ -34,7 +34,7 @@ constexpr uint kRpmPin11 = 19;
 constexpr uint kRpmPin12 = 18;
 constexpr auto kTargetRpm = 2000;
 constexpr auto kMaxTargetRpm =
-    103 * kTargetRpm / 100;  // max tolerance: +3% fan speed
+    105 * kTargetRpm / 100;  // max tolerance: +5% fan speed
 constexpr auto kStartCycle = 500;
 constexpr auto kP = .5F;
 constexpr auto kI = .3F;
