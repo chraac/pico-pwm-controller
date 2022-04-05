@@ -13,8 +13,14 @@ jobs:
           name: "Update sdk submodule"
           command: "cd /pico/pico-sdk && git submodule update --init"
       - run:
-          name: "Build with pico sdk"
-          command: "mkdir -p build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && make"
+          name: "Build debug"
+          command: "mkdir -p build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Debug && make"
+          environment: 
+            PICO_BASE_PATH: '/pico'
+            PICO_SDK_PATH: '/pico/pico-sdk'
+      - run:
+          name: "Build release"
+          command: "rm -rf build/* && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && make"
           environment: 
             PICO_BASE_PATH: '/pico'
             PICO_SDK_PATH: '/pico/pico-sdk'
