@@ -15,7 +15,7 @@
 namespace utility {
 template <typename _Ty>
 class Singleton {
-   public:
+public:
     typedef _Ty TypeName;
 
     static TypeName &GetInstance() {
@@ -23,11 +23,22 @@ class Singleton {
         return instance;
     }
 
-   protected:
+protected:
     Singleton() = default;
 
-   private:
+private:
     DISALLOW_COPY(Singleton);
     DISALLOW_MOVE(Singleton);
 };
+
+class GpioBase {
+public:
+    GpioBase(uint gpio_pin) : gpio_pin_(gpio_pin) {}
+
+    uint GetGpioPin() const noexcept { return gpio_pin_; }
+
+protected:
+    const uint gpio_pin_;
+}
+
 }  // namespace utility
