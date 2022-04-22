@@ -7,7 +7,7 @@
 namespace utility {
 
 class Pid {
-   public:
+public:
     typedef int32_t ValueType;
     typedef float FloatType;
     Pid(const ValueType min, const ValueType max, const ValueType dt,
@@ -35,7 +35,7 @@ class Pid {
         return output;
     }
 
-   private:
+private:
     const ValueType min_;
     const ValueType max_;
     const ValueType dt_;

@@ -7,7 +7,7 @@
 
 namespace utility {
 class ButtonHelper {
-   public:
+public:
     ButtonHelper(const uint gpio_pin) noexcept : gpio_pin_(gpio_pin) {
         gpio_init(gpio_pin_);
         gpio_set_dir(gpio_pin_, GPIO_IN);
@@ -19,7 +19,7 @@ class ButtonHelper {
 
     bool IsPressed() { return !gpio_get(gpio_pin_); }
 
-   private:
+private:
     const uint gpio_pin_;
 
     DISALLOW_COPY(ButtonHelper);

@@ -9,7 +9,7 @@ constexpr uint kDefaultPwmTop = 9999;
 constexpr uint kDefaultCycleDenom = kDefaultPwmTop + 1;
 
 class PwmHelper {
-   public:
+public:
     PwmHelper(const uint gpio_pin, const uint32_t freq_khz,
               const uint32_t top = kDefaultPwmTop) noexcept
         : gpio_pin_(gpio_pin), pwm_config_(pwm_get_default_config()) {
@@ -42,7 +42,7 @@ class PwmHelper {
 
     uint GetGpioPin() const noexcept { return gpio_pin_; }
 
-   private:
+private:
     const uint gpio_pin_;
     pwm_config pwm_config_;
 

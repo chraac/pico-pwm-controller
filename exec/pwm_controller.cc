@@ -41,7 +41,7 @@ constexpr auto kI = .3F;
 constexpr auto kD = .02F;
 
 class FanSpeedManager {
-   public:
+public:
     FanSpeedManager(uint gpio_pwm, uint gpio_speed1, uint gpio_speed2,
                     uint gpio_speed3) noexcept
         : pwm_(gpio_pwm, kPwmFreqKhz),
@@ -80,7 +80,7 @@ class FanSpeedManager {
         return true;
     }
 
-   private:
+private:
     PwmHelper pwm_;
     FanSpeedHelper speed1_;
     FanSpeedHelper speed2_;
@@ -102,7 +102,8 @@ int main() {
     auto fan_manager1 = FanSpeedManager(kPwm1Pin, kRpmPin1, kRpmPin2, kRpmPin3);
     auto fan_manager2 = FanSpeedManager(kPwm2Pin, kRpmPin4, kRpmPin5, kRpmPin6);
     auto fan_manager3 = FanSpeedManager(kPwm3Pin, kRpmPin7, kRpmPin8, kRpmPin9);
-    auto fan_manager4 = FanSpeedManager(kPwm4Pin, kRpmPin10, kRpmPin11, kRpmPin12);
+    auto fan_manager4 =
+        FanSpeedManager(kPwm4Pin, kRpmPin10, kRpmPin11, kRpmPin12);
 
     log_debug("main.entering.loop\n");
     for (;; sleep_ms(200)) {

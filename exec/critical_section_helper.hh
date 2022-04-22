@@ -7,7 +7,7 @@
 namespace utility {
 
 class CriticalSection {
-   public:
+public:
     CriticalSection() noexcept { critical_section_init(&critical_section_); }
 
     ~CriticalSection() noexcept { critical_section_deinit(&critical_section_); }
@@ -18,7 +18,7 @@ class CriticalSection {
 
     void Unlock() noexcept { critical_section_exit(&critical_section_); }
 
-   private:
+private:
     critical_section_t critical_section_;
 
     DISALLOW_COPY(CriticalSection);
