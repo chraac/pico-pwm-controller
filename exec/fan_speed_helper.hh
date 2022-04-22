@@ -62,7 +62,8 @@ CriticalSection GpioFreqencyCounter::event_count_critical_section_;
 
 class FanSpeedHelper : public GpioBase {
 public:
-    FanSpeedHelper(const uint gpio_pin) noexcept : freq_counter_(gpio_pin) {}
+    FanSpeedHelper(const uint gpio_pin) noexcept
+        : GpioBase(gpio_pin), freq_counter_(gpio_pin) {}
 
     uint32_t GetFanSpeedRpm() noexcept {
         // fan speed [rpm] = frequency [Hz] × 60 ÷ 2
