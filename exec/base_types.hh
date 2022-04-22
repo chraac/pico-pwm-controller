@@ -39,6 +39,6 @@ public:
 
 protected:
     const uint gpio_pin_;
-}:
+};
 
 }  // namespace utility
