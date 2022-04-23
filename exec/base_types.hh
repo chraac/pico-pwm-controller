@@ -36,7 +36,7 @@ public:
     virtual ~IGpioBase() {}
 
     virtual uint GetGpioPin() const noexcept = 0;
-}
+};
 
 class GpioBase : public IGpioBase {
 public:
