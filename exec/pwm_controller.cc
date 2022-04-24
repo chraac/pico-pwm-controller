@@ -18,6 +18,7 @@ constexpr uint kPwm1Pin = 0;
 constexpr uint kPwm2Pin = 7;
 constexpr uint kPwm3Pin = 27;
 constexpr uint kPwm4Pin = 17;
+constexpr uint kPwmPinCount = 4;
 constexpr uint kButton1Pin = 14;
 constexpr uint kButton2Pin = 15;
 constexpr uint kButton3Pin = 16;
@@ -76,13 +77,13 @@ public:
     }
 
 private:
-    PwmHelper pwm_array_[] = {
+    PwmHelper pwm_array_[kPwmPinCount] = {
         PwmHelper(kPwm1Pin, kPwmFreqKhz),
         PwmHelper(kPwm2Pin, kPwmFreqKhz),
         PwmHelper(kPwm3Pin, kPwmFreqKhz),
         PwmHelper(kPwm4Pin, kPwmFreqKhz),
     };
-    Pid pid_array_[] = {
+    Pid pid_array_[kPwmPinCount] = {
         Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD),
         Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD),
         Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD),
