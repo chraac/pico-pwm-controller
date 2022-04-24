@@ -41,7 +41,7 @@ public:
           gpio_pin_bit3_(gpio_bit3) {}
 
     void SelectFan(uint8_t fan_index) noexcept {
-        auto SetGpioPinValue = [](uint gpio_pin, bool is_pull_up) {
+        constexpr auto SetGpioPinValue = [](uint gpio_pin, bool is_pull_up) {
             if (is_pull_up) {
                 gpio_pull_up(gpio_pin);
             } else {
