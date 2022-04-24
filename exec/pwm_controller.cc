@@ -2,6 +2,7 @@
 #include <pico/stdlib.h>
 
 #include <algorithm>
+#include <iterator>
 
 #include "button_helper.hh"
 #include "fan_speed_helper.hh"
@@ -20,19 +21,15 @@ constexpr uint kPwm4Pin = 17;
 constexpr uint kButton1Pin = 14;
 constexpr uint kButton2Pin = 15;
 constexpr uint kButton3Pin = 16;
-constexpr uint kRpmPin1 = 1;
-constexpr uint kRpmPin2 = 2;
-constexpr uint kRpmPin3 = 3;
-constexpr uint kRpmPin4 = 4;
-constexpr uint kRpmPin5 = 5;
-constexpr uint kRpmPin6 = 6;
-constexpr uint kRpmPin7 = 26;
-constexpr uint kRpmPin8 = 22;
-constexpr uint kRpmPin9 = 21;
-constexpr uint kRpmPin10 = 20;
-constexpr uint kRpmPin11 = 19;
-constexpr uint kRpmPin12 = 18;
-constexpr auto kTargetRpm = 2000;
+constexpr uint kFanSpeedPin = 13;
+constexpr uint kFanSelPin0 = 11;
+constexpr uint kFanSelPin1 = 10;
+constexpr uint kFanSelPin2 = 9;
+constexpr uint kFanSelPin3 = 8;
+constexpr uint8_t kFanIndexArray = {0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13};
+constexpr uint8_t kFanCount =
+    sizeof(kFanIndexArray) / sizeof(kFanIndexArray[0]);
+constexpr auto kTargetRpm = 1900;
 constexpr auto kMaxTargetRpm =
     105 * kTargetRpm / 100;  // max tolerance: +5% fan speed
 constexpr auto kStartCycle = 500;
@@ -42,50 +39,62 @@ constexpr auto kD = .02F;
 
 class FanSpeedManager {
 public:
-    FanSpeedManager(uint gpio_pwm, uint gpio_speed1, uint gpio_speed2,
-                    uint gpio_speed3) noexcept
-        : pwm_(gpio_pwm, kPwmFreqKhz),
-          speed1_(gpio_speed1),
-          speed2_(gpio_speed2),
-          speed3_(gpio_speed3) {
-        pwm_.SetDutyCycle(kStartCycle);
+    FanSpeedManager() noexcept {
+        selector_.SelectFan(kFanIndexArray[current_fan_]);
+        for (auto &pwm : pwm_array_) {
+            pwm.SetDutyCycle(kStartCycle);
+        }
     }
 
-    bool next() noexcept {
-        auto speed1 = speed1_.GetFanSpeedRpm();
-        auto speed2 = speed2_.GetFanSpeedRpm();
-        auto speed3 = speed3_.GetFanSpeedRpm();
-        log_debug("next.gpio.%d.fanspeed.%drpm\n", int(speed1_.GetGpioPin()),
-                  int(speed1));
-        log_debug("next.gpio.%d.fanspeed.%drpm\n", int(speed2_.GetGpioPin()),
-                  int(speed2));
-        log_debug("next.gpio.%d.fanspeed.%drpm\n", int(speed3_.GetGpioPin()),
-                  int(speed3));
-        auto max_speed = std::max(speed1, std::max(speed2, speed3));
-        if (max_speed >= kTargetRpm && max_speed <= kMaxTargetRpm) {
-            log_debug("next.gpio.%d.skip\n", int(pwm_.GetGpioPin()));
-            speed1_.Reset();
-            speed2_.Reset();
-            speed3_.Reset();
-            return false;
+    void next() noexcept {
+        const auto current_speed = speed_helper_.GetFanSpeedRpm();
+        const auto current_fan = current_fan_;
+        current_fan_ = (current_fan_ + 1) % kFanCount;
+        selector_.SelectFan(kFanIndexArray[current_fan_]);
+        max_fan_speed_ = std::max(max_fan_speed_, current_speed) log_debug(
+            "current.fan.%d.speed.%drpm.max.%drpm\n", int(current_fan),
+            int(current_speed), int(max_fan_speed_));
+
+        const pwm_index = current_fan % std::size(pwm_array_);
+        if (pwm_index < (std::size(pwm_array_) - 1)) {
+            // not the last fan of this pwm group, then return.
+            return;
         }
 
-        auto cycle = pid_.calculate(kTargetRpm, max_speed);
-        pwm_.SetDutyCycle(cycle);
-        speed1_.Reset();
-        speed2_.Reset();
-        speed3_.Reset();
-        log_debug("next.gpio.%d.cycle.%d\n", int(pwm_.GetGpioPin()),
-                  int(cycle));
-        return true;
+        const auto max_fan_speed = max_fan_speed_;
+        max_fan_speed_ = 0;
+        if (max_fan_speed >= kTargetRpm && max_fan_speed <= kMaxTargetRpm) {
+            // skip pid if we already at specified rpm.
+            log_debug("skip.fan.%d\n", int(current_fan));
+            return;
+        }
+
+        auto cycle = pid_array_[pwm_index].calculate(kTargetRpm, max_fan_speed);
+        pwm_array_[pwm_index].SetDutyCycle(cycle);
+        log_debug("set.pwm.%d.cycle.%d\n", int(pwm_index), int(cycle));
+        return;
     }
 
 private:
-    PwmHelper pwm_;
-    FanSpeedHelper speed1_;
-    FanSpeedHelper speed2_;
-    FanSpeedHelper speed3_;
-    Pid pid_ = Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD);
+    PwmHelper pwm_array_[] = {
+        PwmHelper(kPwm1Pin, kPwmFreqKhz),
+        PwmHelper(kPwm2Pin, kPwmFreqKhz),
+        PwmHelper(kPwm3Pin, kPwmFreqKhz),
+        PwmHelper(kPwm4Pin, kPwmFreqKhz),
+    };
+    Pid pid_array_[] = {
+        Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD),
+        Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD),
+        Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD),
+        Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD),
+
+    };
+    static_assert(std::size(pwm_array_) == std::size(pid_array_));
+    FanSpeedHelper speed_helper_(kFanSpeedPin);
+    FanSpeedSelector selector_(kFanSelPin3, kFanSelPin2, kFanSelPin1,
+                               kFanSelPin0);
+    uint8_t current_fan_ = 0;
+    decltype(speed_helper_.GetFanSpeedRpm()) max_fan_speed_ = 0;
 
     DISALLOW_COPY(FanSpeedManager);
     DISALLOW_MOVE(FanSpeedManager);
@@ -99,18 +108,11 @@ int main() {
 
     log_debug("main.init.finished\n");
 
-    auto fan_manager1 = FanSpeedManager(kPwm1Pin, kRpmPin1, kRpmPin2, kRpmPin3);
-    auto fan_manager2 = FanSpeedManager(kPwm2Pin, kRpmPin4, kRpmPin5, kRpmPin6);
-    auto fan_manager3 = FanSpeedManager(kPwm3Pin, kRpmPin7, kRpmPin8, kRpmPin9);
-    auto fan_manager4 =
-        FanSpeedManager(kPwm4Pin, kRpmPin10, kRpmPin11, kRpmPin12);
+    auto fan_manager = FanSpeedManager();
 
     log_debug("main.entering.loop\n");
-    for (;; sleep_ms(200)) {
-        fan_manager1.next();
-        fan_manager2.next();
-        fan_manager3.next();
-        fan_manager4.next();
+    for (;; sleep_ms(50)) {
+        fan_manager.next();
     }
 
     return 0;
