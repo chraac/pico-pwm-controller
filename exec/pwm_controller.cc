@@ -89,9 +89,9 @@ private:
         Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD),
 
     };
-    FanSpeedHelper speed_helper_(kFanSpeedPin);
-    FanSpeedSelector selector_(kFanSelPin3, kFanSelPin2, kFanSelPin1,
-                               kFanSelPin0);
+    FanSpeedHelper speed_helper_ = FanSpeedHelper(kFanSpeedPin);
+    FanSpeedSelector selector_ =
+        FanSpeedSelector(kFanSelPin3, kFanSelPin2, kFanSelPin1, kFanSelPin0);
     uint8_t current_fan_ = 0;
     decltype(speed_helper_.GetFanSpeedRpm()) max_fan_speed_ = 0;
 
