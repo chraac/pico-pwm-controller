@@ -61,8 +61,8 @@ private:
     const uint gpio_pin_bit2_;
     const uint gpio_pin_bit3_;
 
-    DISALLOW_COPY(FanSpeedHelper);
-    DISALLOW_MOVE(FanSpeedHelper);
+    DISALLOW_COPY(FanSpeedSelector);
+    DISALLOW_MOVE(FanSpeedSelector);
 };
 
 }  // namespace utility
