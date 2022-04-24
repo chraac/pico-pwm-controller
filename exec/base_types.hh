@@ -45,7 +45,7 @@ public:
     uint GetGpioPin() const noexcept override { return gpio_pin_; }
 
 protected:
-    const uint gpio_pin_;
+    uint gpio_pin_;
 };
 
 }  // namespace utility

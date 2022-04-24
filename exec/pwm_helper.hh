@@ -34,7 +34,7 @@ public:
         gpio_set_function(gpio_pin_, GPIO_FUNC_PWM);
     }
 
-    PwmHelper(PwmHelper &&other) noexcept {
+    PwmHelper(PwmHelper &&other) : GpioBase(other.gpio_pin_) noexcept {
         pwm_config_ = other.pwm_config_;
         other.pwm_config_ = pwm_get_default_config();
     }
