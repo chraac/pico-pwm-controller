@@ -26,9 +26,8 @@ constexpr uint kFanSelPin0 = 11;
 constexpr uint kFanSelPin1 = 10;
 constexpr uint kFanSelPin2 = 9;
 constexpr uint kFanSelPin3 = 8;
-constexpr uint8_t kFanIndexArray = {0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13};
-constexpr uint8_t kFanCount =
-    sizeof(kFanIndexArray) / sizeof(kFanIndexArray[0]);
+constexpr uint8_t kFanIndexArray[] = {0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13};
+constexpr uint8_t kFanCount = std::size(kFanIndexArray);
 constexpr auto kTargetRpm = 1900;
 constexpr auto kMaxTargetRpm =
     105 * kTargetRpm / 100;  // max tolerance: +5% fan speed
@@ -40,6 +39,7 @@ constexpr auto kD = .02F;
 class FanSpeedManager {
 public:
     FanSpeedManager() noexcept {
+        static_assert(std::size(pwm_array_) == std::size(pid_array_));
         selector_.SelectFan(kFanIndexArray[current_fan_]);
         for (auto &pwm : pwm_array_) {
             pwm.SetDutyCycle(kStartCycle);
@@ -89,7 +89,6 @@ private:
         Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD),
 
     };
-    static_assert(std::size(pwm_array_) == std::size(pid_array_));
     FanSpeedHelper speed_helper_(kFanSpeedPin);
     FanSpeedSelector selector_(kFanSelPin3, kFanSelPin2, kFanSelPin1,
                                kFanSelPin0);
