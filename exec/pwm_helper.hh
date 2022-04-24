@@ -34,6 +34,11 @@ public:
         gpio_set_function(gpio_pin_, GPIO_FUNC_PWM);
     }
 
+    PwmHelper(PwmHelper &&other) noexcept {
+        pwm_config_ = other.pwm_config_;
+        other.pwm_config_ = pwm_get_default_config();
+    }
+
     void SetDutyCycle(uint32_t num,
                       uint32_t denom = kDefaultCycleDenom) noexcept {
         const auto max_cyc = pwm_config_.top;
@@ -43,8 +48,8 @@ public:
 private:
     pwm_config pwm_config_;
 
+    void operator=(PwmHelper &&) = delete;
     DISALLOW_COPY(PwmHelper);
-    DISALLOW_MOVE(PwmHelper);
 };
 
 }  // namespace utility

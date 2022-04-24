@@ -14,6 +14,19 @@ public:
         FloatType kp, FloatType ki, FloatType kd) noexcept
         : min_(min), max_(max), dt_(dt), kp_(kp), ki_(ki), kd_(kd) {}
 
+    Pid(Pid&& other) noexcept
+        : min_(other.min_),
+          max_(other.max_),
+          dt_(other.dt_),
+          kp_(other.kp_),
+          ki_(other.ki_),
+          kd_(other.kd_),
+          last_error_(other.last_error_),
+          integral_(other.integral_) {
+        other.last_error_ = 0;
+        other.integral_ = 0;
+    }
+
     ValueType calculate(ValueType target, ValueType current) {
         // Proportional term
         const auto error = FloatType(target - current);
@@ -45,8 +58,8 @@ private:
     FloatType last_error_ = 0;
     FloatType integral_ = 0;
 
+    void operator=(Pid&&) = delete;
     DISALLOW_COPY(Pid);
-    DISALLOW_MOVE(Pid);
 };
 
 }  // namespace utility
