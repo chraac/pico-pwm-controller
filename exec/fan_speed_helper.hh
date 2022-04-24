@@ -31,4 +31,38 @@ private:
     DISALLOW_MOVE(FanSpeedHelper);
 };
 
+class FanSpeedSelector {
+public:
+    FanSpeedSelector(uint gpio_bit3, uint gpio_bit2, uint gpio_bit1,
+                     uint gpio_bit0) noexcept
+        : gpio_pin_bit0_(gpio_bit0),
+          gpio_pin_bit1_(gpio_bit1),
+          gpio_pin_bit2_(gpio_bit2),
+          gpio_pin_bit3_(gpio_bit3) {}
+
+    void SelectFan(uint8_t fan_index) noexcept {
+        auto SetGpioPinValue = [](uint gpio_pin, bool is_pull_up) {
+            if (is_pull_up) {
+                gpio_pull_up(gpio_pin);
+            } else {
+                gpio_pull_down(gpio_pin);
+            }
+        };
+
+        SetGpioPinValue(gpio_pin_bit0_, fan_index & 1);
+        SetGpioPinValue(gpio_pin_bit1_, fan_index & (1 << 1));
+        SetGpioPinValue(gpio_pin_bit2_, fan_index & (1 << 2));
+        SetGpioPinValue(gpio_pin_bit3_, fan_index & (1 << 3));
+    }
+
+private:
+    const uint gpio_pin_bit0_;
+    const uint gpio_pin_bit1_;
+    const uint gpio_pin_bit2_;
+    const uint gpio_pin_bit3_;
+
+    DISALLOW_COPY(FanSpeedHelper);
+    DISALLOW_MOVE(FanSpeedHelper);
+}
+
 }  // namespace utility
