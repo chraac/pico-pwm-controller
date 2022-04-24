@@ -55,7 +55,7 @@ public:
         log_debug("current.fan.%d.speed.%drpm.max.%drpm\n", int(current_fan),
                   int(current_speed), int(max_fan_speed_));
 
-        const pwm_index = current_fan % std::size(pwm_array_);
+        const auto pwm_index = current_fan % std::size(pwm_array_);
         if (pwm_index < (std::size(pwm_array_) - 1)) {
             // not the last fan of this pwm group, then return.
             return;
