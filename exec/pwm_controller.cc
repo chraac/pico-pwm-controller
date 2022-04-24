@@ -40,7 +40,6 @@ constexpr auto kD = .02F;
 class FanSpeedManager {
 public:
     FanSpeedManager() noexcept {
-        static_assert(std::size(pwm_array_) == std::size(pid_array_));
         selector_.SelectFan(kFanIndexArray[current_fan_]);
         for (auto &pwm : pwm_array_) {
             pwm.SetDutyCycle(kStartCycle);
@@ -52,9 +51,9 @@ public:
         const auto current_fan = current_fan_;
         current_fan_ = (current_fan_ + 1) % kFanCount;
         selector_.SelectFan(kFanIndexArray[current_fan_]);
-        max_fan_speed_ = std::max(max_fan_speed_, current_speed) log_debug(
-            "current.fan.%d.speed.%drpm.max.%drpm\n", int(current_fan),
-            int(current_speed), int(max_fan_speed_));
+        max_fan_speed_ = std::max(max_fan_speed_, current_speed);
+        log_debug("current.fan.%d.speed.%drpm.max.%drpm\n", int(current_fan),
+                  int(current_speed), int(max_fan_speed_));
 
         const pwm_index = current_fan % std::size(pwm_array_);
         if (pwm_index < (std::size(pwm_array_) - 1)) {
