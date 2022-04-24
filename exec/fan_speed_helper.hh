@@ -63,6 +63,6 @@ private:
 
     DISALLOW_COPY(FanSpeedHelper);
     DISALLOW_MOVE(FanSpeedHelper);
-}
+};
 
 }  // namespace utility
