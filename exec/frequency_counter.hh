@@ -15,6 +15,7 @@ constexpr uint32_t kGpioPinCount = 30;
 class GpioFreqencyCounter : public GpioBase {
 public:
     GpioFreqencyCounter(const uint gpio_pin) noexcept : GpioBase(gpio_pin) {
+        gpio_set_input_enabled(gpio_pin, true);
         gpio_set_irq_enabled_with_callback(
             gpio_pin, GPIO_IRQ_EDGE_RISE, true,
             &GpioFreqencyCounter::GpioEventHandler);

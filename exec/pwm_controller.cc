@@ -51,6 +51,7 @@ public:
         const auto current_fan = current_fan_;
         current_fan_ = (current_fan_ + 1) % kFanCount;
         selector_.SelectFan(kFanIndexArray[current_fan_]);
+        speed_helper_.Reset();
         max_fan_speed_ = std::max(max_fan_speed_, current_speed);
         log_debug("current.fan.%d.speed.%drpm.max.%drpm\n", int(current_fan),
                   int(current_speed), int(max_fan_speed_));
