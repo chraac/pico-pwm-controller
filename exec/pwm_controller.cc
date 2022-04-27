@@ -111,7 +111,7 @@ int main() {
     auto fan_manager = FanSpeedManager();
 
     log_debug("main.entering.loop\n");
-    for (;; sleep_ms(50)) {
+    for (;; sleep_ms(400)) {
         fan_manager.next();
     }
 
