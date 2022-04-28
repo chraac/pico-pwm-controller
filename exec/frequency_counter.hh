@@ -37,6 +37,10 @@ public:
         event_count_critical_section_.Lock();
         event_count_[gpio_pin_] = 0;
         event_count_critical_section_.Unlock();
+        // Clear stale events which might cause immediate spurious handler entry
+        // See also:
+        // https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2_common/hardware_gpio/gpio.c#L160
+        gpio_acknowledge_irq(gpio_pin_, GPIO_IRQ_EDGE_RISE);
         last_time_us_ = time_us_64();
     }
 
