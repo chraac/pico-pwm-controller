@@ -56,8 +56,8 @@ public:
         log_debug("current.fan.%d.speed.%drpm.max.%drpm\n", int(current_fan),
                   int(current_speed), int(max_fan_speed_));
 
-        const auto pwm_index = current_fan % std::size(pwm_array_);
-        if (pwm_index < (std::size(pwm_array_) - 1)) {
+        if ((current_fan % std::size(pwm_array_)) <
+            (std::size(pwm_array_) - 1)) {
             // not the last fan of this pwm group, then return.
             return;
         }
@@ -70,6 +70,7 @@ public:
             return;
         }
 
+        const auto pwm_index = current_fan / std::size(pwm_array_);
         auto cycle = pid_array_[pwm_index].calculate(kTargetRpm, max_fan_speed);
         pwm_array_[pwm_index].SetDutyCycle(cycle);
         log_debug("set.pwm.%d.cycle.%d\n", int(pwm_index), int(cycle));
@@ -94,7 +95,7 @@ private:
     FanSpeedSelector selector_ =
         FanSpeedSelector(kFanSelPin3, kFanSelPin2, kFanSelPin1, kFanSelPin0);
     uint8_t current_fan_ = 0;
-    decltype(speed_helper_.GetFanSpeedRpm()) max_fan_speed_ = 0;
+    uint32_t max_fan_speed_ = 0;
 
     DISALLOW_COPY(FanSpeedManager);
     DISALLOW_MOVE(FanSpeedManager);
