@@ -39,21 +39,13 @@ class FanSpeedSelector {
           gpio_pin_bit1_(gpio_bit1),
           gpio_pin_bit2_(gpio_bit2),
           gpio_pin_bit3_(gpio_bit3) {
-        SetGpioPinValue(gpio_pin_bit3_, 0);
-        SetGpioPinValue(gpio_pin_bit2_, 0);
-        SetGpioPinValue(gpio_pin_bit1_, 0);
-        SetGpioPinValue(gpio_pin_bit0_, 0);
+        SetGpioPinValue(gpio_pin_bit3_, false);
+        SetGpioPinValue(gpio_pin_bit2_, false);
+        SetGpioPinValue(gpio_pin_bit1_, false);
+        SetGpioPinValue(gpio_pin_bit0_, false);
     }
 
     void SelectFan(uint8_t fan_index) noexcept {
-        constexpr auto SetGpioPinValue = [](uint gpio_pin, bool is_pull_up) {
-            if (is_pull_up) {
-                gpio_pull_up(gpio_pin);
-            } else {
-                gpio_pull_down(gpio_pin);
-            }
-        };
-
         SetGpioPinValue(gpio_pin_bit3_, fan_index & (1 << 3));
         SetGpioPinValue(gpio_pin_bit2_, fan_index & (1 << 2));
         SetGpioPinValue(gpio_pin_bit1_, fan_index & (1 << 1));
@@ -61,6 +53,14 @@ class FanSpeedSelector {
     }
 
    private:
+    void SetGpioPinValue(uint gpio_pin, bool is_pull_up) {
+        if (is_pull_up) {
+            gpio_pull_up(gpio_pin);
+        } else {
+            gpio_pull_down(gpio_pin);
+        }
+    }
+
     const uint gpio_pin_bit0_;
     const uint gpio_pin_bit1_;
     const uint gpio_pin_bit2_;
