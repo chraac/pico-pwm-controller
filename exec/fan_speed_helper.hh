@@ -49,10 +49,10 @@ public:
             }
         };
 
-        SetGpioPinValue(gpio_pin_bit0_, fan_index & 1);
-        SetGpioPinValue(gpio_pin_bit1_, fan_index & (1 << 1));
-        SetGpioPinValue(gpio_pin_bit2_, fan_index & (1 << 2));
         SetGpioPinValue(gpio_pin_bit3_, fan_index & (1 << 3));
+        SetGpioPinValue(gpio_pin_bit2_, fan_index & (1 << 2));
+        SetGpioPinValue(gpio_pin_bit1_, fan_index & (1 << 1));
+        SetGpioPinValue(gpio_pin_bit0_, fan_index & 1);
     }
 
 private:
