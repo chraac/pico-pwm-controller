@@ -79,7 +79,6 @@ public:
         auto cycle = pid_array_[pwm_index].calculate(kTargetRpm, max_fan_speed);
         pwm_array_[pwm_index].SetDutyCycle(cycle);
         log_debug("set.pwm.%d.cycle.%d\n", int(pwm_index), int(cycle));
-        return;
     }
 
 private:
