@@ -123,7 +123,7 @@ int main() {
         auto consumed_time_ms = (time_us_64() - start_us) / 1000;
         log_debug("current iteration time cost: %dms\n", int(consumed_time_ms));
         next_interval =
-            kPoolIntervalMs - std::min(consumed_time_ms, kPoolIntervalMs);
+            kPoolIntervalMs - std::min<uint>(consumed_time_ms, kPoolIntervalMs);
     }
 
     return 0;
