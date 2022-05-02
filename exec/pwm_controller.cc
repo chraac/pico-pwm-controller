@@ -29,9 +29,10 @@ constexpr uint kFanSelPin2 = 9;
 constexpr uint kFanSelPin3 = 8;
 constexpr uint8_t kFanIndexArray[] = {0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13};
 constexpr uint8_t kFanCount = std::size(kFanIndexArray);
-constexpr auto kTargetRpm = 1900;
-constexpr auto kMaxTargetRpm =
-    105 * kTargetRpm / 100;  // max tolerance: +5% fan speed
+constexpr uint kPoolIntervalMs = 400;
+constexpr uint kFanSpeedStepRpm = 30 * 1000 / kPoolIntervalMs; // See also: https://noctua.at/pub/media/wysiwyg/Noctua_PWM_specifications_white_paper.pdf
+constexpr uint kTargetRpm = 1900;
+constexpr uint kMaxTargetRpm = kTargetRpm + kFanSpeedStepRpm;
 constexpr auto kStartCycle = 500;
 constexpr auto kP = .5F;
 constexpr auto kI = .3F;
@@ -112,7 +113,7 @@ int main() {
     auto fan_manager = FanSpeedManager();
 
     log_debug("main.entering.loop\n");
-    for (;; sleep_ms(400)) {
+    for (;; sleep_ms(kPoolIntervalMs)) {
         fan_manager.next();
     }
 
