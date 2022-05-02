@@ -3,15 +3,13 @@
 #include <hardware/gpio.h>
 #include <hardware/timer.h>
 
-#include <atomic>
-
 #include "base_types.hh"
 #include "frequency_counter.hh"
 
 namespace utility {
 
 class FanSpeedHelper : public GpioBase {
-   public:
+public:
     FanSpeedHelper(const uint gpio_pin) noexcept
         : GpioBase(gpio_pin), freq_counter_(gpio_pin) {}
 
@@ -24,7 +22,7 @@ class FanSpeedHelper : public GpioBase {
 
     void Reset() noexcept { freq_counter_.Reset(); }
 
-   private:
+private:
     GpioFreqencyCounter freq_counter_;
 
     DISALLOW_COPY(FanSpeedHelper);
@@ -32,17 +30,14 @@ class FanSpeedHelper : public GpioBase {
 };
 
 class FanSpeedSelector {
-   public:
+public:
     FanSpeedSelector(uint gpio_bit3, uint gpio_bit2, uint gpio_bit1,
                      uint gpio_bit0) noexcept
         : gpio_pin_bit0_(gpio_bit0),
           gpio_pin_bit1_(gpio_bit1),
           gpio_pin_bit2_(gpio_bit2),
           gpio_pin_bit3_(gpio_bit3) {
-        SetGpioPinValue(gpio_pin_bit3_, false);
-        SetGpioPinValue(gpio_pin_bit2_, false);
-        SetGpioPinValue(gpio_pin_bit1_, false);
-        SetGpioPinValue(gpio_pin_bit0_, false);
+        SelectFan(0);
     }
 
     void SelectFan(uint8_t fan_index) noexcept {
@@ -50,9 +45,12 @@ class FanSpeedSelector {
         SetGpioPinValue(gpio_pin_bit2_, fan_index & (1 << 2));
         SetGpioPinValue(gpio_pin_bit1_, fan_index & (1 << 1));
         SetGpioPinValue(gpio_pin_bit0_, fan_index & 1);
+        // Wait 1ms for the analong switch ready.
+        // http://www.utc-ic.com/uploadfile/2011/0923/20110923124731897.pdf
+        sleep_ms(1);
     }
 
-   private:
+private:
     static void SetGpioPinValue(uint gpio_pin, bool is_pull_up) {
         if (is_pull_up) {
             gpio_pull_up(gpio_pin);
