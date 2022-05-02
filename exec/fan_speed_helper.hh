@@ -53,7 +53,7 @@ class FanSpeedSelector {
     }
 
    private:
-    void SetGpioPinValue(uint gpio_pin, bool is_pull_up) {
+    static void SetGpioPinValue(uint gpio_pin, bool is_pull_up) {
         if (is_pull_up) {
             gpio_pull_up(gpio_pin);
         } else {
