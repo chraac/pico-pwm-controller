@@ -11,7 +11,7 @@
 namespace utility {
 
 class FanSpeedHelper : public GpioBase {
-public:
+   public:
     FanSpeedHelper(const uint gpio_pin) noexcept
         : GpioBase(gpio_pin), freq_counter_(gpio_pin) {}
 
@@ -24,7 +24,7 @@ public:
 
     void Reset() noexcept { freq_counter_.Reset(); }
 
-private:
+   private:
     GpioFreqencyCounter freq_counter_;
 
     DISALLOW_COPY(FanSpeedHelper);
@@ -32,13 +32,18 @@ private:
 };
 
 class FanSpeedSelector {
-public:
+   public:
     FanSpeedSelector(uint gpio_bit3, uint gpio_bit2, uint gpio_bit1,
                      uint gpio_bit0) noexcept
         : gpio_pin_bit0_(gpio_bit0),
           gpio_pin_bit1_(gpio_bit1),
           gpio_pin_bit2_(gpio_bit2),
-          gpio_pin_bit3_(gpio_bit3) {}
+          gpio_pin_bit3_(gpio_bit3) {
+        SetGpioPinValue(gpio_pin_bit3_, fan_index & (1 << 3));
+        SetGpioPinValue(gpio_pin_bit2_, fan_index & (1 << 2));
+        SetGpioPinValue(gpio_pin_bit1_, fan_index & (1 << 1));
+        SetGpioPinValue(gpio_pin_bit0_, fan_index & 1);
+    }
 
     void SelectFan(uint8_t fan_index) noexcept {
         constexpr auto SetGpioPinValue = [](uint gpio_pin, bool is_pull_up) {
@@ -55,7 +60,7 @@ public:
         SetGpioPinValue(gpio_pin_bit0_, fan_index & 1);
     }
 
-private:
+   private:
     const uint gpio_pin_bit0_;
     const uint gpio_pin_bit1_;
     const uint gpio_pin_bit2_;
