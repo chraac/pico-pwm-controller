@@ -3,67 +3,69 @@
 #include <hardware/gpio.h>
 #include <hardware/timer.h>
 
-#include <atomic>
-
 #include "base_types.hh"
-#include "critical_section_helper.hh"
+#include "frequency_counter.hh"
 
 namespace utility {
 
-constexpr uint32_t kGpioPinCount = 30;
-
-class FanSpeedHelper {
-   public:
-    FanSpeedHelper(const uint gpio_pin) noexcept : gpio_pin_(gpio_pin) {
-        gpio_set_irq_enabled_with_callback(gpio_pin, GPIO_IRQ_EDGE_RISE, true,
-                                           &FanSpeedHelper::GpioEventHandler);
-    }
+class FanSpeedHelper : public GpioBase {
+public:
+    FanSpeedHelper(const uint gpio_pin) noexcept
+        : GpioBase(gpio_pin), freq_counter_(gpio_pin) {}
 
     uint32_t GetFanSpeedRpm() noexcept {
-        const auto now_us = time_us_64();
-        uint32_t count;
-        event_count_critical_section_.Lock();
-        count = event_count_[gpio_pin_];
-        event_count_[gpio_pin_] = 0;
-        event_count_critical_section_.Unlock();
-        const auto interval_us = (now_us - last_time_us_);
-        last_time_us_ = now_us;
-
         // fan speed [rpm] = frequency [Hz] × 60 ÷ 2
         // See also:
         // https://noctua.at/pub/media/wysiwyg/Noctua_PWM_specifications_white_paper.pdf
-        return uint64_t(count) * 30 * 1000000 / interval_us;
+        return freq_counter_.GetFrequencyMilliHertz() * 30 / 1000;
     }
 
-    void Reset() noexcept {
-        event_count_critical_section_.Lock();
-        event_count_[gpio_pin_] = 0;
-        event_count_critical_section_.Unlock();
-        last_time_us_ = time_us_64();
-    }
+    void Reset() noexcept { freq_counter_.Reset(); }
 
-    uint GetGpioPin() const noexcept { return gpio_pin_; }
-
-   private:
-    static void GpioEventHandler(uint gpio, uint32_t events) {
-        if (events & GPIO_IRQ_EDGE_RISE) {
-            event_count_critical_section_.Lock();
-            ++event_count_[gpio];
-            event_count_critical_section_.Unlock();
-        }
-    }
-
-    static uint32_t event_count_[kGpioPinCount];
-    static CriticalSection event_count_critical_section_;
-
-    const uint gpio_pin_;
-    uint64_t last_time_us_ = time_us_64();
+private:
+    GpioFreqencyCounter freq_counter_;
 
     DISALLOW_COPY(FanSpeedHelper);
     DISALLOW_MOVE(FanSpeedHelper);
 };
 
-uint32_t FanSpeedHelper::event_count_[] = {};
-CriticalSection FanSpeedHelper::event_count_critical_section_;
+class FanSpeedSelector {
+public:
+    FanSpeedSelector(uint gpio_bit3, uint gpio_bit2, uint gpio_bit1,
+                     uint gpio_bit0) noexcept
+        : gpio_pin_bit0_(gpio_bit0),
+          gpio_pin_bit1_(gpio_bit1),
+          gpio_pin_bit2_(gpio_bit2),
+          gpio_pin_bit3_(gpio_bit3) {
+        SelectFan(0);
+    }
+
+    void SelectFan(uint8_t fan_index) noexcept {
+        SetGpioPinValue(gpio_pin_bit3_, fan_index & (1 << 3));
+        SetGpioPinValue(gpio_pin_bit2_, fan_index & (1 << 2));
+        SetGpioPinValue(gpio_pin_bit1_, fan_index & (1 << 1));
+        SetGpioPinValue(gpio_pin_bit0_, fan_index & 1);
+        // Wait 1ms for the analog switch ready.
+        // http://www.utc-ic.com/uploadfile/2011/0923/20110923124731897.pdf
+        sleep_ms(1);
+    }
+
+private:
+    static void SetGpioPinValue(uint gpio_pin, bool is_pull_up) {
+        if (is_pull_up) {
+            gpio_pull_up(gpio_pin);
+        } else {
+            gpio_pull_down(gpio_pin);
+        }
+    }
+
+    const uint gpio_pin_bit0_;
+    const uint gpio_pin_bit1_;
+    const uint gpio_pin_bit2_;
+    const uint gpio_pin_bit3_;
+
+    DISALLOW_COPY(FanSpeedSelector);
+    DISALLOW_MOVE(FanSpeedSelector);
+};
 
 }  // namespace utility

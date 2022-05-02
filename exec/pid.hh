@@ -7,12 +7,25 @@
 namespace utility {
 
 class Pid {
-   public:
+public:
     typedef int32_t ValueType;
     typedef float FloatType;
     Pid(const ValueType min, const ValueType max, const ValueType dt,
         FloatType kp, FloatType ki, FloatType kd) noexcept
         : min_(min), max_(max), dt_(dt), kp_(kp), ki_(ki), kd_(kd) {}
+
+    Pid(Pid&& other) noexcept
+        : min_(other.min_),
+          max_(other.max_),
+          dt_(other.dt_),
+          kp_(other.kp_),
+          ki_(other.ki_),
+          kd_(other.kd_),
+          last_error_(other.last_error_),
+          integral_(other.integral_) {
+        other.last_error_ = 0;
+        other.integral_ = 0;
+    }
 
     ValueType calculate(ValueType target, ValueType current) {
         // Proportional term
@@ -35,7 +48,7 @@ class Pid {
         return output;
     }
 
-   private:
+private:
     const ValueType min_;
     const ValueType max_;
     const ValueType dt_;
@@ -45,8 +58,8 @@ class Pid {
     FloatType last_error_ = 0;
     FloatType integral_ = 0;
 
+    void operator=(Pid&&) = delete;
     DISALLOW_COPY(Pid);
-    DISALLOW_MOVE(Pid);
 };
 
 }  // namespace utility
