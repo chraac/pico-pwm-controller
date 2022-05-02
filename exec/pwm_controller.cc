@@ -18,7 +18,7 @@ constexpr uint kPwm1Pin = 0;
 constexpr uint kPwm2Pin = 7;
 constexpr uint kPwm3Pin = 27;
 constexpr uint kPwm4Pin = 17;
-constexpr uint kPwmPinCount = 4;
+constexpr uint8_t kPwmPinCount = 4;
 constexpr uint kButton1Pin = 14;
 constexpr uint kButton2Pin = 15;
 constexpr uint kButton3Pin = 16;
@@ -29,8 +29,12 @@ constexpr uint kFanSelPin2 = 9;
 constexpr uint kFanSelPin3 = 8;
 constexpr uint8_t kFanIndexArray[] = {0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13};
 constexpr uint8_t kFanCount = std::size(kFanIndexArray);
+constexpr uint8_t kFanCountPerGroup = kFanCount / kPwmPinCount;
 constexpr uint kPoolIntervalMs = 400;
-constexpr uint kFanSpeedStepRpm = 30 * 1000 / kPoolIntervalMs; // See also: https://noctua.at/pub/media/wysiwyg/Noctua_PWM_specifications_white_paper.pdf
+
+// See also:
+// https://noctua.at/pub/media/wysiwyg/Noctua_PWM_specifications_white_paper.pdf
+constexpr uint kFanSpeedStepRpm = 30 * 1000 / kPoolIntervalMs;
 constexpr uint kTargetRpm = 1900;
 constexpr uint kMaxTargetRpm = kTargetRpm + kFanSpeedStepRpm;
 constexpr auto kStartCycle = 500;
@@ -57,8 +61,7 @@ public:
         log_debug("current.fan.%d.speed.%drpm.max.%drpm\n", int(current_fan),
                   int(current_speed), int(max_fan_speed_));
 
-        if ((current_fan % std::size(pwm_array_)) <
-            (std::size(pwm_array_) - 1)) {
+        if ((current_fan % kFanCountPerGroup) < (kFanCountPerGroup - 1)) {
             // not the last fan of this pwm group, then return.
             return;
         }
@@ -71,7 +74,7 @@ public:
             return;
         }
 
-        const auto pwm_index = current_fan / std::size(pwm_array_);
+        const auto pwm_index = current_fan / kFanCountPerGroup;
         auto cycle = pid_array_[pwm_index].calculate(kTargetRpm, max_fan_speed);
         pwm_array_[pwm_index].SetDutyCycle(cycle);
         log_debug("set.pwm.%d.cycle.%d\n", int(pwm_index), int(cycle));
