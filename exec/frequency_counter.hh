@@ -21,7 +21,9 @@ public:
             &GpioFreqencyCounter::GpioEventHandler);
     }
 
-    uint32_t GetFrequencyHz() noexcept {
+    // Get frequency in MilliHertz
+    // See also: https://www.convertworld.com/en/frequency/millihertz.html
+    uint32_t GetFrequencyMilliHertz() noexcept {
         uint32_t count;
         const auto now_us = time_us_64();
         event_count_critical_section_.Lock();
@@ -30,7 +32,7 @@ public:
         event_count_critical_section_.Unlock();
         const auto interval_us = (now_us - last_time_us_);
         last_time_us_ = now_us;
-        return uint64_t(count) * 1000000 / interval_us;
+        return uint64_t(count) * 1000000 * 1000 / interval_us;
     }
 
     void Reset() noexcept {

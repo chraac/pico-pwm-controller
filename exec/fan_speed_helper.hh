@@ -19,7 +19,7 @@ public:
         // fan speed [rpm] = frequency [Hz] × 60 ÷ 2
         // See also:
         // https://noctua.at/pub/media/wysiwyg/Noctua_PWM_specifications_white_paper.pdf
-        return freq_counter_.GetFrequencyHz() * 30;
+        return freq_counter_.GetFrequencyMilliHertz() * 30 / 1000;
     }
 
     void Reset() noexcept { freq_counter_.Reset(); }
