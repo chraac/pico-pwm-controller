@@ -39,10 +39,10 @@ class FanSpeedSelector {
           gpio_pin_bit1_(gpio_bit1),
           gpio_pin_bit2_(gpio_bit2),
           gpio_pin_bit3_(gpio_bit3) {
-        SetGpioPinValue(gpio_pin_bit3_, fan_index & (1 << 3));
-        SetGpioPinValue(gpio_pin_bit2_, fan_index & (1 << 2));
-        SetGpioPinValue(gpio_pin_bit1_, fan_index & (1 << 1));
-        SetGpioPinValue(gpio_pin_bit0_, fan_index & 1);
+        SetGpioPinValue(gpio_pin_bit3_, 0);
+        SetGpioPinValue(gpio_pin_bit2_, 0);
+        SetGpioPinValue(gpio_pin_bit1_, 0);
+        SetGpioPinValue(gpio_pin_bit0_, 0);
     }
 
     void SelectFan(uint8_t fan_index) noexcept {
