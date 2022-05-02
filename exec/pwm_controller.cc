@@ -1,4 +1,5 @@
 
+#include <hardware/timer.h>
 #include <pico/stdlib.h>
 
 #include <algorithm>
@@ -116,8 +117,13 @@ int main() {
     auto fan_manager = FanSpeedManager();
 
     log_debug("main.entering.loop\n");
-    for (;; sleep_ms(kPoolIntervalMs)) {
+    for (auto next_interval = kPoolIntervalMs;; sleep_ms(next_interval)) {
+        const auto start_us = time_us_64();
         fan_manager.next();
+        auto consumed_time_ms = (time_us_64() - start_us) / 1000;
+        log_debug("current iteration time cost: %dms\n", int(consumed_time_ms));
+        next_interval =
+            kPoolIntervalMs - std::min(consumed_time_ms, kPoolIntervalMs);
     }
 
     return 0;
