@@ -45,7 +45,7 @@ public:
         SetGpioPinValue(gpio_pin_bit2_, fan_index & (1 << 2));
         SetGpioPinValue(gpio_pin_bit1_, fan_index & (1 << 1));
         SetGpioPinValue(gpio_pin_bit0_, fan_index & 1);
-        // Wait 1ms for the analong switch ready.
+        // Wait 1ms for the analog switch ready.
         // http://www.utc-ic.com/uploadfile/2011/0923/20110923124731897.pdf
         sleep_ms(1);
     }
