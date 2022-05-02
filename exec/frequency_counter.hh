@@ -3,8 +3,6 @@
 #include <hardware/gpio.h>
 #include <hardware/timer.h>
 
-#include <atomic>
-
 #include "base_types.hh"
 #include "critical_section_helper.hh"
 
