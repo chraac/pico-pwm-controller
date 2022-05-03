@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  "Build":
+  "Build Pico":
     docker:
       - image: chraac/pico-builder:latest
     steps:
@@ -38,4 +38,4 @@ jobs:
 workflows:
   pico-pwm-controller-workflow:
     jobs:
-      - Build Pico
+      - "Build Pico"
