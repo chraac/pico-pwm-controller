@@ -38,4 +38,4 @@ jobs:
 workflows:
   pico-pwm-controller-workflow:
     jobs:
-      - Build
+      - Build Pico
