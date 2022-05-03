@@ -18,9 +18,11 @@ if (${BUILD_PLATFORM} STREQUAL "pico")
 
     # Initialize the SDK
     pico_sdk_init()
+    add_compile_definitions(PLATFORM_PICO)
 elseif (${BUILD_PLATFORM} STREQUAL "esp32-c3")
     set(PLATFORM_ESP32_C3 true)
     include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+    add_compile_definitions(PLATFORM_ESP32 PLATFORM_ESP32_C3)
 else()
     message(FATAL_ERROR "Invalid BUILD_PLATFORM, possible value: pico, esp32-c3")
 endif()
@@ -34,7 +36,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -Os")
 add_compile_options(-Wall
     -Wformat
     -Wno-unused-function # we have some for the docs that aren't called
-    #-Wno-maybe-uninitialized
     )
 
 add_subdirectory(exec)
