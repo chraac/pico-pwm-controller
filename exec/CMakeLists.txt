@@ -1,5 +1,4 @@
 
-
 if (PLATFORM_PICO)
     add_executable(
         pwm_controller
