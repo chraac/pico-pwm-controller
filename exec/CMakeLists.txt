@@ -17,4 +17,8 @@ if (PLATFORM_PICO)
     # create map/bin/hex file etc.
     pico_add_extra_outputs(pwm_controller)
 elseif (PLATFORM_ESP32_C3)
+    add_executable(
+        pwm_controller
+        pwm_controller_esp32.cc
+    )
 endif()

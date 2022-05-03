@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "base_types.hh"
 
 #ifdef PLATFORM_PICO
