@@ -4,6 +4,7 @@ set(BUILD_PLATFORM "pico" CACHE STRING "The target platform of the current build
 
 set(PLATFORM_ESP32_C3 false)
 set(PLATFORM_PICO false)
+message("BUILD_PLATFORM: ${BUILD_PLATFORM}}")
 if (${BUILD_PLATFORM} STREQUAL "pico") 
     set(PLATFORM_PICO true)
     # Pull in SDK (must be before project)
