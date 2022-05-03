@@ -1,7 +1,9 @@
 
+add_executable(pwm_controller)
+
 if (PLATFORM_PICO)
-    add_executable(
-        pwm_controller
+    target_sources(
+        pwm_controller PRIVATE
         pwm_controller_pico.cc
     )
     if (USB_STDIO)
@@ -17,8 +19,8 @@ if (PLATFORM_PICO)
     # create map/bin/hex file etc.
     pico_add_extra_outputs(pwm_controller)
 elseif (PLATFORM_ESP32_C3)
-    add_executable(
-        pwm_controller
+    target_sources(
+        pwm_controller PRIVATE
         pwm_controller_esp32.cc
     )
 endif()
