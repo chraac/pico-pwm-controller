@@ -37,11 +37,13 @@ jobs:
   "Build esp32":
     docker:
       - image: espressif/idf:release-v4.4
-        entrypoint: /opt/esp/entrypoint.sh
         environment: 
           BASH_ENV: '/opt/esp/entrypoint.sh'
     steps:
       - checkout
+      - run:
+          name: "Setup env"
+          command: "/opt/esp/entrypoint.sh"
       - run:
           name: "Build debug"
           command: idf.py build
