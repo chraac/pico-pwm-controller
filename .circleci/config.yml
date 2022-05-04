@@ -42,11 +42,8 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Setup env"
-          command: "/opt/esp/entrypoint.sh"
-      - run:
           name: "Build debug"
-          command: idf.py build
+          command: /opt/esp/entrypoint.sh idf.py build
 
 workflows:
   pico-pwm-controller-workflow:
