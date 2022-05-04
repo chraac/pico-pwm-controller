@@ -38,12 +38,13 @@ jobs:
     docker:
       - image: espressif/idf:latest
         entrypoint: /opt/esp/entrypoint.sh
+        environment: 
+          BASH_ENV: '/opt/esp/entrypoint.sh'
     steps:
       - checkout
       - run:
           name: "Build debug"
           command: |
-            export BASH_ENV=''
             idf.py -DBUILD_PLATFORM=esp32-c3 -DCMAKE_BUILD_TYPE=Debug build
 
 workflows:
