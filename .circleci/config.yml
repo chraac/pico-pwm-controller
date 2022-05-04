@@ -42,8 +42,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: "Setup env"
+          command: alias idf_cmd=$IDF_TOOLS_PATH/entrypoint.sh idf.py
+      - run:
           name: "Build debug"
-          command: $IDF_TOOLS_PATH/entrypoint.sh idf.py -DBUILD_PLATFORM=esp32-c3 -DCMAKE_BUILD_TYPE=Debug build
+          command: idf_cmd -DBUILD_PLATFORM=esp32-c3 -DCMAKE_BUILD_TYPE=Debug build
 
 workflows:
   pico-pwm-controller-workflow:
