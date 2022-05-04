@@ -39,11 +39,12 @@ jobs:
       - image: espressif/idf:release-v4.4
         environment: 
           BASH_ENV: '$IDF_TOOLS_PATH/entrypoint.sh'
+          DEBIAN_FRONTEND: noninteractive
     steps:
       - checkout
       - run:
           name: "Setup env"
-          command: "exec $IDF_TOOLS_PATH/entrypoint.sh"
+          command: "sh -c $IDF_TOOLS_PATH/entrypoint.sh"
       - run:
           name: "Build debug"
           command: idf.py build
