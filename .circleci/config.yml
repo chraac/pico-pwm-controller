@@ -38,8 +38,6 @@ jobs:
     docker:
       - image: espressif/idf:release-v4.4
         environment: 
-          DEBIAN_FRONTEND: 'noninteractive'
-          BATCH_BUILD: 'true'
           LANG: 'en_US.UTF-8'
     steps:
       - checkout
