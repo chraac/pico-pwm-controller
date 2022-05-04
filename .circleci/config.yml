@@ -36,15 +36,14 @@ jobs:
           path: build/exec/pwm_controller.hex
   "Build esp32":
     docker:
-      - image: espressif/idf:release-v4.4
+      - image: espressif/idf:v4.4.1
         environment: 
           LANG: 'en_US.UTF-8'
-          IDF_CMD: '$IDF_TOOLS_PATH/entrypoint.sh idf.py'
     steps:
       - checkout
       - run:
           name: "Build debug"
-          command: $IDF_CMD -DBUILD_PLATFORM=esp32-c3 -DCMAKE_BUILD_TYPE=Debug build
+          command: $IDF_TOOLS_PATH/entrypoint.sh idf.py -DBUILD_PLATFORM=esp32-c3 -DCMAKE_BUILD_TYPE=Debug build
 
 workflows:
   pico-pwm-controller-workflow:
