@@ -41,7 +41,7 @@ jobs:
       - checkout
       - run:
           name: "Build debug"
-          command: "idf.py -DBUILD_PLATFORM=esp32-c3 -DCMAKE_BUILD_TYPE=Debug"
+          command: "$IDF_PATH/tools/idf.py -DBUILD_PLATFORM=esp32-c3 -DCMAKE_BUILD_TYPE=Debug"
 
 workflows:
   pico-pwm-controller-workflow:
