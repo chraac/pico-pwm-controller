@@ -4,7 +4,7 @@ jobs:
   "Build pico":
     docker:
       - image: chraac/pico-builder:latest
-      entrypoint: $IDF_TOOLS_PATH/entrypoint.sh
+        entrypoint: $IDF_TOOLS_PATH/entrypoint.sh
     steps:
       - checkout
       - run:
