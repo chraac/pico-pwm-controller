@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  "Build Pico":
+  "Build pico":
     docker:
       - image: chraac/pico-builder:latest
     steps:
@@ -34,8 +34,16 @@ jobs:
           path: build/exec/pwm_controller.bin
       - store_artifacts:
           path: build/exec/pwm_controller.hex
+  "Build esp32":
+    docker:
+      - image: espressif/idf:latest
+    steps:
+      - checkout
+      - run:
+          name: "Build debug"
+          command: "idf.py -DBUILD_PLATFORM=esp32-c3 -DCMAKE_BUILD_TYPE=Debug"
 
 workflows:
   pico-pwm-controller-workflow:
     jobs:
-      - "Build Pico"
+      - "Build pico"
