@@ -45,7 +45,7 @@ jobs:
       - checkout
       - run:
           name: "Setup env"
-          command: "sh -c $IDF_TOOLS_PATH/entrypoint.sh"
+          command: "mkdir build && cd build && $IDF_TOOLS_PATH/entrypoint.sh"
       - run:
           name: "Build debug"
           command: idf.py build
