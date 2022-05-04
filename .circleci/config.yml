@@ -13,14 +13,20 @@ jobs:
           name: "Update sdk submodule"
           command: "cd /pico/pico-sdk && git submodule update --init"
       - run:
+          name: "Setup build directory"
+          command: mkdir -p build
+      - run:
           name: "Build debug"
-          command: "mkdir -p build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Debug && make -j8"
+          command: "cd build && cmake .. -DCMAKE_BUILD_TYPE=Debug && make -j8"
           environment: 
             PICO_BASE_PATH: '/pico'
             PICO_SDK_PATH: '/pico/pico-sdk'
       - run:
+          name: "Cleanup"
+          command: rm -rf build/*
+      - run:
           name: "Build release"
-          command: "rm -rf build/* && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && make -j8"
+          command: "cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && make -j8"
           environment: 
             PICO_BASE_PATH: '/pico'
             PICO_SDK_PATH: '/pico/pico-sdk'
@@ -45,6 +51,12 @@ jobs:
       - run:
           name: "Build debug"
           command: $IDF_TOOLS_PATH/entrypoint.sh idf.py -DBUILD_PLATFORM=esp32-c3 -DCMAKE_BUILD_TYPE=Debug build
+      - run:
+          name: "Cleanup"
+          command: rm -rf build/*
+      - run:
+          name: "Build release"
+          command: $IDF_TOOLS_PATH/entrypoint.sh idf.py -DBUILD_PLATFORM=esp32-c3 -DCMAKE_BUILD_TYPE=Release build
 
 workflows:
   pico-pwm-controller-workflow:
