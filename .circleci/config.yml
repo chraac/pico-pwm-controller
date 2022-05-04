@@ -37,7 +37,7 @@ jobs:
   "Build esp32":
     docker:
       - image: espressif/idf:latest
-        entrypoint: $IDF_TOOLS_PATH/entrypoint.sh
+        entrypoint: /opt/esp/entrypoint.sh
     steps:
       - checkout
       - run:
