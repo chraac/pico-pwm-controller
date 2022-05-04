@@ -40,7 +40,8 @@ jobs:
         environment: 
           BASH_ENV: '$IDF_TOOLS_PATH/entrypoint.sh'
           DEBIAN_FRONTEND: 'noninteractive'
-          BATCH_BUILD: "true"
+          BATCH_BUILD: 'true'
+          LANG: 'en_US.UTF-8'
     steps:
       - checkout
       - run:
