@@ -38,12 +38,12 @@ jobs:
     docker:
       - image: espressif/idf:release-v4.4
         environment: 
-          BASH_ENV: '$IDF_PATH/export.sh'
+          BASH_ENV: '$IDF_PATH/entrypoint.sh'
     steps:
       - checkout
       - run:
           name: "Setup env"
-          command: ". $IDF_PATH/export.sh"
+          command: "exec $IDF_PATH/entrypoint.sh"
       - run:
           name: "Build debug"
           command: idf.py build
