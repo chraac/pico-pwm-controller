@@ -37,7 +37,6 @@ jobs:
   "Build esp32":
     docker:
       - image: espressif/idf:release-v4.4
-        entrypoint: /opt/esp/entrypoint.sh
         environment: 
           DEBIAN_FRONTEND: 'noninteractive'
           BATCH_BUILD: 'true'
@@ -46,7 +45,7 @@ jobs:
       - checkout
       - run:
           name: "Build debug"
-          command: idf.py build
+          command: /opt/esp/entrypoint.sh idf.py build
 
 workflows:
   pico-pwm-controller-workflow:
