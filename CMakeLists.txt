@@ -22,6 +22,7 @@ if (${BUILD_PLATFORM} STREQUAL "pico")
 elseif (${BUILD_PLATFORM} STREQUAL "esp32-c3")
     set(PLATFORM_ESP32_C3 true)
     include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+    include($ENV{IDF_PATH}/tools/cmake/utilities.cmake)
     # Use generator expression so that users can append/override flags even after call to
     # idf_build_process
     idf_build_get_property(include_directories INCLUDE_DIRECTORIES GENERATOR_EXPRESSION)
