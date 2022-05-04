@@ -43,7 +43,7 @@ jobs:
       - checkout
       - run:
           name: "Setup env"
-          command: alias idf_cmd=$IDF_TOOLS_PATH/entrypoint.sh idf.py
+          command: alias idf_cmd="$IDF_TOOLS_PATH/entrypoint.sh idf.py"
       - run:
           name: "Build debug"
           command: idf_cmd -DBUILD_PLATFORM=esp32-c3 -DCMAKE_BUILD_TYPE=Debug build
