@@ -4,6 +4,7 @@ jobs:
   "Build pico":
     docker:
       - image: chraac/pico-builder:latest
+      entrypoint: $IDF_TOOLS_PATH/entrypoint.sh
     steps:
       - checkout
       - run:
@@ -42,9 +43,7 @@ jobs:
       - run:
           name: "Build debug"
           command: |
-            $IDF_TOOLS_PATH/entrypoint.sh
             source $BASH_ENV
-            env
             idf.py -DBUILD_PLATFORM=esp32-c3 -DCMAKE_BUILD_TYPE=Debug build
 
 workflows:
