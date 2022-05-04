@@ -39,6 +39,7 @@ jobs:
       - image: espressif/idf:v4.4.1
         environment: 
           LANG: 'en_US.UTF-8'
+          IDF_TARGET: 'esp32c3'
     steps:
       - checkout
       - run:
