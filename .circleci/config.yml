@@ -47,3 +47,4 @@ workflows:
   pico-pwm-controller-workflow:
     jobs:
       - "Build pico"
+      - "Build esp32"
