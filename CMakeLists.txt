@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 
-set(BUILD_PLATFORM "pico" CACHE STRING "The target platform of the current build, possible value: pico, esp32-c3")
+IF(DEFINED $ENV{IDF_TARGET})
+    set(BUILD_PLATFORM "$ENV{IDF_TARGET}" CACHE STRING "The target platform of the current build, possible value: pico, esp32c3")
+else()
+    set(BUILD_PLATFORM "pico" CACHE STRING "The target platform of the current build, possible value: pico, esp32c3")
+endif()
 
 set(PLATFORM_ESP32_C3 false)
 set(PLATFORM_PICO false)
@@ -19,7 +23,7 @@ if (${BUILD_PLATFORM} STREQUAL "pico")
     # Initialize the SDK
     pico_sdk_init()
     add_compile_definitions(PLATFORM_PICO)
-elseif (${BUILD_PLATFORM} STREQUAL "esp32-c3")
+elseif (${BUILD_PLATFORM} STREQUAL "esp32c3")
     set(PLATFORM_ESP32_C3 true)
     set(EXTRA_COMPONENT_DIRS exec)
     set(COMPONENTS exec)
@@ -27,7 +31,7 @@ elseif (${BUILD_PLATFORM} STREQUAL "esp32-c3")
   
     add_compile_definitions(PLATFORM_ESP32 PLATFORM_ESP32_C3)
 else()
-    message(FATAL_ERROR "Invalid BUILD_PLATFORM, possible value: pico, esp32-c3")
+    message(FATAL_ERROR "Invalid BUILD_PLATFORM, possible value: pico, esp32c3")
 endif()
 
 project(pwm_controller C CXX ASM)

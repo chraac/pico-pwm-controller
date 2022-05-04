@@ -50,13 +50,13 @@ jobs:
       - checkout
       - run:
           name: "Build debug"
-          command: $IDF_TOOLS_PATH/entrypoint.sh idf.py -DBUILD_PLATFORM=esp32-c3 -DCMAKE_BUILD_TYPE=Debug build
+          command: $IDF_TOOLS_PATH/entrypoint.sh idf.py -DCMAKE_BUILD_TYPE=Debug build
       - run:
           name: "Cleanup"
           command: rm -rf build/*
       - run:
           name: "Build release"
-          command: $IDF_TOOLS_PATH/entrypoint.sh idf.py -DBUILD_PLATFORM=esp32-c3 -DCMAKE_BUILD_TYPE=Release build
+          command: $IDF_TOOLS_PATH/entrypoint.sh idf.py -DCMAKE_BUILD_TYPE=Release build
 
 workflows:
   pico-pwm-controller-workflow:
