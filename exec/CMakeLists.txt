@@ -19,5 +19,5 @@ if (PLATFORM_PICO)
     pico_add_extra_outputs(pwm_controller)
 elseif (PLATFORM_ESP32_C3)
     idf_component_register(SRCS "pwm_controller_esp32.cc"
-                        INCLUDE_DIRS ".")
+        INCLUDE_DIRS ".")
 endif()

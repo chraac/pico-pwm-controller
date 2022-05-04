@@ -21,7 +21,7 @@ if (${BUILD_PLATFORM} STREQUAL "pico")
     add_compile_definitions(PLATFORM_PICO)
 elseif (${BUILD_PLATFORM} STREQUAL "esp32-c3")
     set(PLATFORM_ESP32_C3 true)
-    list(APPEND EXTRA_COMPONENT_DIRS "exec")
+    set(EXTRA_COMPONENT_DIRS exec)
     include(cmake/esp32_sdk_import.cmake)
   
     add_compile_definitions(PLATFORM_ESP32 PLATFORM_ESP32_C3)
