@@ -39,14 +39,12 @@ jobs:
       - image: espressif/idf:release-v4.4
         environment: 
           LANG: 'en_US.UTF-8'
+          IDF_CMD: '$IDF_TOOLS_PATH/entrypoint.sh idf.py'
     steps:
       - checkout
       - run:
-          name: "Setup env"
-          command: alias idf_cmd="$IDF_TOOLS_PATH/entrypoint.sh idf.py"
-      - run:
           name: "Build debug"
-          command: idf_cmd -DBUILD_PLATFORM=esp32-c3 -DCMAKE_BUILD_TYPE=Debug build
+          command: $IDF_CMD -DBUILD_PLATFORM=esp32-c3 -DCMAKE_BUILD_TYPE=Debug build
 
 workflows:
   pico-pwm-controller-workflow:
