@@ -36,7 +36,7 @@ jobs:
           path: build/exec/pwm_controller.hex
   "Build esp32":
     docker:
-      - image: espressif/idf:latest
+      - image: espressif/idf:release-v4.4
         entrypoint: /opt/esp/entrypoint.sh
         environment: 
           BASH_ENV: '/opt/esp/entrypoint.sh'
