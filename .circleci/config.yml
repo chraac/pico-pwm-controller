@@ -43,6 +43,7 @@ jobs:
           name: Update PATH and Define Environment Variable at Runtime
           command: |
             echo 'export PATH=$IDF_PATH/tools::$PATH' >> $BASH_ENV
+            sh -c env
             source $BASH_ENV
       - run:
           name: "Build debug"
