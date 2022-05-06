@@ -28,7 +28,7 @@ PwmHelper::PwmHelper(PwmHelper &&other) noexcept : GpioBase(other.gpio_pin_) {
 }
 
 void PwmHelper::SetDutyCycle(uint32_t num,
-                             uint32_t denom = kDefaultCycleDenom) noexcept {
+                             uint32_t denom) noexcept {
     const auto max_cyc = pwm_config_.top;
     pwm_set_gpio_level(gpio_pin_, num * max_cyc / denom);
 }
