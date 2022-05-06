@@ -2,9 +2,6 @@
 
 #ifdef PLATFORM_PICO
 #include <hardware/pwm.h>
-namespace utility {
-using pwm_cfg = pwm_config;
-}
 #elif defined(PLATFORM_ESP32_C3)
 #include <driver/ledc.h>
 #endif
@@ -26,7 +23,12 @@ public:
                       uint32_t denom = kDefaultCycleDenom) noexcept;
 
 private:
-    pwm_cfg pwm_config_;
+#ifdef PLATFORM_PICO
+    pwm_config pwm_config_;
+#elif defined(PLATFORM_ESP32_C3)
+    ledc_channel_config_t channel_config_;
+    ledc_timer_config_t timer_config_;
+#endif
 
     void operator=(PwmHelper &&) = delete;
     DISALLOW_COPY(PwmHelper);
