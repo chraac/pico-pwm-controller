@@ -19,6 +19,10 @@ if (PLATFORM_PICO)
     # create map/bin/hex file etc.
     pico_add_extra_outputs(pwm_controller)
 elseif (PLATFORM_ESP32_C3)
-    idf_component_register(SRCS "pwm_controller_esp32.cc"
+    set(srcs
+        "pwm_helper_esp32.cc"
+        "pwm_controller_esp32.cc"
+    )
+    idf_component_register(SRCS "${srcs}"
         INCLUDE_DIRS ".")
 endif()
