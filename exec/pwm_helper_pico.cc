@@ -20,13 +20,6 @@ PwmHelper::PwmHelper(const uint gpio_pin, const uint32_t freq_khz,
     gpio_set_function(gpio_pin_, GPIO_FUNC_PWM);
 }
 
-PwmHelper::PwmHelper(const uint gpio_pin, const pwm_config &pwm_cfg) noexcept
-    : GpioBase(gpio_pin), pwm_config_(pwm_cfg) {
-    auto slice_num = pwm_gpio_to_slice_num(gpio_pin);
-    pwm_init(slice_num, &pwm_config_, true);
-    gpio_set_function(gpio_pin_, GPIO_FUNC_PWM);
-}
-
 PwmHelper::PwmHelper(PwmHelper &&other) noexcept : GpioBase(other.gpio_pin_) {
     pwm_config_ = other.pwm_config_;
     other.pwm_config_ = pwm_get_default_config();

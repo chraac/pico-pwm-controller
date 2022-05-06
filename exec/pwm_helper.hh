@@ -20,15 +20,13 @@ public:
     PwmHelper(const uint gpio_pin, const uint32_t freq_khz,
               const uint32_t top = kDefaultPwmTop) noexcept;
 
-    PwmHelper(const uint gpio_pin, const pwm_config &pwm_cfg) noexcept;
-
     PwmHelper(PwmHelper &&other) noexcept;
 
     void SetDutyCycle(uint32_t num,
                       uint32_t denom = kDefaultCycleDenom) noexcept;
 
 private:
-    pwm_config pwm_config_;
+    pwm_cfg pwm_config_;
 
     void operator=(PwmHelper &&) = delete;
     DISALLOW_COPY(PwmHelper);
