@@ -9,8 +9,6 @@ using pwm_cfg = pwm_config;
 #include <driver/ledc.h>
 #endif
 
-#include "system_clock.hh"
-
 namespace utility {
 constexpr uint kDefaultPwmTop = 9999;
 constexpr uint kDefaultCycleDenom = kDefaultPwmTop + 1;

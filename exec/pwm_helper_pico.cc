@@ -1,10 +1,11 @@
 
 #include "pwm_helper.hh"
+#include "system_clock.hh"
 
 using namespace utility;
 
 PwmHelper::PwmHelper(const uint gpio_pin, const uint32_t freq_khz,
-                     const uint32_t top = kDefaultPwmTop) noexcept
+                     const uint32_t top) noexcept
     : GpioBase(gpio_pin), pwm_config_(pwm_get_default_config()) {
     // For more detail, see:
     // https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf, Page
