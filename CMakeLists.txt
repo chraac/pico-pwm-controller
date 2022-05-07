@@ -45,6 +45,7 @@ elseif(${BUILD_PLATFORM} STREQUAL "esp32c3")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_COMPILE_FLAGS}")
 
     include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+    message("EXTRA_COMPONENT_DIRS: ${EXTRA_COMPONENT_DIRS}")
     list(APPEND EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_LIST_DIR}/main")
     project(pwm_controller)
 else()
