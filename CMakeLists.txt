@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.5)
 
 if(DEFINED ENV{IDF_TARGET})
     set(BUILD_PLATFORM "$ENV{IDF_TARGET}" CACHE STRING "The target platform of the current build, possible value: pico, esp32c3")
