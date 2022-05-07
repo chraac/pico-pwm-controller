@@ -1,4 +1,5 @@
-
+message("bool PLATFORM_ESP32: ${PLATFORM_ESP32}")
+message("bool PLATFORM_PICO: ${PLATFORM_PICO}")
 
 if(PLATFORM_PICO)
     add_executable(
