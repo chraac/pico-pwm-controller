@@ -19,7 +19,7 @@ if(PLATFORM_PICO)
 
     # create map/bin/hex file etc.
     pico_add_extra_outputs(pwm_controller)
-elseif(CONFIG_IDF_TARGET STREQUAL "esp32c3")
+elseif(PLATFORM_ESP32)
     set(exec_srcs
         "pwm_helper_esp32.cc"
         "pwm_controller_esp32.cc"
