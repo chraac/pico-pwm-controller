@@ -21,10 +21,11 @@ if(${BUILD_PLATFORM} STREQUAL "pico")
         message(FATAL_ERROR "Raspberry Pi Pico SDK version 1.3.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
     endif()
 
+    project(pwm_controller C CXX ASM)
+    
     # Initialize the SDK
     pico_sdk_init()
     add_compile_definitions(PLATFORM_PICO)
-    project(pwm_controller C CXX ASM)
     add_subdirectory(main)
 elseif(${BUILD_PLATFORM} STREQUAL "esp32c3")
     set(PLATFORM_ESP32 TRUE)
