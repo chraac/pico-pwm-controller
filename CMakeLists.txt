@@ -11,6 +11,17 @@ set(PLATFORM_ESP32_C3 FALSE)
 set(PLATFORM_PICO FALSE)
 set(USB_STDIO FALSE)
 message("BUILD_PLATFORM: ${BUILD_PLATFORM}")
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1 -g -O0")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -Os")
+
+add_compile_options(-Wall
+    -Wformat
+    -Wno-unused-function # we have some for the docs that aren't called
+    )
+
 if(${BUILD_PLATFORM} STREQUAL "pico") 
     set(PLATFORM_PICO TRUE)
     # Pull in SDK (must be before project)
@@ -30,23 +41,12 @@ elseif(${BUILD_PLATFORM} STREQUAL "esp32c3")
     set(PLATFORM_ESP32 TRUE)
     set(PLATFORM_ESP32_C3 TRUE)
     add_compile_definitions(PLATFORM_ESP32 PLATFORM_ESP32_C3)
-    set(COMPONENT_DIRS "${CMAKE_CURRENT_LIST_DIR}/main")
 
     include($ENV{IDF_PATH}/tools/cmake/project.cmake)
     project(pwm_controller)
 else()
     message(FATAL_ERROR "Invalid BUILD_PLATFORM, possible value: pico, esp32c3")
 endif()
-
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1 -g -O0")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -Os")
-
-add_compile_options(-Wall
-    -Wformat
-    -Wno-unused-function # we have some for the docs that aren't called
-    )
 
 if(PLATFORM_PICO)
     add_subdirectory(main)
