@@ -29,7 +29,7 @@ elseif(${BUILD_PLATFORM} STREQUAL "esp32c3")
     set(PLATFORM_ESP32_C3 TRUE)
     add_compile_definitions(PLATFORM_ESP32 PLATFORM_ESP32_C3)
 
-    include(cmake/esp32_sdk_import.cmake)
+    include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 else()
     message(FATAL_ERROR "Invalid BUILD_PLATFORM, possible value: pico, esp32c3")
 endif()
