@@ -28,7 +28,7 @@ elseif (${BUILD_PLATFORM} STREQUAL "esp32c3")
     set(PLATFORM_ESP32 true)
     set(PLATFORM_ESP32_C3 true)
     #set(COMPONENTS "exec")
-    list(APPEND EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_LIST_DIR}/exec")
+    #set(EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_LIST_DIR}/exec")
     include(cmake/esp32_sdk_import.cmake)
   
     add_compile_definitions(PLATFORM_ESP32 PLATFORM_ESP32_C3)
@@ -48,5 +48,5 @@ add_compile_options(-Wall
     )
 
 if (PLATFORM_PICO)
-    add_subdirectory(exec)
+    add_subdirectory(main)
 endif()

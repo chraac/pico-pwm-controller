@@ -31,15 +31,15 @@ jobs:
             PICO_BASE_PATH: '/pico'
             PICO_SDK_PATH: '/pico/pico-sdk'
       - store_artifacts:
-          path: build/exec/pwm_controller.elf
+          path: build/main/pwm_controller.elf
       - store_artifacts:
-          path: build/exec/pwm_controller.elf.map
+          path: build/main/pwm_controller.elf.map
       - store_artifacts:
-          path: build/exec/pwm_controller.uf2
+          path: build/main/pwm_controller.uf2
       - store_artifacts:
-          path: build/exec/pwm_controller.bin
+          path: build/main/pwm_controller.bin
       - store_artifacts:
-          path: build/exec/pwm_controller.hex
+          path: build/main/pwm_controller.hex
   "Build esp32":
     docker:
       - image: espressif/idf:v4.4.1
