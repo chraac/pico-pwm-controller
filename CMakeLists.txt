@@ -36,7 +36,7 @@ if(${BUILD_PLATFORM} STREQUAL "pico")
         -Wformat
         -Wno-unused-function # we have some for the docs that aren't called
         )
-elseif(${BUILD_PLATFORM} MATCHES "esp32(c3|s3)?")
+elseif(${BUILD_PLATFORM} MATCHES "esp32(c3|s2)?")
     set(PLATFORM_ESP32 TRUE)
     #add_compile_definitions(PLATFORM_ESP32)
     set(COMMON_COMPILE_FLAGS "-DPLATFORM_ESP32")
