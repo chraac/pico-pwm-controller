@@ -44,6 +44,7 @@ jobs:
     docker:
       - image: espressif/idf:v4.3.2
         environment: 
+          LC_ALL: 'en_US.UTF-8'
           LANG: 'en_US.UTF-8'
           IDF_TARGET: 'esp32c3'
     steps:
