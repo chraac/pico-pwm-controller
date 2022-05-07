@@ -43,7 +43,6 @@ jobs:
   "Build esp32":
     docker:
       - image: espressif/idf:v4.4.1
-        entrypoint: /opt/esp/entrypoint.sh
         environment: 
           LANG: 'en_US.UTF-8'
           IDF_TARGET: 'esp32c3'
@@ -51,13 +50,13 @@ jobs:
       - checkout
       - run:
           name: "Build debug"
-          command: idf.py -DCMAKE_BUILD_TYPE=Debug build
+          command: $IDF_TOOLS_PATH/entrypoint.sh idf.py -DCMAKE_BUILD_TYPE=Debug build
       - run:
           name: "Cleanup"
           command: rm -rf build/*
       - run:
           name: "Build release"
-          command: idf.py -DCMAKE_BUILD_TYPE=Release build
+          command: $IDF_TOOLS_PATH/entrypoint.sh idf.py -DCMAKE_BUILD_TYPE=Release build
 
 workflows:
   pico-pwm-controller-workflow:
