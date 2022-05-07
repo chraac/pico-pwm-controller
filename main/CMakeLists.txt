@@ -26,5 +26,5 @@ elseif(PLATFORM_ESP32)
     )
     idf_component_register(SRCS "${exec_srcs}"
         INCLUDE_DIRS "."
-        PRIV_REQUIRES driver main)
+        REQUIRES driver main)
 endif()
