@@ -21,6 +21,8 @@ if(${BUILD_PLATFORM} STREQUAL "pico")
         message(FATAL_ERROR "Raspberry Pi Pico SDK version 1.3.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
     endif()
 
+    project(pwm_controller C CXX ASM)
+
     # Initialize the SDK
     pico_sdk_init()
     add_compile_definitions(PLATFORM_PICO)
@@ -30,11 +32,11 @@ elseif(${BUILD_PLATFORM} STREQUAL "esp32c3")
     add_compile_definitions(PLATFORM_ESP32 PLATFORM_ESP32_C3)
 
     include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+    project(pwm_controller)
 else()
     message(FATAL_ERROR "Invalid BUILD_PLATFORM, possible value: pico, esp32c3")
 endif()
 
-project(pwm_controller C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1 -g -O0")
