@@ -40,6 +40,7 @@ if(${BUILD_PLATFORM} STREQUAL "pico")
 elseif(${BUILD_PLATFORM} STREQUAL "esp32c3")
     set(PLATFORM_ESP32 TRUE)
     set(PLATFORM_ESP32_C3 TRUE)
+    set(EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_LIST_DIR}")
     add_compile_definitions(PLATFORM_ESP32 PLATFORM_ESP32_C3)
 
     include($ENV{IDF_PATH}/tools/cmake/project.cmake)
