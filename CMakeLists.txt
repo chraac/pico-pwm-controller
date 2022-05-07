@@ -17,11 +17,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1 -g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -Os")
 
-add_compile_options(-Wall
-    -Wformat
-    -Wno-unused-function # we have some for the docs that aren't called
-    )
-
 if(${BUILD_PLATFORM} STREQUAL "pico") 
     set(PLATFORM_PICO TRUE)
     # Pull in SDK (must be before project)
@@ -37,6 +32,10 @@ if(${BUILD_PLATFORM} STREQUAL "pico")
     # Initialize the SDK
     pico_sdk_init()
     add_compile_definitions(PLATFORM_PICO)
+    add_compile_options(-Wall
+        -Wformat
+        -Wno-unused-function # we have some for the docs that aren't called
+        )
 elseif(${BUILD_PLATFORM} STREQUAL "esp32c3")
     set(PLATFORM_ESP32 TRUE)
     set(PLATFORM_ESP32_C3 TRUE)
