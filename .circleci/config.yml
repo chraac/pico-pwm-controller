@@ -50,7 +50,9 @@ jobs:
       - checkout
       - run:
           name: "Build debug"
-          command: $IDF_TOOLS_PATH/entrypoint.sh idf.py -DCMAKE_BUILD_TYPE=Debug -v build
+          command: |
+            . $IDF_PATH/export.sh
+            idf.py -DCMAKE_BUILD_TYPE=Debug -v build
       - run:
           name: "Cleanup"
           command: rm -rf build/*
