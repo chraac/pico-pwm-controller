@@ -29,7 +29,7 @@ elseif (${BUILD_PLATFORM} STREQUAL "esp32c3")
     set(PLATFORM_ESP32_C3 true)
     #set(COMPONENTS "exec")
     include(cmake/esp32_sdk_import.cmake)
-    list(APPEND EXTRA_COMPONENT_DIRS "exec")
+    list(APPEND EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_LIST_DIR}/exec")
   
     add_compile_definitions(PLATFORM_ESP32 PLATFORM_ESP32_C3)
 else()
