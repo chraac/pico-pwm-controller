@@ -44,7 +44,6 @@ elseif(${BUILD_PLATFORM} STREQUAL "esp32c3")
 
     include($ENV{IDF_PATH}/tools/cmake/project.cmake)
     project(pwm_controller)
-    add_subdirectory(main)
 else()
     message(FATAL_ERROR "Invalid BUILD_PLATFORM, possible value: pico, esp32c3")
 endif()
