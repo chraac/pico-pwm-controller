@@ -25,6 +25,7 @@ if(${BUILD_PLATFORM} STREQUAL "pico")
     pico_sdk_init()
     add_compile_definitions(PLATFORM_PICO)
     project(pwm_controller C CXX ASM)
+    add_subdirectory(main)
 elseif(${BUILD_PLATFORM} STREQUAL "esp32c3")
     set(PLATFORM_ESP32 TRUE)
     set(PLATFORM_ESP32_C3 TRUE)
@@ -45,7 +46,3 @@ add_compile_options(-Wall
     -Wformat
     -Wno-unused-function # we have some for the docs that aren't called
     )
-
-if(PLATFORM_PICO)
-    add_subdirectory(main)
-endif()
