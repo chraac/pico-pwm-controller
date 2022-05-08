@@ -25,5 +25,6 @@ elseif(PLATFORM_ESP32)
         "pwm_controller_esp32.cc"
     )
     idf_component_register(SRCS "${exec_srcs}"
-        INCLUDE_DIRS ".")
+        INCLUDE_DIRS .
+        PRIV_REQUIRES driver)
 endif()
