@@ -1,3 +1,8 @@
+# It seems that the express idf build system will call the CMakeLists.txt in sub directory from a separated process without calling makin directory CMakeLists.txt.
+# See also: https://github.dev/espressif/esp-idf/blob/273633ee310fbc18b17edfaeae3f3121508e3b8d/tools/cmake/scripts/component_get_requirements.cmake#L118
+cmake_minimum_required(VERSION 3.5)
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/platform_detect.cmake)
+
 message("bool PLATFORM_ESP32: ${PLATFORM_ESP32}")
 message("bool PLATFORM_PICO: ${PLATFORM_PICO}")
 
