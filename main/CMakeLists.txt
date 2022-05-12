@@ -10,6 +10,7 @@ if(PLATFORM_PICO)
     add_executable(
         pwm_controller
         pwm_helper_pico.cc
+        frequency_counter_pico.cc
         pwm_controller_pico.cc
     )
     if (USB_STDIO)
