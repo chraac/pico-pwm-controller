@@ -1,7 +1,8 @@
-#include "logger.hh"
 #include "pwm_helper.hh"
 
 #include <driver/ledc.h>
+#include <atomic>
+#include "logger.hh"
 
 using namespace utility;
 
@@ -11,6 +12,7 @@ constexpr uint32_t kResolutionBit = 11;
 constexpr uint32_t kInvalidValue = LEDC_TIMER_MAX;
 uint32_t timer_frequency_hz[LEDC_TIMER_MAX] = {kInvalidValue, kInvalidValue,
                                                kInvalidValue, kInvalidValue};
+std::atomic_uint32_t current_channel_index(0);
 
 ledc_timer_t GetAvailableTimerIndex(const uint32_t freq_hz) {
     for (uint32_t i = 0; i < LEDC_TIMER_MAX; ++i) {
@@ -45,7 +47,7 @@ PwmHelper::PwmHelper(const uint32_t gpio_pin, const uint32_t freq_khz,
 
     channel_config_.gpio_num = gpio_pin;
     channel_config_.speed_mode = timer_config_.speed_mode;
-    channel_config_.channel = ledc_channel_t(timer_idx);
+    channel_config_.channel = ledc_channel_t(current_channel_index++);
     channel_config_.intr_type = LEDC_INTR_DISABLE;
     channel_config_.timer_sel = timer_idx;
     channel_config_.duty = 0;
