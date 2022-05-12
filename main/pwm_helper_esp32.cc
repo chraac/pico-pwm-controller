@@ -7,6 +7,7 @@ using namespace utility;
 
 namespace {
 
+constexpr uint32_t kResolutionBit = 11;
 constexpr uint32_t kInvalidValue = LEDC_TIMER_MAX;
 uint32_t timer_frequency_hz[LEDC_TIMER_MAX] = {kInvalidValue, kInvalidValue,
                                                kInvalidValue, kInvalidValue};
@@ -35,10 +36,12 @@ PwmHelper::PwmHelper(const uint32_t gpio_pin, const uint32_t freq_khz,
     }
 
     timer_config_.speed_mode = LEDC_LOW_SPEED_MODE;
-    timer_config_.duty_resolution = LEDC_TIMER_12_BIT;
+    timer_config_.duty_resolution =
+        static_cast<ledc_timer_bit_t>(kResolutionBit);  // LEDC_TIMER_11_BIT
     timer_config_.timer_num = timer_idx;
     timer_config_.freq_hz = freq_khz * 1000;
     timer_config_.clk_cfg = LEDC_AUTO_CLK;
+    ledc_timer_config(&timer_config_);
 
     channel_config_.gpio_num = gpio_pin;
     channel_config_.speed_mode = timer_config_.speed_mode;
@@ -46,7 +49,8 @@ PwmHelper::PwmHelper(const uint32_t gpio_pin, const uint32_t freq_khz,
     channel_config_.intr_type = LEDC_INTR_DISABLE;
     channel_config_.timer_sel = timer_idx;
     channel_config_.duty = 0;
-    channel_config_.hpoint = top;
+    channel_config_.hpoint = 0;
+    ledc_channel_config(&channel_config_);
 }
 
 PwmHelper::PwmHelper(PwmHelper &&other) noexcept : GpioBase(other.gpio_pin_) {
@@ -57,7 +61,7 @@ PwmHelper::PwmHelper(PwmHelper &&other) noexcept : GpioBase(other.gpio_pin_) {
 }
 
 void PwmHelper::SetDutyCycle(uint32_t num, uint32_t denom) noexcept {
-    auto duty = ((1 << 12) - 1) * num / denom;
+    auto duty = ((1L << kResolutionBit) - 1) * num / denom;
     ledc_set_duty(timer_config_.speed_mode, channel_config_.channel, duty);
     ledc_update_duty(timer_config_.speed_mode, channel_config_.channel);
 }
