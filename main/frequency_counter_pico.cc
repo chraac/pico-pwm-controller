@@ -1,5 +1,5 @@
-#include "critical_section_helper.hh"
 #include "frequency_counter.hh"
+#include "critical_section_helper.hh"
 
 #include <hardware/gpio.h>
 #include <hardware/timer.h>

@@ -27,10 +27,11 @@ if(PLATFORM_PICO)
     pico_add_extra_outputs(pwm_controller)
 elseif(PLATFORM_ESP32)
     set(exec_srcs
-        "pwm_helper_esp32.cc"
-        "pwm_controller_esp32.cc"
+        pwm_helper_esp32.cc
+        frequency_counter_esp32.cc
+        pwm_controller_esp32.cc
     )
-    idf_component_register(SRCS "${exec_srcs}"
+    idf_component_register(SRCS ${exec_srcs}
         INCLUDE_DIRS .
         PRIV_REQUIRES driver)
 endif()
