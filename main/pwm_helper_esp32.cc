@@ -24,7 +24,7 @@ GetAvailableTimerIndex(const uint32_t freq_hz) {
 
 }  // namespace
 
-PwmHelper::PwmHelper(const uint gpio_pin, const uint32_t freq_khz,
+PwmHelper::PwmHelper(const uint32_t gpio_pin, const uint32_t freq_khz,
                      const uint32_t top) noexcept
     : GpioBase(gpio_pin), channel_config_{}, timer_config_{} {
     const auto timer_idx = GetAvailableTimerIndex(freq_hz);

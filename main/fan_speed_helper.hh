@@ -10,7 +10,7 @@ namespace utility {
 
 class FanSpeedHelper : public GpioBase {
 public:
-    FanSpeedHelper(const uint gpio_pin) noexcept
+    FanSpeedHelper(const uint32_t gpio_pin) noexcept
         : GpioBase(gpio_pin), freq_counter_(gpio_pin) {}
 
     uint32_t GetFanSpeedRpm() noexcept {
@@ -31,8 +31,8 @@ private:
 
 class FanSpeedSelector {
 public:
-    FanSpeedSelector(uint gpio_bit3, uint gpio_bit2, uint gpio_bit1,
-                     uint gpio_bit0) noexcept
+    FanSpeedSelector(uint32_t gpio_bit3, uint32_t gpio_bit2, uint32_t gpio_bit1,
+                     uint32_t gpio_bit0) noexcept
         : gpio_pin_bit0_(gpio_bit0),
           gpio_pin_bit1_(gpio_bit1),
           gpio_pin_bit2_(gpio_bit2),
@@ -51,7 +51,7 @@ public:
     }
 
 private:
-    static void SetGpioPinValue(uint gpio_pin, bool is_pull_up) {
+    static void SetGpioPinValue(uint32_t gpio_pin, bool is_pull_up) {
         if (is_pull_up) {
             gpio_pull_up(gpio_pin);
         } else {
@@ -59,10 +59,10 @@ private:
         }
     }
 
-    const uint gpio_pin_bit0_;
-    const uint gpio_pin_bit1_;
-    const uint gpio_pin_bit2_;
-    const uint gpio_pin_bit3_;
+    const uint32_t gpio_pin_bit0_;
+    const uint32_t gpio_pin_bit1_;
+    const uint32_t gpio_pin_bit2_;
+    const uint32_t gpio_pin_bit3_;
 
     DISALLOW_COPY(FanSpeedSelector);
     DISALLOW_MOVE(FanSpeedSelector);

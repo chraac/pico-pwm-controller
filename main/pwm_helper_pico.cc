@@ -5,7 +5,7 @@
 
 using namespace utility;
 
-PwmHelper::PwmHelper(const uint gpio_pin, const uint32_t freq_khz,
+PwmHelper::PwmHelper(const uint32_t gpio_pin, const uint32_t freq_khz,
                      const uint32_t top) noexcept
     : GpioBase(gpio_pin), pwm_config_(pwm_get_default_config()) {
     // For more detail, see:

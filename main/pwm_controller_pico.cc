@@ -14,30 +14,30 @@
 using namespace utility;
 
 namespace {
-constexpr uint kPwmFreqKhz = 25;
-constexpr uint kPwm1Pin = 0;
-constexpr uint kPwm2Pin = 7;
-constexpr uint kPwm3Pin = 27;
-constexpr uint kPwm4Pin = 17;
+constexpr uint32_t kPwmFreqKhz = 25;
+constexpr uint32_t kPwm1Pin = 0;
+constexpr uint32_t kPwm2Pin = 7;
+constexpr uint32_t kPwm3Pin = 27;
+constexpr uint32_t kPwm4Pin = 17;
 constexpr uint8_t kPwmPinCount = 4;
-constexpr uint kButton1Pin = 14;
-constexpr uint kButton2Pin = 15;
-constexpr uint kButton3Pin = 16;
-constexpr uint kFanSpeedPin = 13;
-constexpr uint kFanSelPin0 = 11;
-constexpr uint kFanSelPin1 = 10;
-constexpr uint kFanSelPin2 = 9;
-constexpr uint kFanSelPin3 = 8;
+constexpr uint32_t kButton1Pin = 14;
+constexpr uint32_t kButton2Pin = 15;
+constexpr uint32_t kButton3Pin = 16;
+constexpr uint32_t kFanSpeedPin = 13;
+constexpr uint32_t kFanSelPin0 = 11;
+constexpr uint32_t kFanSelPin1 = 10;
+constexpr uint32_t kFanSelPin2 = 9;
+constexpr uint32_t kFanSelPin3 = 8;
 constexpr uint8_t kFanIndexArray[] = {0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13};
 constexpr uint8_t kFanCount = std::size(kFanIndexArray);
 constexpr uint8_t kFanCountPerGroup = kFanCount / kPwmPinCount;
-constexpr uint kPoolIntervalMs = 400;
+constexpr uint32_t kPoolIntervalMs = 400;
 
 // See also:
 // https://noctua.at/pub/media/wysiwyg/Noctua_PWM_specifications_white_paper.pdf
-constexpr uint kFanSpeedStepRpm = 30 * 1000 / kPoolIntervalMs;
-constexpr uint kTargetRpm = 1900;
-constexpr uint kMaxTargetRpm = kTargetRpm + kFanSpeedStepRpm;
+constexpr uint32_t kFanSpeedStepRpm = 30 * 1000 / kPoolIntervalMs;
+constexpr uint32_t kTargetRpm = 1900;
+constexpr uint32_t kMaxTargetRpm = kTargetRpm + kFanSpeedStepRpm;
 constexpr auto kStartCycle = 500;
 constexpr auto kP = .5F;
 constexpr auto kI = .3F;
@@ -122,7 +122,7 @@ int main() {
         auto consumed_time_ms = (time_us_64() - start_us) / 1000;
         log_debug("current iteration time cost: %dms\n", int(consumed_time_ms));
         next_interval =
-            kPoolIntervalMs - std::min<uint>(consumed_time_ms, kPoolIntervalMs);
+            kPoolIntervalMs - std::min<uint32_t>(consumed_time_ms, kPoolIntervalMs);
     }
 
     return 0;

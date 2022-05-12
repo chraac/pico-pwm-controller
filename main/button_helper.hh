@@ -8,7 +8,7 @@
 namespace utility {
 class ButtonHelper : public GpioBase {
 public:
-    ButtonHelper(const uint gpio_pin) noexcept : GpioBase(gpio_pin) {
+    ButtonHelper(const uint32_t gpio_pin) noexcept : GpioBase(gpio_pin) {
         gpio_init(gpio_pin_);
         gpio_set_dir(gpio_pin_, GPIO_IN);
         // We are using the button to pull down to 0v when pressed, so ensure

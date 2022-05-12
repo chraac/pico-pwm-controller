@@ -9,12 +9,12 @@
 #include "base_types.hh"
 
 namespace utility {
-constexpr uint kDefaultPwmTop = 9999;
-constexpr uint kDefaultCycleDenom = kDefaultPwmTop + 1;
+constexpr uint32_t kDefaultPwmTop = 9999;
+constexpr uint32_t kDefaultCycleDenom = kDefaultPwmTop + 1;
 
 class PwmHelper : public GpioBase {
 public:
-    PwmHelper(const uint gpio_pin, const uint32_t freq_khz,
+    PwmHelper(const uint32_t gpio_pin, const uint32_t freq_khz,
               const uint32_t top = kDefaultPwmTop) noexcept;
 
     PwmHelper(PwmHelper &&other) noexcept;

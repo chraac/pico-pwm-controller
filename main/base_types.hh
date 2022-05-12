@@ -35,17 +35,17 @@ class IGpioBase {
 public:
     virtual ~IGpioBase() {}
 
-    virtual uint GetGpioPin() const noexcept = 0;
+    virtual uint32_t GetGpioPin() const noexcept = 0;
 };
 
 class GpioBase : public IGpioBase {
 public:
-    GpioBase(uint gpio_pin) : gpio_pin_(gpio_pin) {}
+    GpioBase(uint32_t gpio_pin) : gpio_pin_(gpio_pin) {}
 
-    uint GetGpioPin() const noexcept override { return gpio_pin_; }
+    uint32_t GetGpioPin() const noexcept override { return gpio_pin_; }
 
 protected:
-    uint gpio_pin_;
+    uint32_t gpio_pin_;
 };
 
 }  // namespace utility
