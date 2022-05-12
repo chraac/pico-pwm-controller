@@ -2,7 +2,7 @@
 
 #ifdef PLATFORM_PICO
 #include <hardware/pwm.h>
-#elif defined(PLATFORM_ESP32_C3)
+#elif defined(PLATFORM_ESP32)
 #include <driver/ledc.h>
 #endif
 
@@ -25,9 +25,9 @@ public:
 private:
 #ifdef PLATFORM_PICO
     pwm_config pwm_config_;
-#elif defined(PLATFORM_ESP32_C3)
-    ledc_channel_config_t channel_config_;
-    ledc_timer_config_t timer_config_;
+#elif defined(PLATFORM_ESP32)
+    ledc_channel_config_t channel_config_ = {};
+    ledc_timer_config_t timer_config_ = {};
 #endif
 
     void operator=(PwmHelper &&) = delete;

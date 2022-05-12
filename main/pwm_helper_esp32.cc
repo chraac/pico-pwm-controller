@@ -1,34 +1,35 @@
-#include "pwm_helper.hh"
 #include "logger.hh"
+#include "pwm_helper.hh"
+
+#include <driver/ledc.h>
 
 using namespace utility;
 
 namespace {
 
-constexpr uint32_t kInvalidValue = 0xFFFFFFFF;
+constexpr uint32_t kInvalidValue = LEDC_TIMER_MAX;
 uint32_t timer_frequency_hz[LEDC_TIMER_MAX] = {kInvalidValue, kInvalidValue,
-                                               kInvalidValue, kInvalidValue}
+                                               kInvalidValue, kInvalidValue};
 
-uint32_t
-GetAvailableTimerIndex(const uint32_t freq_hz) {
+ledc_timer_t GetAvailableTimerIndex(const uint32_t freq_hz) {
     for (uint32_t i = 0; i < LEDC_TIMER_MAX; ++i) {
         if (timer_frequency_hz[i] == kInvalidValue ||
             timer_frequency_hz[i] == freq_hz) {
             timer_frequency_hz[i] = freq_hz;
-            return i;
+            return ledc_timer_t(i);
         }
     }
 
-    return kInvalidValue;
+    return ledc_timer_t(kInvalidValue);
 }
 
 }  // namespace
 
 PwmHelper::PwmHelper(const uint32_t gpio_pin, const uint32_t freq_khz,
                      const uint32_t top) noexcept
-    : GpioBase(gpio_pin), channel_config_{}, timer_config_{} {
-    const auto timer_idx = GetAvailableTimerIndex(freq_hz);
-    if (timer_idx == kInvalidValue) {
+    : GpioBase(gpio_pin) {
+    const auto timer_idx = GetAvailableTimerIndex(freq_khz * 1000);
+    if (timer_idx == ledc_timer_t(kInvalidValue)) {
         log_info("[PwmHelper]Timer unavailable!");
         return;
     }
@@ -37,11 +38,11 @@ PwmHelper::PwmHelper(const uint32_t gpio_pin, const uint32_t freq_khz,
     timer_config_.duty_resolution = LEDC_TIMER_12_BIT;
     timer_config_.timer_num = timer_idx;
     timer_config_.freq_hz = freq_khz * 1000;
-    timer_config_.clk_cfg = LEDC_SLOW_CLK_RTC8M;
+    timer_config_.clk_cfg = LEDC_AUTO_CLK;
 
-    channel_config_.gpio_num = PULSE_IO;
+    channel_config_.gpio_num = gpio_pin;
     channel_config_.speed_mode = timer_config_.speed_mode;
-    channel_config_.channel = timer_idx;
+    channel_config_.channel = ledc_channel_t(timer_idx);
     channel_config_.intr_type = LEDC_INTR_DISABLE;
     channel_config_.timer_sel = timer_idx;
     channel_config_.duty = 0;
