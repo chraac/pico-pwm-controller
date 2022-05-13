@@ -1,10 +1,11 @@
+// clang-format off
 #include "frequency_counter.hh"
+// clang-format on
 
 #include <driver/gpio.h>
 
 #include <atomic>
 #include <chrono>
-
 
 using namespace utility;
 using system_clock = std::chrono::system_clock;

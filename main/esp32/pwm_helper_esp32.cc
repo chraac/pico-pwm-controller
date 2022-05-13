@@ -1,7 +1,11 @@
+// clang-format off
 #include "pwm_helper.hh"
+// clang-format on
 
 #include <driver/ledc.h>
+
 #include <atomic>
+
 #include "logger.hh"
 
 using namespace utility;

@@ -1,9 +1,11 @@
+// clang-format off
 #include "frequency_counter.hh"
-#include "critical_section_helper.hh"
+// clang-format on
 
 #include <hardware/gpio.h>
 #include <hardware/timer.h>
 
+#include "critical_section_helper.hh"
 
 using namespace utility;
 

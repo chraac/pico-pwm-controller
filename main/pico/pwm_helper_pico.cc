@@ -1,7 +1,11 @@
+// clang-format off
 #include "pwm_helper.hh"
-#include "system_clock.hh"
+// clang-format on
 
 #include <pico/stdlib.h>
+
+#include "system_clock.hh"
+
 
 using namespace utility;
 
@@ -27,8 +31,7 @@ PwmHelper::PwmHelper(PwmHelper &&other) noexcept : GpioBase(other.gpio_pin_) {
     other.pwm_config_ = pwm_get_default_config();
 }
 
-void PwmHelper::SetDutyCycle(uint32_t num,
-                             uint32_t denom) noexcept {
+void PwmHelper::SetDutyCycle(uint32_t num, uint32_t denom) noexcept {
     const auto max_cyc = pwm_config_.top;
     pwm_set_gpio_level(gpio_pin_, num * max_cyc / denom);
 }
