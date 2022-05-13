@@ -40,10 +40,11 @@ extern "C" void app_main() {
     gpio_set_direction(kGpioGreen, GPIO_MODE_OUTPUT);
     gpio_reset_pin(kGpioBlue);
     gpio_set_direction(kGpioBlue, GPIO_MODE_OUTPUT);
-    for (uint32_t i = 0;; i = ((i + 1) % 3)) {
-        gpio_set_level(kGpioRed, i % 3 == 0);
-        gpio_set_level(kGpioGreen, i % 3 == 1);
-        gpio_set_level(kGpioBlue, i % 3 == 2);
-        vTaskDelay(500 / portTICK_PERIOD_MS);  // delay 500ms
+
+    for (bool light_on = true;; light_on = !light_on) {
+        gpio_set_level(kGpioRed, light_on);
+        gpio_set_level(kGpioGreen, light_on);
+        gpio_set_level(kGpioBlue, light_on);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);  // delay 1000ms
     }
 }
