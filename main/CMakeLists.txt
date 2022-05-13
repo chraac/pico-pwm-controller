@@ -29,6 +29,7 @@ elseif(PLATFORM_ESP32)
     set(exec_srcs
         esp32/pwm_helper_esp32.cc
         esp32/frequency_counter_esp32.cc
+        esp32/ble_spp_helper_esp32.cc
         esp32/pwm_controller_esp32.cc
     )
     set(inc_dirs
@@ -37,5 +38,5 @@ elseif(PLATFORM_ESP32)
     )
     idf_component_register(SRCS ${exec_srcs}
         INCLUDE_DIRS ${inc_dirs}
-        PRIV_REQUIRES driver)
+        PRIV_REQUIRES driver bt)
 endif()
