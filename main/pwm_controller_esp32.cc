@@ -23,6 +23,7 @@ constexpr gpio_num_t kGpioBlue = GPIO_NUM_5;
 }  // namespace
 
 extern "C" void app_main() {
+    esp_log_level_set(LOG_TAG, DEFAULT_LOG_LEVEL);
     log_debug("app_main.init\n");
 
     auto pwm1 = PwmHelper(kGpioPwm1, kPwmFreqKhz);

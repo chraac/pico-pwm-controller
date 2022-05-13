@@ -20,8 +20,10 @@
 #define LOG_TAG "pwm"
 #define log_info(format, args...) ESP_LOGI(LOG_TAG, format, ##args)
 #ifdef DEBUG
+#define DEFAULT_LOG_LEVEL ESP_LOG_DEBUG
 #define log_debug(format, args...) ESP_LOGD(LOG_TAG, format, ##args)
 #else
+#define DEFAULT_LOG_LEVEL ESP_LOG_INFO
 #define log_debug(format, args...) (void)0
 #endif
 
