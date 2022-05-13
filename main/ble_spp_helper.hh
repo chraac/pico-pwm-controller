@@ -29,6 +29,9 @@ private:
     QueueHandle_t spp_common_uart_queue_ = nullptr;
     bool is_connected_ = false;
     uint8_t addr_type_ = 0;
+    uint8_t gatt_svr_sec_test_static_val_ = 0;
+    uint16_t ble_svc_gatt_read_val_handle_ = 0;
+    uint16_t ble_spp_svc_gatt_read_val_handle_ = 0;
     uint16_t connection_handle_ = 0;
 #endif
 

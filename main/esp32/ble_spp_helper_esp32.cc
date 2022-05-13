@@ -57,9 +57,6 @@ constexpr ble_uuid128_t kGattSvrChrSecTestStaticUuid =
                          0x45, 0x7e, 0x89, 0x9e, 0x65, 0x3a, 0x5c);
 
 // TODO: make this values as class member
-uint8_t gatt_svr_sec_test_static_val = 0;
-uint16_t ble_svc_gatt_read_val_handle = 0;
-uint16_t ble_spp_svc_gatt_read_val_handle = 0;
 
 void PrintBleAddr(const uint8_t *addr) {
     log_info("%02x:%02x:%02x:%02x:%02x:%02x", addr[5], addr[4], addr[3],
@@ -132,6 +129,7 @@ int GattSvrChrWrite(struct os_mbuf *om, uint16_t min_len, uint16_t max_len,
 int GattSvrChrAccessSecTest(uint16_t conn_handle, uint16_t attr_handle,
                             ble_gatt_access_ctxt *ctxt, void *arg) {
     const ble_uuid_t *uuid = ctxt->chr->uuid;
+    uint8_t &gatt_svr_sec_test_static_val = *reinterpret_cast<uint8_t *>(arg);
 
     /* Determine which characteristic is being accessed by examining its
      * 128-bit UUID.
@@ -174,18 +172,20 @@ int GattSvrChrAccessSecTest(uint16_t conn_handle, uint16_t attr_handle,
     return BLE_ATT_ERR_UNLIKELY;
 }
 
-int GattSvrInit() {
+int GattSvrInit(uint8_t &gatt_svr_sec_test_static_val) {
     const ble_gatt_chr_def kGattChrs[] = {
         {
             /*** Characteristic: Random number generator. */
             .uuid = &kGattSvrChrSecTestRandUuid.u,
             .access_cb = GattSvrChrAccessSecTest,
+            .arg = &gatt_svr_sec_test_static_val,
             .flags = BLE_GATT_CHR_F_READ | BLE_GATT_CHR_F_READ_ENC,
         },
         {
             /*** Characteristic: Static value. */
             .uuid = &kGattSvrChrSecTestStaticUuid.u,
             .access_cb = GattSvrChrAccessSecTest,
+            .arg = &gatt_svr_sec_test_static_val,
             .flags = BLE_GATT_CHR_F_READ | BLE_GATT_CHR_F_WRITE |
                      BLE_GATT_CHR_F_WRITE_ENC,
         },
@@ -221,11 +221,13 @@ int GattSvrInit() {
     return 0;
 }
 
-int GattSvrRegister(void) {
+int GattSvrRegister(uint16_t &ble_svc_gatt_read_val_handle,
+                    uint16_t &ble_spp_svc_gatt_read_val_handle) {
     const ble_gatt_chr_def kBleSvcGattChrs[] = {
         {
             /* Support new alert category */
-            .uuid = reinterpret_cast<const ble_uuid_t*>(&kBleSvcAnsChrUuid16SupNewAlertCat),
+            .uuid = reinterpret_cast<const ble_uuid_t *>(
+                &kBleSvcAnsChrUuid16SupNewAlertCat),
             .access_cb = BleSvcGattHandler,
             .flags = BLE_GATT_CHR_F_READ | BLE_GATT_CHR_F_WRITE |
                      BLE_GATT_CHR_F_NOTIFY | BLE_GATT_CHR_F_INDICATE,
@@ -238,7 +240,7 @@ int GattSvrRegister(void) {
     const ble_gatt_chr_def kBleSvcSppChrs[] = {
         {
             /* Support SPP service */
-            .uuid = reinterpret_cast<const ble_uuid_t*>(&kBleSvcSppChrUuid16),
+            .uuid = reinterpret_cast<const ble_uuid_t *>(&kBleSvcSppChrUuid16),
             .access_cb = BleSvcGattHandler,
             .flags = BLE_GATT_CHR_F_READ | BLE_GATT_CHR_F_WRITE |
                      BLE_GATT_CHR_F_NOTIFY | BLE_GATT_CHR_F_INDICATE,
@@ -253,13 +255,13 @@ int GattSvrRegister(void) {
         {
             /*** Service: GATT */
             .type = BLE_GATT_SVC_TYPE_PRIMARY,
-            .uuid = reinterpret_cast<const ble_uuid_t*>(&kBleSvcAnsUuid16),
+            .uuid = reinterpret_cast<const ble_uuid_t *>(&kBleSvcAnsUuid16),
             .characteristics = kBleSvcGattChrs,
         },
         {
             /*** Service: SPP */
             .type = BLE_GATT_SVC_TYPE_PRIMARY,
-            .uuid = reinterpret_cast<const ble_uuid_t*>(&kBleSvcSppUuid16),
+            .uuid = reinterpret_cast<const ble_uuid_t *>(&kBleSvcSppUuid16),
             .characteristics = kBleSvcSppChrs,
         },
         {
@@ -415,13 +417,14 @@ bool BleSppHelper::Init(const uint32_t uart_num) {
 
     ble_hs_cfg.sm_io_cap = BLE_SM_IO_CAP_NO_IO;
 
-    int rc = GattSvrInit();
+    int rc = GattSvrInit(gatt_svr_sec_test_static_val_);
     if (rc != 0) {
         log_info("error on new_gatt_svr_init, rc: %d\n", rc);
         return false;
     }
     /* Register custom service */
-    rc = GattSvrRegister();
+    rc = GattSvrRegister(ble_svc_gatt_read_val_handle_,
+                         ble_spp_svc_gatt_read_val_handle_);
     if (rc != 0) {
         log_info("error on gatt_svr_register, rc: %d\n", rc);
         return false;
@@ -459,7 +462,7 @@ void BleSppHelper::UartTask() {
                         txom = ble_hs_mbuf_from_flat(ntf, sizeof(ntf));
                         rc = ble_gattc_notify_custom(
                             connection_handle_,
-                            ble_spp_svc_gatt_read_val_handle, txom);
+                            ble_spp_svc_gatt_read_val_handle_, txom);
                         if (rc == 0) {
                             log_info("Notification sent successfully");
                         } else {
