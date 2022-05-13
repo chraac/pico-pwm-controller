@@ -3,8 +3,10 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
+#include "ble_spp_helper.hh"
 #include "logger.hh"
 #include "pwm_helper.hh"
+
 
 using namespace utility;
 
@@ -23,6 +25,7 @@ constexpr gpio_num_t kGpioBlue = GPIO_NUM_5;
 }  // namespace
 
 extern "C" void app_main() {
+    BleSppHelper::GetInstance().Init(UART_NUM_0);
     esp_log_level_set(LOG_TAG, DEFAULT_LOG_LEVEL);
     log_debug("app_main.init\n");
 
