@@ -7,7 +7,6 @@
 #include "logger.hh"
 #include "pwm_helper.hh"
 
-
 using namespace utility;
 
 namespace {
@@ -49,6 +48,7 @@ extern "C" void app_main() {
         gpio_set_level(kGpioRed, light_on);
         gpio_set_level(kGpioGreen, light_on);
         gpio_set_level(kGpioBlue, light_on);
+        log_info("app_main.light_on: %d\n", int(light_on));
         vTaskDelay(1000 / portTICK_PERIOD_MS);  // delay 1000ms
     }
 }
