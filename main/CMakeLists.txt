@@ -3,15 +3,14 @@
 cmake_minimum_required(VERSION 3.12)
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/platform_detect.cmake)
 
-message("PLATFORM_ESP32: ${PLATFORM_ESP32}")
-message("PLATFORM_PICO: ${PLATFORM_PICO}")
+message("PLATFORM_STRING: ${PLATFORM_STRING}")
 
 if(PLATFORM_PICO)
     add_executable(
         pwm_controller
-        pwm_helper_pico.cc
-        frequency_counter_pico.cc
-        pwm_controller_pico.cc
+        pico/pwm_helper_pico.cc
+        pico/frequency_counter_pico.cc
+        pico/pwm_controller_pico.cc
     )
     if (USB_STDIO)
         pico_enable_stdio_usb(pwm_controller 1)
@@ -21,17 +20,22 @@ if(PLATFORM_PICO)
         target_compile_definitions(pwm_controller PUBLIC UART_STDIO)
     endif()
 
+    target_include_directories(pwm_controller PRIVATE . esp32)
     target_link_libraries(pwm_controller pico_stdlib hardware_pwm)
 
     # create map/bin/hex file etc.
     pico_add_extra_outputs(pwm_controller)
 elseif(PLATFORM_ESP32)
     set(exec_srcs
-        pwm_helper_esp32.cc
-        frequency_counter_esp32.cc
-        pwm_controller_esp32.cc
+        esp32/pwm_helper_esp32.cc
+        esp32/frequency_counter_esp32.cc
+        esp32/pwm_controller_esp32.cc
+    )
+    set(inc_dirs
+        .
+        esp32
     )
     idf_component_register(SRCS ${exec_srcs}
-        INCLUDE_DIRS .
+        INCLUDE_DIRS ${inc_dirs}
         PRIV_REQUIRES driver)
 endif()
