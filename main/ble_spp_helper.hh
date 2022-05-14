@@ -18,6 +18,7 @@ public:
 
 #ifdef PLATFORM_ESP32
     void UartTask();
+    void LoggerTask(const char *buffer, size_t size);
     void Advertise(const uint8_t addr_type);
     void Advertise() { Advertise(addr_type_); }
     int GapEvent(ble_gap_event *event);

@@ -10,6 +10,8 @@
 #include <nvs_flash.h>
 #include <services/gap/ble_svc_gap.h>
 
+#include <cstdio>
+
 #include "ble_gatt_utilitys.hh"
 #include "logger.hh"
 
@@ -19,8 +21,16 @@ using namespace utility::ble;
 namespace {
 
 constexpr ble_uuid16_t kGattSvrSvcAlterUuid16 = BLE_UUID16_INIT_CPP(0x1811);
+constexpr size_t kLogBufferSizeInBytes = 4096;
 
-// TODO: make this values as class member
+int BleSppVprintf(const char *format, va_list vlist) {
+    char buffer[kLogBufferSizeInBytes];
+    const auto rt = vsnprintf(buffer, kLogBufferSizeInBytes, format, vlist);
+    BleSppHelper::GetInstance().LoggerTask(buffer, kLogBufferSizeInBytes);
+    return rt;
+}
+
+void BleSppLogInit() { esp_log_set_vprintf(BleSppVprintf); }
 
 void PrintBleAddr(const uint8_t *addr) {
     log_info("%02x:%02x:%02x:%02x:%02x:%02x", addr[5], addr[4], addr[3],
@@ -121,7 +131,7 @@ void BleSppServerOnSync() {
     BleSppHelper::GetInstance().Advertise(addr_type);
 }
 
-void BleSppServerOnRegister(struct ble_gatt_register_ctxt *ctxt, void *arg) {
+void BleSppServerOnRegister(ble_gatt_register_ctxt *ctxt, void *arg) {
     char buffer[BLE_UUID_STR_LEN + 1] = {};
 
     switch (ctxt->op) {
@@ -175,7 +185,8 @@ bool BleSppHelper::Init(const uint32_t uart_num) {
     nimble_port_init();
 
     /* Initialize uart driver and start uart task */
-    BleSppUartInit(uart_num_, this, spp_common_uart_queue_);
+    // BleSppUartInit(uart_num_, this, spp_common_uart_queue_);
+    BleSppLogInit();
     ble_hs_cfg.reset_cb = BleSppServerOnReset;
     ble_hs_cfg.sync_cb = BleSppServerOnSync;
     ble_hs_cfg.gatts_register_cb = BleSppServerOnRegister;
@@ -221,17 +232,13 @@ void BleSppHelper::UartTask() {
             switch (event.type) {
                 // Event of UART receving data
                 case UART_DATA:
-                    if (event.size && (is_connected_ == true)) {
-                        uint8_t ntf[1];
-                        ntf[0] = 90;
-                        struct os_mbuf *txom;
-                        txom = ble_hs_mbuf_from_flat(ntf, sizeof(ntf));
+                    if (event.size && is_connected_) {
+                        uint8_t ntf[1] = {90};
+                        os_mbuf *txom = ble_hs_mbuf_from_flat(ntf, sizeof(ntf));
                         rc = ble_gattc_notify_custom(
                             connection_handle_,
                             ble_spp_svc_gatt_read_val_handle_, txom);
-                        if (rc == 0) {
-                            log_info("Notification sent successfully");
-                        } else {
+                        if (rc != 0) {
                             log_info("Error in sending notification");
                         }
                     }
@@ -242,6 +249,19 @@ void BleSppHelper::UartTask() {
         }
     }
     vTaskDelete(nullptr);
+}
+
+void BleSppHelper::LoggerTask(const char *buffer, size_t size) {
+    if (!is_connected_) {
+        return;
+    }
+
+    auto *txom = ble_hs_mbuf_from_flat(buffer, size);
+    auto rc = ble_gattc_notify_custom(connection_handle_,
+                                      ble_spp_svc_gatt_read_val_handle_, txom);
+    if (rc != 0) {
+        log_info("Error in sending notification");
+    }
 }
 
 /**
