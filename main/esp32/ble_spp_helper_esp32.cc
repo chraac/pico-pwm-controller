@@ -27,7 +27,9 @@ int BleSppVprintf(const char *format, va_list vlist) {
     char buffer[kLogBufferSizeInBytes + 1];
     buffer[kLogBufferSizeInBytes] = 0;
     const auto rt = vsnprintf(buffer, kLogBufferSizeInBytes, format, vlist);
-    BleSppHelper::GetInstance().LoggerTask(buffer, kLogBufferSizeInBytes);
+    if (rt > 0) {
+        BleSppHelper::GetInstance().LoggerTask(buffer, rt);
+    }
     return rt;
 }
 
@@ -82,8 +84,8 @@ void BleSppUartInit(const uint32_t uart_num, void *param,
     // Set UART pins
     uart_set_pin(uart_num, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE,
                  UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-    xTaskCreate(BleSppUartTask, "BleSppUartTask", 2048, (void *)param, 8,
-                nullptr);
+    xTaskCreate(BleSppUartTask, "BleSppUartTask", kLogBufferSizeInBytes * 2,
+                (void *)param, 8, nullptr);
 }
 
 void BleSppServerOnReset(int reason) {
