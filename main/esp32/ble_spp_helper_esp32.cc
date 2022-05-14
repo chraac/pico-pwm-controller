@@ -21,10 +21,11 @@ using namespace utility::ble;
 namespace {
 
 constexpr ble_uuid16_t kGattSvrSvcAlterUuid16 = BLE_UUID16_INIT_CPP(0x1811);
-constexpr size_t kLogBufferSizeInBytes = 4096;
+constexpr size_t kLogBufferSizeInBytes = 2048;
 
 int BleSppVprintf(const char *format, va_list vlist) {
-    char buffer[kLogBufferSizeInBytes];
+    char buffer[kLogBufferSizeInBytes + 1];
+    buffer[kLogBufferSizeInBytes] = 0;
     const auto rt = vsnprintf(buffer, kLogBufferSizeInBytes, format, vlist);
     BleSppHelper::GetInstance().LoggerTask(buffer, kLogBufferSizeInBytes);
     return rt;
@@ -173,7 +174,6 @@ void BleSppServerHostTask(void *param) {
 
 bool BleSppHelper::Init(const uint32_t uart_num) {
     /* Initialize NVS — it is used to store PHY calibration data */
-    uart_num_ = uart_num;
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
         ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -185,6 +185,7 @@ bool BleSppHelper::Init(const uint32_t uart_num) {
     nimble_port_init();
 
     /* Initialize uart driver and start uart task */
+    uart_num_ = uart_num;
     // BleSppUartInit(uart_num_, this, spp_common_uart_queue_);
     BleSppLogInit();
     ble_hs_cfg.reset_cb = BleSppServerOnReset;
