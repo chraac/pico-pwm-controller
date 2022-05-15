@@ -4,6 +4,7 @@
 
 #ifdef PLATFORM_ESP32
 #include <driver/uart.h>
+#include <freertos/stream_buffer.h>
 #include <host/ble_hs.h>
 #endif
 
@@ -14,20 +15,19 @@ public:
     BleSppHelper() = default;
     ~BleSppHelper() = default;
 
-    bool Init(const uint32_t uart_num);
+    bool Init();
 
 #ifdef PLATFORM_ESP32
-    void UartTask();
-    void LoggerTask(const char *buffer, size_t size);
+    void LogWithBuffer(const char *buffer, size_t size);
+    void LogTask();
     void Advertise(const uint8_t addr_type);
     void Advertise() { Advertise(addr_type_); }
     int GapEvent(ble_gap_event *event);
 #endif
 
 private:
-    uint32_t uart_num_;
 #ifdef PLATFORM_ESP32
-    QueueHandle_t spp_common_uart_queue_ = nullptr;
+    StreamBufferHandle_t log_buffer_ = nullptr;
     bool is_connected_ = false;
     uint8_t addr_type_ = 0;
     uint8_t gatt_svr_sec_test_static_val_ = 0;

@@ -21,13 +21,29 @@ constexpr gpio_num_t kGpioRed = GPIO_NUM_3;
 constexpr gpio_num_t kGpioGreen = GPIO_NUM_4;
 constexpr gpio_num_t kGpioBlue = GPIO_NUM_5;
 
+void InitLed() {
+    gpio_reset_pin(kGpioRed);
+    gpio_set_direction(kGpioRed, GPIO_MODE_OUTPUT);
+    gpio_reset_pin(kGpioGreen);
+    gpio_set_direction(kGpioGreen, GPIO_MODE_OUTPUT);
+    gpio_reset_pin(kGpioBlue);
+    gpio_set_direction(kGpioBlue, GPIO_MODE_OUTPUT);
+}
+
 }  // namespace
 
 extern "C" void app_main() {
-    BleSppHelper::GetInstance().Init(UART_NUM_0);
+    InitLed();
+    gpio_set_level(kGpioRed, true);
+    BleSppHelper::GetInstance().Init();
+
+    gpio_set_level(kGpioRed, false);
+    gpio_set_level(kGpioGreen, true);
     esp_log_level_set(LOG_TAG, DEFAULT_LOG_LEVEL);
     log_debug("app_main.init\n");
 
+    gpio_set_level(kGpioGreen, false);
+    gpio_set_level(kGpioBlue, true);
     auto pwm1 = PwmHelper(kGpioPwm1, kPwmFreqKhz);
     auto pwm2 = PwmHelper(kGpioPwm2, kPwmFreqKhz);
     auto pwm3 = PwmHelper(kGpioPwm3, kPwmFreqKhz);
@@ -37,13 +53,7 @@ extern "C" void app_main() {
     pwm3.SetDutyCycle(6000);
     pwm4.SetDutyCycle(8000);
 
-    gpio_reset_pin(kGpioRed);
-    gpio_set_direction(kGpioRed, GPIO_MODE_OUTPUT);
-    gpio_reset_pin(kGpioGreen);
-    gpio_set_direction(kGpioGreen, GPIO_MODE_OUTPUT);
-    gpio_reset_pin(kGpioBlue);
-    gpio_set_direction(kGpioBlue, GPIO_MODE_OUTPUT);
-
+    gpio_set_level(kGpioBlue, false);
     for (bool light_on = true;; light_on = !light_on) {
         gpio_set_level(kGpioRed, light_on);
         gpio_set_level(kGpioGreen, light_on);

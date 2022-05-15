@@ -21,19 +21,40 @@ using namespace utility::ble;
 namespace {
 
 constexpr ble_uuid16_t kGattSvrSvcAlterUuid16 = BLE_UUID16_INIT_CPP(0x1811);
-constexpr size_t kLogBufferSizeInBytes = 2048;
+constexpr size_t kLogLocalBufferSizeInBytes = 1024;
+constexpr size_t kLogBufferSizeInBytes = kLogLocalBufferSizeInBytes * 4;
+constexpr size_t kLogTaskStackSizeInBytes = kLogLocalBufferSizeInBytes * 3;
+constexpr size_t kLogTaskPollBufferSizeInBytes = kLogLocalBufferSizeInBytes * 2;
+constexpr auto kLogSendTimeoutMs = pdMS_TO_TICKS(3);
+constexpr auto kLogReceiveTimeoutMs = pdMS_TO_TICKS(500);
 
 int BleSppVprintf(const char *format, va_list vlist) {
-    char buffer[kLogBufferSizeInBytes + 1];
-    buffer[kLogBufferSizeInBytes] = 0;
-    const auto rt = vsnprintf(buffer, kLogBufferSizeInBytes, format, vlist);
+    char buffer[kLogLocalBufferSizeInBytes + 1];
+    buffer[kLogLocalBufferSizeInBytes] = 0;
+    const auto rt =
+        vsnprintf(buffer, kLogLocalBufferSizeInBytes, format, vlist);
     if (rt > 0) {
-        BleSppHelper::GetInstance().LoggerTask(buffer, rt);
+        BleSppHelper::GetInstance().LogWithBuffer(buffer, rt);
     }
     return rt;
 }
 
-void BleSppLogInit() { esp_log_set_vprintf(BleSppVprintf); }
+void BleSppLogTask(void *param) {
+    reinterpret_cast<BleSppHelper *>(param)->LogTask();
+}
+
+StreamBufferHandle_t BleSppLogInit(BleSppHelper *helper) {
+    static uint8_t buffer[kLogBufferSizeInBytes];
+    static StaticStreamBuffer_t stream_buffer_struct;
+
+    StreamBufferHandle_t handler = xStreamBufferCreateStatic(
+        kLogBufferSizeInBytes, kLogLocalBufferSizeInBytes, buffer,
+        &stream_buffer_struct);
+    xTaskCreate(BleSppLogTask, "BleSppLogTask", kLogBufferSizeInBytes,
+                reinterpret_cast<void *>(helper), 8, nullptr);
+    esp_log_set_vprintf(BleSppVprintf);
+    return handler;
+}
 
 void PrintBleAddr(const uint8_t *addr) {
     log_info("%02x:%02x:%02x:%02x:%02x:%02x", addr[5], addr[4], addr[3],
@@ -59,33 +80,6 @@ void BleSppServerPrintConnDesc(ble_gap_conn_desc *desc) {
         desc->conn_itvl, desc->conn_latency, desc->supervision_timeout,
         desc->sec_state.encrypted, desc->sec_state.authenticated,
         desc->sec_state.bonded);
-}
-
-void BleSppUartTask(void *param) {
-    reinterpret_cast<BleSppHelper *>(param)->UartTask();
-}
-
-void BleSppUartInit(const uint32_t uart_num, void *param,
-                    QueueHandle_t &spp_common_uart_queue) {
-    uart_config_t uart_config = {
-        .baud_rate = 115200,
-        .data_bits = UART_DATA_8_BITS,
-        .parity = UART_PARITY_DISABLE,
-        .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_RTS,
-        .rx_flow_ctrl_thresh = 122,
-        .source_clk = UART_SCLK_APB,
-    };
-
-    // Install UART driver, and get the queue.
-    uart_driver_install(uart_num, 4096, 8192, 10, &spp_common_uart_queue, 0);
-    // Set UART parameters
-    uart_param_config(uart_num, &uart_config);
-    // Set UART pins
-    uart_set_pin(uart_num, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE,
-                 UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-    xTaskCreate(BleSppUartTask, "BleSppUartTask", kLogBufferSizeInBytes * 2,
-                (void *)param, 8, nullptr);
 }
 
 void BleSppServerOnReset(int reason) {
@@ -174,7 +168,7 @@ void BleSppServerHostTask(void *param) {
 
 }  // namespace
 
-bool BleSppHelper::Init(const uint32_t uart_num) {
+bool BleSppHelper::Init() {
     /* Initialize NVS — it is used to store PHY calibration data */
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
@@ -186,10 +180,8 @@ bool BleSppHelper::Init(const uint32_t uart_num) {
     ESP_ERROR_CHECK(esp_nimble_hci_and_controller_init());
     nimble_port_init();
 
-    /* Initialize uart driver and start uart task */
-    uart_num_ = uart_num;
-    // BleSppUartInit(uart_num_, this, spp_common_uart_queue_);
-    BleSppLogInit();
+    /* Initialize log task */
+    log_buffer_ = BleSppLogInit(this);
     ble_hs_cfg.reset_cb = BleSppServerOnReset;
     ble_hs_cfg.sync_cb = BleSppServerOnSync;
     ble_hs_cfg.gatts_register_cb = BleSppServerOnRegister;
@@ -224,47 +216,35 @@ bool BleSppHelper::Init(const uint32_t uart_num) {
     return true;
 }
 
-void BleSppHelper::UartTask() {
-    log_info("BLE server UART_task started\n");
-    uart_event_t event;
-    int rc = 0;
-    for (;;) {
-        // Waiting for UART event.
-        if (xQueueReceive(spp_common_uart_queue_, (void *)&event,
-                          (TickType_t)portMAX_DELAY)) {
-            switch (event.type) {
-                // Event of UART receving data
-                case UART_DATA:
-                    if (event.size && is_connected_) {
-                        uint8_t ntf[1] = {90};
-                        os_mbuf *txom = ble_hs_mbuf_from_flat(ntf, sizeof(ntf));
-                        rc = ble_gattc_notify_custom(
-                            connection_handle_,
-                            ble_spp_svc_gatt_read_val_handle_, txom);
-                        if (rc != 0) {
-                            log_info("Error in sending notification");
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-    vTaskDelete(nullptr);
-}
-
-void BleSppHelper::LoggerTask(const char *buffer, size_t size) {
-    if (!is_connected_) {
+void BleSppHelper::LogWithBuffer(const char *buffer, size_t size) {
+    if (!is_connected_ || !log_buffer_) {
         return;
     }
 
-    auto *txom = ble_hs_mbuf_from_flat(buffer, size);
-    auto rc = ble_gattc_notify_custom(connection_handle_,
-                                      ble_spp_svc_gatt_read_val_handle_, txom);
-    if (rc != 0) {
-        log_info("Error in sending notification");
+    xStreamBufferSend(log_buffer_, buffer, size, kLogSendTimeoutMs);
+}
+
+void BleSppHelper::LogTask() {
+    static uint8_t buffer[kLogTaskPollBufferSizeInBytes];
+    for (;;) {
+        if (!is_connected_ || !log_buffer_) {
+            vTaskDelay(kLogReceiveTimeoutMs);
+            continue;
+        }
+
+        auto size = xStreamBufferReceive(log_buffer_, buffer,
+                                         kLogTaskPollBufferSizeInBytes,
+                                         kLogReceiveTimeoutMs);
+        if (size == 0) {
+            continue;
+        }
+
+        auto *txom = ble_hs_mbuf_from_flat(buffer, size);
+        ble_gattc_notify_custom(connection_handle_,
+                                ble_spp_svc_gatt_read_val_handle_, txom);
     }
+
+    vTaskDelete(nullptr);
 }
 
 /**
