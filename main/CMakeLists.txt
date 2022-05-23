@@ -8,6 +8,7 @@ message("PLATFORM_STRING: ${PLATFORM_STRING}")
 if(PLATFORM_PICO)
     add_executable(
         pwm_controller
+        pico/i2c_helper_pico.cc
         pico/pwm_helper_pico.cc
         pico/frequency_counter_pico.cc
         pico/pwm_controller_pico.cc
@@ -21,7 +22,7 @@ if(PLATFORM_PICO)
     endif()
 
     target_include_directories(pwm_controller PRIVATE . esp32)
-    target_link_libraries(pwm_controller pico_stdlib hardware_pwm)
+    target_link_libraries(pwm_controller pico_stdlib hardware_pwm hardware_i2c)
 
     # create map/bin/hex file etc.
     pico_add_extra_outputs(pwm_controller)
