@@ -114,6 +114,10 @@ Aw9523bFreqencyCounter::Aw9523bFreqencyCounter(const uint32_t gpio_scl,
                                        Aw9523bEventHandler);
 
     aw9523_.Reset();
+    aw9523_.SetDirection(Aw9523Helper::kPort0, Aw9523Helper::kDirectionInput);
+    aw9523_.SetDirection(Aw9523Helper::kPort1, Aw9523Helper::kDirectionInput);
+    aw9523_.SetEnableInterrupt(Aw9523Helper::kPort0, true);
+    aw9523_.SetEnableInterrupt(Aw9523Helper::kPort1, true);
 }
 
 // Get frequency in MilliHertz
