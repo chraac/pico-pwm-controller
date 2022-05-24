@@ -4,7 +4,7 @@
 #include "i2c_helper.hh"
 // clang-format on
 
-#include <algorithm>
+#include <iterator>
 
 namespace utility {
 
