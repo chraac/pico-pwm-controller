@@ -30,6 +30,10 @@ class Aw9523Helper {
     } Addrs;
 
 public:
+    typedef enum {
+        kGpioCount = 16,
+    } Constants;
+
     typedef enum _Port {
         kPort0 = 0x00,  // Port 0
         kPort1 = 0x01,  // Port 1
@@ -77,11 +81,10 @@ public:
         kP17 = 0x2F,  // DIM15
     } LedDimCtrl;
 
-    Aw9523Helper(uint32_t gpio_scl, uint32_t gpio_sda, uint32_t gpio_rst,
-                 uint32_t gpio_intr, uint8_t ad0, uint8_t ad1) noexcept
+    Aw9523Helper(uint32_t gpio_scl, uint32_t gpio_sda, uint32_t gpio_intr,
+                 uint8_t ad0, uint8_t ad1) noexcept
         : gpio_scl_(gpio_scl),
           gpio_sda_(gpio_sda),
-          gpio_rst_(gpio_rst),
           gpio_intr_(gpio_intr),
           i2c_ad0_(ad0),
           i2c_ad1_(ad1),
@@ -140,7 +143,6 @@ private:
 
     uint32_t gpio_scl_;
     uint32_t gpio_sda_;
-    uint32_t gpio_rst_;
     uint32_t gpio_intr_;
     uint8_t i2c_ad0_;
     uint8_t i2c_ad1_;
