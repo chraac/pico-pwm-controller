@@ -38,14 +38,17 @@ void Aw9523bEventHandler(uint gpio, uint32_t events) {
         return;
     }
 
-    uint16_t value = (uint16_t(aw9523->ReadPort(Aw9523Helper::kPort1)) << 8) |
-                     aw9523->ReadPort(Aw9523Helper::kPort0);
+    static uint16_t last_value_ = 0;
+    uint16_t value = ~((uint16_t(aw9523->ReadPort(Aw9523Helper::kPort1)) << 8) |
+                       aw9523->ReadPort(Aw9523Helper::kPort0));
+    value = value & (value ^ last_value_);
     for (size_t i = 0; i < Aw9523Helper::kGpioCount; ++i, value = value >> 1) {
-        if (~(value & 1)) {
+        if (value & 0x1) {
             ++event_count_[i];
         }
     }
 
+    last_value_ = value;
     event_count_critical_section_.Unlock();
 }
 
