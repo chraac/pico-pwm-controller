@@ -46,12 +46,12 @@ public:
 
     typedef enum _PortDirection {
         kDirectionOutput = 0x00,  // Output mode
-        kDirectionInput = 0x01    // Input mode
+        kDirectionInput = 0xFF,   // Input mode
     } PortDirection;
 
     typedef enum _GpioMode {
-        kModeLed = 0x00,  // Led mode
-        kModeGpio = 0x01  // Gpio mode
+        kModeLed = 0x00,   // Led mode
+        kModeGpio = 0xFF,  // Gpio mode
     } GpioMode;
 
     typedef enum _LedsDim {
@@ -107,7 +107,8 @@ public:
     }
 
     void SetEnableInterrupt(Port port, bool enabled) {
-        WriteByte(port == kPort0 ? kIntEnable0 : kIntEnable0, !enabled);
+        WriteByte(port == kPort0 ? kIntEnable0 : kIntEnable1,
+                  enabled ? 0 : 0xFF);
     }
 
     void SetGpioMode(Port port, GpioMode mode) {
@@ -135,9 +136,10 @@ private:
     }
 
     uint8_t ReadByte(uint8_t addr) {
-        i2c_.Write(GetI2cBaseAddr(), &addr, 1);
+        const auto base_addr = GetI2cBaseAddr();
+        i2c_.Write(base_addr, &addr, 1);
         uint8_t buffer = 0;
-        i2c_.Read(GetI2cBaseAddr(), &buffer, 1);
+        i2c_.Read(base_addr, &buffer, 1);
         return buffer;
     }
 

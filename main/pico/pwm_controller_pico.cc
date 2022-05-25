@@ -23,11 +23,12 @@ constexpr uint8_t kPwmPinCount = 4;
 constexpr uint32_t kButton1Pin = 14;
 constexpr uint32_t kButton2Pin = 15;
 constexpr uint32_t kButton3Pin = 16;
-constexpr uint32_t kFanSpeedPin = 13;
-constexpr uint32_t kFanSelPin0 = 11;
-constexpr uint32_t kFanSelPin1 = 10;
-constexpr uint32_t kFanSelPin2 = 9;
-constexpr uint32_t kFanSelPin3 = 8;
+constexpr uint32_t kFanSpeedSda = 8;
+constexpr uint32_t kFanSpeedScl = 9;
+constexpr uint32_t kFanSpeedRstn = 11;
+constexpr uint32_t kFanSpeedIntr = 13;
+constexpr uint32_t kFanSpeedAd0 = 10;
+constexpr uint32_t kFanSpeedAd1 = 7;
 constexpr uint8_t kFanIndexArray[] = {0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13};
 constexpr uint8_t kFanCount = std::size(kFanIndexArray);
 constexpr uint8_t kFanCountPerGroup = kFanCount / kPwmPinCount;
@@ -46,39 +47,40 @@ constexpr auto kD = .02F;
 class FanSpeedManager {
 public:
     FanSpeedManager() noexcept {
-        selector_.SelectFan(kFanIndexArray[current_fan_]);
         for (auto &pwm : pwm_array_) {
             pwm.SetDutyCycle(kStartCycle);
         }
     }
 
     void next() noexcept {
-        const auto current_speed = speed_helper_.GetFanSpeedRpm();
-        const auto current_fan = current_fan_;
-        current_fan_ = (current_fan_ + 1) % kFanCount;
-        selector_.SelectFan(kFanIndexArray[current_fan_]);
-        speed_helper_.Reset();
-        max_fan_speed_ = std::max(max_fan_speed_, current_speed);
-        log_debug("current.fan.%d.speed.%drpm.max.%drpm\n", int(current_fan),
-                  int(current_speed), int(max_fan_speed_));
+        uint32_t max_fan_speed = 0;
+        for (size_t i = 0; i < kFanCount; i++) {
+            const auto fan_pin = kFanIndexArray[i];
+            const auto current_speed = speed_helper_.GetFanSpeedRpm(fan_pin);
+            max_fan_speed = std::max(max_fan_speed, current_speed);
+            log_debug("current.fan.%d.speed.%drpm.max.%drpm\n", int(i),
+                      int(current_speed), int(max_fan_speed));
+            if ((i % kFanCountPerGroup) < (kFanCountPerGroup - 1)) {
+                // not the last fan of this pwm group, then return.
+                continue;
+            }
 
-        if ((current_fan % kFanCountPerGroup) < (kFanCountPerGroup - 1)) {
-            // not the last fan of this pwm group, then return.
-            return;
+            const auto pwm_index = i / kFanCountPerGroup;
+            if (max_fan_speed >= kTargetRpm && max_fan_speed <= kMaxTargetRpm) {
+                // skip pid if we already at specified rpm.
+                log_debug("skip.pwm.%d.max.speed.%d\n", int(pwm_index),
+                          int(max_fan_speed));
+                max_fan_speed = 0;
+                continue;
+            }
+
+            auto cycle =
+                pid_array_[pwm_index].calculate(kTargetRpm, max_fan_speed);
+            pwm_array_[pwm_index].SetDutyCycle(cycle);
+            log_debug("set.pwm.%d.cycle.%d\n", int(pwm_index), int(cycle));
+            max_fan_speed = 0;
+            speed_helper_.Reset(fan_pin);
         }
-
-        const auto max_fan_speed = max_fan_speed_;
-        max_fan_speed_ = 0;
-        if (max_fan_speed >= kTargetRpm && max_fan_speed <= kMaxTargetRpm) {
-            // skip pid if we already at specified rpm.
-            log_debug("skip.fan.%d\n", int(current_fan));
-            return;
-        }
-
-        const auto pwm_index = current_fan / kFanCountPerGroup;
-        auto cycle = pid_array_[pwm_index].calculate(kTargetRpm, max_fan_speed);
-        pwm_array_[pwm_index].SetDutyCycle(cycle);
-        log_debug("set.pwm.%d.cycle.%d\n", int(pwm_index), int(cycle));
     }
 
 private:
@@ -95,11 +97,9 @@ private:
         Pid(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD),
 
     };
-    FanSpeedHelper speed_helper_ = FanSpeedHelper(kFanSpeedPin);
-    FanSpeedSelector selector_ =
-        FanSpeedSelector(kFanSelPin3, kFanSelPin2, kFanSelPin1, kFanSelPin0);
-    uint8_t current_fan_ = 0;
-    uint32_t max_fan_speed_ = 0;
+    Aw9523FanSpeedHelper speed_helper_ =
+        Aw9523FanSpeedHelper(kFanSpeedScl, kFanSpeedSda, kFanSpeedAd0,
+                             kFanSpeedAd1, kFanSpeedIntr, kFanSpeedRstn);
 
     DISALLOW_COPY(FanSpeedManager);
     DISALLOW_MOVE(FanSpeedManager);
@@ -121,8 +121,8 @@ int main() {
         fan_manager.next();
         auto consumed_time_ms = (time_us_64() - start_us) / 1000;
         log_debug("current iteration time cost: %dms\n", int(consumed_time_ms));
-        next_interval =
-            kPoolIntervalMs - std::min<uint32_t>(consumed_time_ms, kPoolIntervalMs);
+        next_interval = kPoolIntervalMs -
+                        std::min<uint32_t>(consumed_time_ms, kPoolIntervalMs);
     }
 
     return 0;

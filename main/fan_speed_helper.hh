@@ -68,4 +68,33 @@ private:
     DISALLOW_MOVE(FanSpeedSelector);
 };
 
+class Aw9523FanSpeedHelper {
+public:
+    Aw9523FanSpeedHelper(const uint32_t gpio_scl, const uint32_t gpio_sda,
+                         const uint32_t gpio_ad0, const uint32_t gpio_ad1,
+                         const uint32_t gpio_intr,
+                         const uint32_t gpio_rst) noexcept
+        : freq_counter_(gpio_scl, gpio_sda, gpio_ad0, gpio_ad1, gpio_intr,
+                        gpio_rst) {}
+
+    uint32_t GetFanSpeedRpm(uint32_t pin) noexcept {
+        // fan speed [rpm] = frequency [Hz] × 60 ÷ 2
+        // See also:
+        // https://noctua.at/pub/media/wysiwyg/Noctua_PWM_specifications_white_paper.pdf
+        return freq_counter_.GetFrequencyMilliHertz(
+                   Aw9523bFreqencyCounter::FreqPin(pin)) *
+               30 / 1000;
+    }
+
+    void Reset(uint32_t pin) noexcept {
+        freq_counter_.Reset(Aw9523bFreqencyCounter::FreqPin(pin));
+    }
+
+private:
+    Aw9523bFreqencyCounter freq_counter_;
+
+    DISALLOW_COPY(Aw9523FanSpeedHelper);
+    DISALLOW_MOVE(Aw9523FanSpeedHelper);
+};
+
 }  // namespace utility

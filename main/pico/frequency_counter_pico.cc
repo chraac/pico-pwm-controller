@@ -38,11 +38,10 @@ void Aw9523bEventHandler(uint gpio, uint32_t events) {
         return;
     }
 
-    uint16_t value = (aw9523->ReadPort(Aw9523Helper::kPort1) << 8) |
+    uint16_t value = (uint16_t(aw9523->ReadPort(Aw9523Helper::kPort1)) << 8) |
                      aw9523->ReadPort(Aw9523Helper::kPort0);
-
-    for (size_t i = 0; i < Aw9523Helper::kGpioCount; ++i) {
-        if (value & (1 << i)) {
+    for (size_t i = 0; i < Aw9523Helper::kGpioCount; ++i, value = value >> 1) {
+        if (~(value & 1)) {
             ++event_count_[i];
         }
     }
@@ -106,8 +105,11 @@ Aw9523bFreqencyCounter::Aw9523bFreqencyCounter(const uint32_t gpio_scl,
     SetGpioValue(gpio_ad1, kAw9253Addr1);
 
     gpio_set_dir(gpio_rst, GPIO_OUT);
-    SetGpioValue(gpio_ad1, true);
+    SetGpioValue(gpio_rst, true);
 
+    event_count_critical_section_.Lock();
+    helper_array_[gpio_intr] = &aw9523_;
+    event_count_critical_section_.Unlock();
     gpio_set_dir(gpio_intr, GPIO_IN);
     gpio_set_input_enabled(gpio_intr, true);
     gpio_set_irq_enabled_with_callback(gpio_intr, GPIO_IRQ_EDGE_FALL, true,
@@ -116,6 +118,8 @@ Aw9523bFreqencyCounter::Aw9523bFreqencyCounter(const uint32_t gpio_scl,
     aw9523_.Reset();
     aw9523_.SetDirection(Aw9523Helper::kPort0, Aw9523Helper::kDirectionInput);
     aw9523_.SetDirection(Aw9523Helper::kPort1, Aw9523Helper::kDirectionInput);
+    aw9523_.SetGpioMode(Aw9523Helper::kPort0, Aw9523Helper::kModeGpio);
+    aw9523_.SetGpioMode(Aw9523Helper::kPort1, Aw9523Helper::kModeGpio);
     aw9523_.SetEnableInterrupt(Aw9523Helper::kPort0, true);
     aw9523_.SetEnableInterrupt(Aw9523Helper::kPort1, true);
 }
