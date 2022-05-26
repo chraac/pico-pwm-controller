@@ -41,6 +41,7 @@ public:
         kPin13,
         kPin14,
         kPin15,
+        kPinCount,
     } FreqPin;
 
     explicit Aw9523bFreqencyCounter(const uint32_t gpio_scl,
@@ -57,7 +58,7 @@ public:
     void Reset(FreqPin pin) noexcept;
 
 private:
-    uint64_t last_time_us_;
+    uint64_t last_time_us_[kPinCount] = {};
     Aw9523Helper aw9523_;
 
     DISALLOW_COPY(Aw9523bFreqencyCounter);

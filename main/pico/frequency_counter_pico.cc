@@ -6,6 +6,7 @@
 #include <hardware/timer.h>
 
 #include "critical_section_helper.hh"
+#include "logger.hh"
 
 using namespace utility;
 
@@ -39,16 +40,17 @@ void Aw9523bEventHandler(uint gpio, uint32_t events) {
     }
 
     static uint16_t last_value_ = 0;
-    uint16_t value = ~((uint16_t(aw9523->ReadPort(Aw9523Helper::kPort1)) << 8) |
-                       aw9523->ReadPort(Aw9523Helper::kPort0));
-    value = value & (value ^ last_value_);
+    const uint16_t raw_value =
+        ~((uint16_t(aw9523->ReadPort(Aw9523Helper::kPort1)) << 8) |
+          aw9523->ReadPort(Aw9523Helper::kPort0));
+    uint16_t value = raw_value & (raw_value ^ last_value_);
     for (size_t i = 0; i < Aw9523Helper::kGpioCount; ++i, value = value >> 1) {
         if (value & 0x1) {
             ++event_count_[i];
         }
     }
 
-    last_value_ = value;
+    last_value_ = raw_value;
     event_count_critical_section_.Unlock();
 }
 
@@ -118,6 +120,7 @@ Aw9523bFreqencyCounter::Aw9523bFreqencyCounter(const uint32_t gpio_scl,
     gpio_set_irq_enabled_with_callback(gpio_intr, GPIO_IRQ_EDGE_FALL, true,
                                        Aw9523bEventHandler);
 
+    log_debug("chip.id.%d\n", int(aw9523_.GetId()));
     aw9523_.Reset();
     aw9523_.SetDirection(Aw9523Helper::kPort0, Aw9523Helper::kDirectionInput);
     aw9523_.SetDirection(Aw9523Helper::kPort1, Aw9523Helper::kDirectionInput);
@@ -136,8 +139,8 @@ uint32_t Aw9523bFreqencyCounter::GetFrequencyMilliHertz(FreqPin pin) noexcept {
     count = event_count_[pin];
     event_count_[pin] = 0;
     event_count_critical_section_.Unlock();
-    const auto interval_us = (now_us - last_time_us_);
-    last_time_us_ = now_us;
+    const auto interval_us = (now_us - last_time_us_[pin]);
+    last_time_us_[pin] = now_us;
     return uint64_t(count) * 1000000 * 1000 / interval_us;
 }
 
@@ -145,5 +148,5 @@ void Aw9523bFreqencyCounter::Reset(FreqPin pin) noexcept {
     event_count_critical_section_.Lock();
     event_count_[pin] = 0;
     event_count_critical_section_.Unlock();
-    last_time_us_ = time_us_64();
+    last_time_us_[pin] = time_us_64();
 }

@@ -132,15 +132,28 @@ private:
 
     void WriteByte(uint8_t addr, uint8_t data) {
         const uint8_t buffer[] = {addr, data};
-        i2c_.Write(GetI2cBaseAddr(), buffer, std::size(buffer));
+        WriteWithRetry(buffer, std::size(buffer));
     }
 
     uint8_t ReadByte(uint8_t addr) {
-        const auto base_addr = GetI2cBaseAddr();
-        i2c_.Write(base_addr, &addr, 1);
+        WriteWithRetry(&addr, 1);
         uint8_t buffer = 0;
-        i2c_.Read(base_addr, &buffer, 1);
+        ReadWithRetry(&buffer, 1);
         return buffer;
+    }
+
+    void WriteWithRetry(const uint8_t *src, size_t len) noexcept {
+        int write_bytes = 0;
+        do {
+            write_bytes = i2c_.Write(GetI2cBaseAddr(), src, len);
+        } while (size_t(write_bytes) != len);
+    }
+
+    void ReadWithRetry(uint8_t *dst, size_t len) noexcept {
+        int read_bytes = 0;
+        do {
+            read_bytes = i2c_.Read(GetI2cBaseAddr(), dst, len);
+        } while (size_t(read_bytes) != len);
     }
 
     uint32_t gpio_scl_;
