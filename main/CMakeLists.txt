@@ -28,6 +28,7 @@ if(PLATFORM_PICO)
     pico_add_extra_outputs(pwm_controller)
 elseif(PLATFORM_ESP32)
     set(exec_srcs
+        esp32/i2c_helper_esp32.cc
         esp32/pwm_helper_esp32.cc
         esp32/frequency_counter_esp32.cc
         esp32/ble_spp_helper_esp32.cc

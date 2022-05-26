@@ -3,15 +3,21 @@
 #include "base_types.hh"
 
 #ifdef PLATFORM_PICO
+
 #include <hardware/i2c.h>
 namespace utility {
 typedef i2c_inst_t *i2c_handler_t;
-}
+constexpr i2c_handler_t kNullHandler = nullptr;
+}  // namespace utility
+
 #elif defined(PLATFORM_ESP32)
+
 #include <driver/i2c.h>
 namespace utility {
-typedef i2c_cmd_handle_t i2c_handler_t;
-}
+typedef i2c_port_t i2c_handler_t;
+constexpr i2c_handler_t kNullHandler = 0;
+}  // namespace utility
+
 #endif
 
 namespace utility {
@@ -23,7 +29,7 @@ public:
               uint32_t baudrate_hz) noexcept;
 #elif defined(PLATFORM_ESP32)
     I2cHelper(uint32_t gpio_scl, uint32_t gpio_sda, uint32_t baudrate_hz,
-              uint32_t i2c_port = 0) noexcept;
+              i2c_port_t i2c_port = 0) noexcept;
 #endif
 
     ~I2cHelper() noexcept;
@@ -35,10 +41,7 @@ private:
     uint32_t gpio_scl_;
     uint32_t gpio_sda_;
     uint32_t baudrate_hz_;
-    i2c_handler_t handler_ = nullptr;
-#ifdef PLATFORM_ESP32
-    uint32_t i2c_master_port_ = 0;
-#endif
+    i2c_handler_t handler_ = kNullHandler;
 
     DISALLOW_COPY(I2cHelper);
     DISALLOW_MOVE(I2cHelper);
