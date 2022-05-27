@@ -6,6 +6,9 @@
 
 #include <pico/stdio.h>
 
+#include <cstdio>
+
+
 #define log_info(format, args...) printf(format, ##args)
 #ifdef DEBUG
 #define log_debug(format, args...) printf(format, ##args)
