@@ -16,9 +16,9 @@ using namespace utility;
 namespace {
 constexpr uint32_t kPwmFreqKhz = 25;
 constexpr uint32_t kPwm1Pin = 0;
-constexpr uint32_t kPwm2Pin = 7;
-constexpr uint32_t kPwm3Pin = 27;
-constexpr uint32_t kPwm4Pin = 17;
+constexpr uint32_t kPwm2Pin = 2;
+constexpr uint32_t kPwm3Pin = 4;
+constexpr uint32_t kPwm4Pin = 6;
 constexpr uint8_t kPwmPinCount = 4;
 constexpr uint32_t kButton1Pin = 14;
 constexpr uint32_t kButton2Pin = 15;
