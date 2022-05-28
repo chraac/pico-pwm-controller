@@ -29,10 +29,10 @@ void GpioEventHandler(uint gpio, uint32_t events) {
 
 bool Aw9523bTimerCallback(repeating_timer_t *rt) {
     event_count_critical_section_.Lock();
-    auto *aw9523 = reinterpret_case<Aw9523Helper *>(rt->user_data);
+    auto *aw9523 = reinterpret_cast<Aw9523Helper *>(rt->user_data);
     if (!aw9523) {
         event_count_critical_section_.Unlock();
-        return;
+        return true;
     }
 
     static uint16_t last_value_ = 0;
