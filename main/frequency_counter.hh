@@ -2,6 +2,12 @@
 
 #include "aw9523_helper.hh"
 #include "base_types.hh"
+#ifdef PLATFORM_PICO
+#include <pico/stdlib.h>
+namespace utility {
+typedef repeating_timer_t system_timer_t;
+}
+#endif
 
 namespace utility {
 
@@ -60,6 +66,9 @@ public:
 private:
     uint64_t last_time_us_[kPinCount] = {};
     Aw9523Helper aw9523_;
+#ifdef PLATFORM_PICO
+    system_timer_t timer_ = {};
+#endif
 
     DISALLOW_COPY(Aw9523bFreqencyCounter);
     DISALLOW_MOVE(Aw9523bFreqencyCounter);

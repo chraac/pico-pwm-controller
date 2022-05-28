@@ -15,7 +15,7 @@ namespace {
 constexpr uint8_t kAw9253Addr0 = 0;
 constexpr uint8_t kAw9253Addr1 = 0;
 constexpr uint32_t kGpioPinCount = 30;
-Aw9523Helper *helper_array_[kGpioPinCount] = {};
+constexpr uint32_t kDefaultTimerIntervalMs = 2;
 uint32_t event_count_[kGpioPinCount] = {};
 CriticalSection event_count_critical_section_;
 
@@ -27,13 +27,9 @@ void GpioEventHandler(uint gpio, uint32_t events) {
     }
 }
 
-void Aw9523bEventHandler(uint gpio, uint32_t events) {
-    if (!(events & GPIO_IRQ_EDGE_FALL)) {
-        return;
-    }
-
+bool Aw9523bTimerCallback(repeating_timer_t *rt) {
     event_count_critical_section_.Lock();
-    auto *aw9523 = helper_array_[gpio];
+    auto *aw9523 = reinterpret_case<Aw9523Helper *>(rt->user_data);
     if (!aw9523) {
         event_count_critical_section_.Unlock();
         return;
@@ -44,7 +40,7 @@ void Aw9523bEventHandler(uint gpio, uint32_t events) {
         ~((uint16_t(aw9523->ReadPort(Aw9523Helper::kPort1)) << 8) |
           aw9523->ReadPort(Aw9523Helper::kPort0));
     uint16_t value = raw_value & (raw_value ^ last_value_);
-    for (size_t i = 0; i < Aw9523Helper::kGpioCount; ++i, value = value >> 1) {
+    for (size_t i = 0; i<Aw9523Helper::kGpioCount; ++i, value = value>> 1) {
         if (value & 0x1) {
             ++event_count_[i];
         }
@@ -52,6 +48,7 @@ void Aw9523bEventHandler(uint gpio, uint32_t events) {
 
     last_value_ = raw_value;
     event_count_critical_section_.Unlock();
+    return true;
 }
 
 }  // namespace
@@ -112,22 +109,17 @@ Aw9523bFreqencyCounter::Aw9523bFreqencyCounter(const uint32_t gpio_scl,
     gpio_set_dir(gpio_rst, GPIO_OUT);
     SetGpioValue(gpio_rst, true);
 
-    event_count_critical_section_.Lock();
-    helper_array_[gpio_intr] = &aw9523_;
-    event_count_critical_section_.Unlock();
-    gpio_set_dir(gpio_intr, GPIO_IN);
-    gpio_set_input_enabled(gpio_intr, true);
-    gpio_set_irq_enabled_with_callback(gpio_intr, GPIO_IRQ_EDGE_FALL, true,
-                                       Aw9523bEventHandler);
-
     log_debug("chip.id.%d\n", int(aw9523_.GetId()));
     aw9523_.Reset();
     aw9523_.SetDirection(Aw9523Helper::kPort0, Aw9523Helper::kDirectionInput);
     aw9523_.SetDirection(Aw9523Helper::kPort1, Aw9523Helper::kDirectionInput);
     aw9523_.SetGpioMode(Aw9523Helper::kPort0, Aw9523Helper::kModeGpio);
     aw9523_.SetGpioMode(Aw9523Helper::kPort1, Aw9523Helper::kModeGpio);
-    aw9523_.SetEnableInterrupt(Aw9523Helper::kPort0, true);
-    aw9523_.SetEnableInterrupt(Aw9523Helper::kPort1, true);
+    aw9523_.SetEnableInterrupt(Aw9523Helper::kPort0, false);
+    aw9523_.SetEnableInterrupt(Aw9523Helper::kPort1, false);
+
+    add_repeating_timer_ms(kDefaultTimerIntervalMs, Aw9523bTimerCallback,
+                           &aw9523_, &timer_);
 }
 
 // Get frequency in MilliHertz
