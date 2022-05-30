@@ -6,12 +6,18 @@
 
 namespace utility {
 
+constexpr auto kDefaultP = .5F;
+constexpr auto kDefaultI = .3F;
+constexpr auto kDefaultD = .02F;
+
 class Pid {
 public:
     typedef int32_t ValueType;
     typedef float FloatType;
+
     Pid(const ValueType min, const ValueType max, const ValueType dt,
-        FloatType kp, FloatType ki, FloatType kd) noexcept
+        FloatType kp = kDefaultP, FloatType ki = kDefaultI,
+        FloatType kd = kDefaultD) noexcept
         : min_(min), max_(max), dt_(dt), kp_(kp), ki_(ki), kd_(kd) {}
 
     Pid(Pid&& other) noexcept
