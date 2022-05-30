@@ -66,7 +66,9 @@ public:
             }
 
             const auto pwm_index = i / kFanCountPerGroup;
-            if (max_fan_speed >= kTargetRpm && max_fan_speed <= kMaxTargetRpm) {
+            if ((max_fan_speed >= kTargetRpm &&
+                 max_fan_speed <= kMaxTargetRpm) ||
+                max_fan_speed == 0) {
                 // skip pid if we already at specified rpm.
                 log_debug("skip.pwm.%d.max.speed.%d\n", int(pwm_index),
                           int(max_fan_speed));

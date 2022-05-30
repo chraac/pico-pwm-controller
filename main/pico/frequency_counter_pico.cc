@@ -15,7 +15,7 @@ namespace {
 constexpr uint8_t kAw9253Addr0 = 0;
 constexpr uint8_t kAw9253Addr1 = 0;
 constexpr uint32_t kGpioPinCount = 30;
-constexpr uint32_t kDefaultTimerIntervalMs = 2;
+constexpr uint32_t kDefaultTimerIntervalMs = 4;
 uint32_t event_count_[kGpioPinCount] = {};
 CriticalSection event_count_critical_section_;
 
@@ -40,7 +40,7 @@ bool Aw9523bTimerCallback(repeating_timer_t *rt) {
         ~((uint16_t(aw9523->ReadPort(Aw9523Helper::kPort1)) << 8) |
           aw9523->ReadPort(Aw9523Helper::kPort0));
     uint16_t value = raw_value & (raw_value ^ last_value_);
-    for (size_t i = 0; i<Aw9523Helper::kGpioCount; ++i, value = value>> 1) {
+    for (size_t i = 0; i < Aw9523Helper::kGpioCount; ++i, value = value >> 1) {
         if (value & 0x1) {
             ++event_count_[i];
         }
