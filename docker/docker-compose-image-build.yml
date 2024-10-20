@@ -4,6 +4,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
+      args:
+        - TAG_NAME=2.0.0
     image: chraac/pico-builder:latest
     command: /bin/bash -c 'env'
     restart: "no"
