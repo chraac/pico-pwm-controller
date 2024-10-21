@@ -22,7 +22,7 @@ int main() {
     for (auto next_interval = utility::kPoolIntervalMs;;
          sleep_ms(next_interval)) {
         const auto start_us = time_us_64();
-        fan_manager.next();
+        fan_manager.Next();
         auto consumed_time_ms = (time_us_64() - start_us) / 1000;
         log_debug("current iteration time cost: %dms\n", int(consumed_time_ms));
         next_interval =

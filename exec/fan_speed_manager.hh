@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include "button_helper.hh"
 #include "fan_speed_helper.hh"
 #include "pid.hh"
@@ -15,17 +17,33 @@ constexpr const uint kPwm4Pin = 17;
 constexpr const uint8_t kPwmPinCount = 4;
 constexpr const uint kPoolIntervalMs = 400;
 
+class SingleFanSpeedManager {
+public:
+    SingleFanSpeedManager(uint pwm_gpio_pin, uint spd_gpio_pin) noexcept;
+    void Next() noexcept;
+
+private:
+    PwmHelper pwm_;
+    Pid pid_;
+    FanSpeedHelper speed_helper_;
+    uint target_rpm_;
+    uint rpm_tolerance_;
+
+    DISALLOW_COPY(SingleFanSpeedManager);
+    DISALLOW_MOVE(SingleFanSpeedManager);
+};
+
 class FanSpeedManagerWithSelector {
 public:
     FanSpeedManagerWithSelector(uint pwm_gpio_pin1 = kPwm1Pin,
-                    uint pwm_gpio_pin2 = kPwm2Pin,
-                    uint pwm_gpio_pin3 = kPwm3Pin,
-                    uint pwm_gpio_pin4 = kPwm4Pin) noexcept;
-    void next() noexcept;
+                                uint pwm_gpio_pin2 = kPwm2Pin,
+                                uint pwm_gpio_pin3 = kPwm3Pin,
+                                uint pwm_gpio_pin4 = kPwm4Pin) noexcept;
+    void Next() noexcept;
 
 private:
-    PwmHelper pwm_array_[kPwmPinCount];
-    Pid pid_array_[kPwmPinCount];
+    std::array<PwmHelper, kPwmPinCount> pwm_array_;
+    std::array<Pid, kPwmPinCount> pid_array_;
     FanSpeedHelper speed_helper_;
     FanSpeedSelector selector_;
     uint8_t current_fan_ = 0;
