@@ -3,23 +3,25 @@ services:
     platform: linux/x86_64
     image: chraac/pico-builder:latest
     environment:
-      - LLAMA_CPP_REPO=/pico-pwm-coneroller
+      - REPO_DIR=/pico-pwm-controller
+      - REPO_BUILD_DIR=/pico-pwm-controller-build
     volumes:
-      - ..:/pico-pwm-controller
+      - ${REPO_SOURCE_DIR}:/pico-pwm-controller:ro
     command:
       - bash
       - -c
       - |
         echo "PICO_SDK_PATH: $$PICO_SDK_PATH"
-        cd $$LLAMA_CPP_REPO
+        mkdir -p $$REPO_BUILD_DIR
+        cd $$REPO_BUILD_DIR
         mkdir -p build_debug
         rm -rf build_debug/*
         cd build_debug
-        cmake .. -DCMAKE_BUILD_TYPE=Debug
+        cmake $${REPO_DIR} -DCMAKE_BUILD_TYPE=Debug
         make -j$$(nproc)
         mkdir -p ../build_release
         rm -rf ../build_release/*
         cd ../build_release
-        cmake .. -DCMAKE_BUILD_TYPE=Release
+        cmake $${REPO_DIR} -DCMAKE_BUILD_TYPE=Release
         make -j$$(nproc)
     restart: "no"

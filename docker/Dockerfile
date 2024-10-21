@@ -16,3 +16,17 @@ ARG TAG_NAME=2.0.0
 WORKDIR ${PICO_SDK_PATH}
 RUN git fetch --tags && git checkout -b v${TAG_NAME} tags/${TAG_NAME}
 RUN git submodule update --init
+
+# Install picotool
+# Appendix B: Picotool: https://datasheets.raspberrypi.com/pico/getting-started-with-pico.pdf 
+RUN apt install libusb-1.0-0-dev -y
+WORKDIR ${PICO_BASE_PATH}
+RUN  git clone https://github.com/raspberrypi/picotool.git
+WORKDIR ${PICO_BASE_PATH}/picotool
+RUN mkdir build
+WORKDIR ${PICO_BASE_PATH}/picotool/build
+RUN cmake ..
+RUN make -j$(nproc)
+RUN make install
+
+WORKDIR ${PICO_BASE_PATH}
