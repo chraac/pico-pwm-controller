@@ -1,9 +1,27 @@
-add_executable(
-    pwm_controller
-    pwm_controller.cc
+
+set(PWM_CONTROLLER_SRC
+    frequency_counter.cc
+    fan_speed_manager.cc
 )
 
-if (USB_STDIO)
+if(BUILD_LITE)
+    set(PWM_CONTROLLER_SRC
+        ${PWM_CONTROLLER_SRC}
+        pwm_controller_lite.cc
+    )
+else()
+    set(PWM_CONTROLLER_SRC
+        ${PWM_CONTROLLER_SRC}
+        pwm_controller.cc
+    )
+endif()
+
+add_executable(
+    pwm_controller
+    ${PWM_CONTROLLER_SRC}
+)
+
+if(USB_STDIO)
     pico_enable_stdio_usb(pwm_controller 1)
     target_compile_definitions(pwm_controller PUBLIC USB_STDIO)
 else()
