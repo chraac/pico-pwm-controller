@@ -20,4 +20,4 @@ jobs:
     - name: Configure
       run: mkdir -p build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Debug
     - name: Build
-      run: make -j$$(nproc)
+      run: make
