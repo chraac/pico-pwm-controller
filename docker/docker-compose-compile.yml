@@ -5,8 +5,10 @@ services:
     environment:
       - REPO_DIR=/pico-pwm-controller
       - REPO_BUILD_DIR=/pico-pwm-controller-build
+      - OUTPUT_DIR=/output
     volumes:
       - ..:/pico-pwm-controller:ro
+      - ${OUTPUT_DIR}:/output:rw
     command:
       - bash
       - -c
@@ -19,9 +21,19 @@ services:
         cd build_debug
         cmake $${REPO_DIR} -DCMAKE_BUILD_TYPE=Debug
         make -j$$(nproc)
+        mkdir -p $${OUTPUT_DIR}/debug
+        cp -f $${REPO_BUILD_DIR}/build_debug/exec/pwm_controller.elf $${OUTPUT_DIR}/debug
+        cp -f $${REPO_BUILD_DIR}/build_debug/exec/pwm_controller.elf.map $${OUTPUT_DIR}/debug
+        cp -f $${REPO_BUILD_DIR}/build_debug/exec/pwm_controller.uf2 $${OUTPUT_DIR}/debug
+        cp -f $${REPO_BUILD_DIR}/build_debug/exec/pwm_controller.bin $${OUTPUT_DIR}/debug
         mkdir -p ../build_release
         rm -rf ../build_release/*
         cd ../build_release
         cmake $${REPO_DIR} -DCMAKE_BUILD_TYPE=Release
         make -j$$(nproc)
+        mkdir -p $${OUTPUT_DIR}/release
+        cp -f $$REPO_BUILD_DIR/build_release/exec/pwm_controller.elf $${OUTPUT_DIR}/release
+        cp -f $$REPO_BUILD_DIR/build_release/exec/pwm_controller.elf.map $${OUTPUT_DIR}/release
+        cp -f $$REPO_BUILD_DIR/build_release/exec/pwm_controller.uf2 $${OUTPUT_DIR}/release
+        cp -f $$REPO_BUILD_DIR/build_release/exec/pwm_controller.bin $${OUTPUT_DIR}/release
     restart: "no"

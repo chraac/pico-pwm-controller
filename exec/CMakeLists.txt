@@ -1,8 +1,24 @@
-add_executable(
-    pwm_controller
+
+set(PWM_CONTROLLER_SRC
     frequency_counter.cc
     fan_speed_manager.cc
-    pwm_controller.cc
+)
+
+if(BUILD_LITE)
+    set(PWM_CONTROLLER_SRC
+        ${PWM_CONTROLLER_SRC}
+        pwm_controller_lite.cc
+    )
+else()
+    set(PWM_CONTROLLER_SRC
+        ${PWM_CONTROLLER_SRC}
+        pwm_controller.cc
+    )
+endif()
+
+add_executable(
+    pwm_controller
+    ${PWM_CONTROLLER_SRC}
 )
 
 if(USB_STDIO)

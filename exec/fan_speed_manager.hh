@@ -10,17 +10,17 @@
 namespace utility {
 
 constexpr const uint kPwmFreqKhz = 25;
-constexpr const uint kPwm1Pin = 0;
-constexpr const uint kPwm2Pin = 7;
-constexpr const uint kPwm3Pin = 27;
-constexpr const uint kPwm4Pin = 17;
 constexpr const uint8_t kPwmPinCount = 4;
 constexpr const uint kPoolIntervalMs = 400;
 
 class SingleFanSpeedManager {
 public:
-    SingleFanSpeedManager(uint pwm_gpio_pin, uint spd_gpio_pin) noexcept;
-    void Next() noexcept;
+    explicit SingleFanSpeedManager(uint pwm_gpio_pin,
+                                   uint spd_gpio_pin) noexcept;
+    uint Next() noexcept;
+    void SetTargetRpm(uint rpm) noexcept { target_rpm_ = rpm; }
+    uint GetFanSpeedRpm() noexcept { return speed_helper_.GetFanSpeedRpm(); }
+    uint GetPwmGpioPin() const noexcept { return pwm_.GetGpioPin(); }
 
 private:
     PwmHelper pwm_;
@@ -35,10 +35,9 @@ private:
 
 class FanSpeedManagerWithSelector {
 public:
-    FanSpeedManagerWithSelector(uint pwm_gpio_pin1 = kPwm1Pin,
-                                uint pwm_gpio_pin2 = kPwm2Pin,
-                                uint pwm_gpio_pin3 = kPwm3Pin,
-                                uint pwm_gpio_pin4 = kPwm4Pin) noexcept;
+    FanSpeedManagerWithSelector(uint pwm_gpio_pin1, uint pwm_gpio_pin2,
+                                uint pwm_gpio_pin3,
+                                uint pwm_gpio_pin4) noexcept;
     void Next() noexcept;
 
 private:

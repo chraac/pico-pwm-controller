@@ -43,17 +43,18 @@ SingleFanSpeedManager::SingleFanSpeedManager(uint pwm_gpio_pin,
     pwm_.SetDutyCycle(kStartCycle);
 }
 
-void SingleFanSpeedManager::Next() noexcept {
+uint SingleFanSpeedManager::Next() noexcept {
     const auto current_speed = speed_helper_.GetFanSpeedRpm();
     if (current_speed >= (target_rpm_ - rpm_tolerance_) &&
         current_speed < (target_rpm_ + rpm_tolerance_)) {
         // skip pid if we already at target_rpm_.
         log_debug("skip.fan.pwm_gpio.%d\n", int(pwm_.GetGpioPin()));
-        return;
+        return current_speed;
     }
 
     auto cycle = pid_.calculate(target_rpm_, current_speed);
     pwm_.SetDutyCycle(cycle);
+    return current_speed;
 }
 
 FanSpeedManagerWithSelector::FanSpeedManagerWithSelector(uint pwm_gpio_pin1,
