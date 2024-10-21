@@ -1,9 +1,11 @@
 add_executable(
     pwm_controller
+    frequency_counter.cc
+    fan_speed_manager.cc
     pwm_controller.cc
 )
 
-if (USB_STDIO)
+if(USB_STDIO)
     pico_enable_stdio_usb(pwm_controller 1)
     target_compile_definitions(pwm_controller PUBLIC USB_STDIO)
 else()
