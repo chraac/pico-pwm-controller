@@ -7,6 +7,7 @@
 
 #include "fan_speed_manager.hh"
 #include "logger.hh"
+#include "rgb_led_helper.hh"
 
 using namespace utility;
 
@@ -21,6 +22,10 @@ constexpr const uint kFanSpd0Pin = 4;
 constexpr const uint kFanSpd1Pin = 1;
 constexpr const uint kFanSpd2Pin = 27;
 constexpr const uint kFanSpd3Pin = 29;
+
+constexpr const uint kRedPin = 17;
+constexpr const uint kGreenPin = 16;
+constexpr const uint kBluePin = 25;
 
 }  // namespace
 
@@ -37,6 +42,8 @@ int main() {
         SingleFanSpeedManager{kPwm3Pin, kFanSpd3Pin},
     };
 
+    RgbLedHelper rgb_led{kRedPin, kGreenPin, kBluePin};
+
     log_info("main.entering.loop\n");
     for (auto next_interval = utility::kPoolIntervalMs;;
          sleep_ms(next_interval)) {
@@ -46,6 +53,7 @@ int main() {
             log_info("fan.pwm_gpio.%d.rpm.%d\n",
                      int(fan_manager.GetPwmGpioPin()), int(rpm));
         }
+        rgb_led.Next();
         auto consumed_time_ms = (time_us_64() - start_us) / 1000;
         log_debug("current iteration time cost: %dms\n", int(consumed_time_ms));
         next_interval =
