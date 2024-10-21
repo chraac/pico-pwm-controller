@@ -5,7 +5,7 @@ pushd "$_script_dir"
 
 set -e
 
-REPO_SOURCE_DIR=$_repo_dir docker compose -f docker-compose-compile.yml up --build
+docker compose -f docker-compose-compile.yml up --build
 
 set +e
 

@@ -6,7 +6,7 @@ services:
       - REPO_DIR=/pico-pwm-controller
       - REPO_BUILD_DIR=/pico-pwm-controller-build
     volumes:
-      - ${REPO_SOURCE_DIR}:/pico-pwm-controller:ro
+      - ..:/pico-pwm-controller:ro
     command:
       - bash
       - -c

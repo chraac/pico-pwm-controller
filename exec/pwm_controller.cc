@@ -1,5 +1,6 @@
 
 #include <hardware/timer.h>
+#include <pico/runtime_init.h>
 #include <pico/stdlib.h>
 
 #include <algorithm>
