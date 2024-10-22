@@ -29,7 +29,7 @@ else()
     target_compile_definitions(pwm_controller PUBLIC UART_STDIO)
 endif()
 
-target_link_libraries(pwm_controller pico_stdlib hardware_pwm)
+target_link_libraries(pwm_controller pico_stdlib hardware_pwm pico-ssd1306)
 
 # create map/bin/hex file etc.
 pico_add_extra_outputs(pwm_controller)
