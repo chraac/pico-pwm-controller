@@ -49,7 +49,7 @@ public:
 
     void EndDraw() noexcept { ssd1306_show(&disp_); }
 
-    uint16_t GetFontHeight() const noexcept { return 5; }
+    uint16_t GetFontHeight() const noexcept { return 8; }
 
 private:
     ssd1306_t disp_;
