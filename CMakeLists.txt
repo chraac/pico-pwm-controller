@@ -12,7 +12,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -Os")
 set(USB_STDIO true)
 set(BUILD_LITE true)
 
-if (PICO_SDK_VERSION_STRING VERSION_LESS "1.3.0")
+if(PICO_SDK_VERSION_STRING VERSION_LESS "1.3.0")
     message(FATAL_ERROR "Raspberry Pi Pico SDK version 1.3.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
 endif()
 
@@ -22,7 +22,9 @@ pico_sdk_init()
 add_compile_options(-Wall
     -Wformat
     -Wno-unused-function # we have some for the docs that aren't called
-    #-Wno-maybe-uninitialized
-    )
 
+    # -Wno-maybe-uninitialized
+)
+
+add_subdirectory(thirdparty)
 add_subdirectory(exec)

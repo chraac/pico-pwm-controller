@@ -6,6 +6,7 @@
 #include <iterator>
 
 #include "fan_speed_manager.hh"
+#include "lcd_helper.hh"
 #include "logger.hh"
 #include "rgb_led_helper.hh"
 
@@ -27,6 +28,10 @@ constexpr const uint kRedPin = 17;
 constexpr const uint kGreenPin = 16;
 constexpr const uint kBluePin = 25;
 
+constexpr const uint kDefaultTargetRpm = 1900;
+constexpr const uint16_t kDefaultLcdWidth = 128;
+constexpr const uint16_t kDefaultLcdHeight = 64;
+
 }  // namespace
 
 int main() {
@@ -42,18 +47,29 @@ int main() {
         SingleFanSpeedManager{kPwm3Pin, kFanSpd3Pin},
     };
 
+    for (auto &fan_manager : managers) {
+        fan_manager.SetTargetRpm(kDefaultTargetRpm);
+    }
+
     RgbLedHelper rgb_led{kRedPin, kGreenPin, kBluePin};
+    XiaoRp2040LcdDrawer lcd_drawer{kDefaultLcdWidth, kDefaultLcdHeight};
 
     log_info("main.entering.loop\n");
     for (auto next_interval = utility::kPoolIntervalMs;;
          sleep_ms(next_interval)) {
         const auto start_us = time_us_64();
-        for (auto &fan_manager : managers) {
+        uint speeds[std::size(managers)] = {};
+        for (size_t i = 0; i < std::size(managers); ++i) {
+            auto &fan_manager = managers[i];
             auto rpm = fan_manager.Next();
             log_info("fan.pwm_gpio.%d.rpm.%d\n",
                      int(fan_manager.GetPwmGpioPin()), int(rpm));
+            speeds[i] = rpm;
         }
         rgb_led.Next();
+        static_assert(std::size(managers) == 4);
+        lcd_drawer.DrawRpm(speeds[0], speeds[1], speeds[2], speeds[3],
+                           kDefaultTargetRpm);
         auto consumed_time_ms = (time_us_64() - start_us) / 1000;
         log_debug("current iteration time cost: %dms\n", int(consumed_time_ms));
         next_interval =
