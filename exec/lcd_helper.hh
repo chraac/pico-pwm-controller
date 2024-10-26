@@ -19,6 +19,7 @@ namespace utility {
 class Ssd1306Device {
     constexpr static const uint8_t kI2cAddr = 0x3C;
     constexpr static const uint32_t kI2cFreq = 400000;  // 400kHz
+    constexpr static const uint8_t kDefaultContrast = 0x7F;
 
 public:
     explicit Ssd1306Device(i2c_inst_t *i2c, uint8_t i2c_scl_pin,
@@ -38,9 +39,12 @@ public:
         disp_.external_vcc = false;
         ssd1306_init(&disp_, width_, height_, kI2cAddr, i2c_inst_);
         ssd1306_clear(&disp_);
+        ssd1306_contrast(&disp_, kDefaultContrast);
     }
 
     void Clear() noexcept { ssd1306_clear(&disp_); }
+
+    void SetContrast(uint8_t val) noexcept { ssd1306_contrast(&disp_, val); }
 
     void DrawString(const char *str, uint16_t x, uint16_t y) noexcept {
         ssd1306_draw_string(&disp_, x, y, 1,
