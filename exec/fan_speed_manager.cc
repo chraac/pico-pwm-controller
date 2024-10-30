@@ -22,7 +22,7 @@ constexpr uint8_t kFanCountPerGroup = kFanCount / utility::kPwmPinCount;
 // https://noctua.at/pub/media/wysiwyg/Noctua_PWM_specifications_white_paper.pdf
 constexpr uint kFanSpeedStepRpm = 30 * 1000 / utility::kPoolIntervalMs;
 constexpr uint kTargetRpm = 1900;
-constexpr uint kRpmTolerance = 50;
+constexpr uint kRpmTolerance = 60;
 constexpr uint kMaxTargetRpm = kTargetRpm + kFanSpeedStepRpm;
 constexpr auto kStartCycle = 500;
 constexpr auto kP = .5F;
