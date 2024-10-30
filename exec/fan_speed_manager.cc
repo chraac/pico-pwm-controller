@@ -22,7 +22,7 @@ constexpr uint8_t kFanCountPerGroup = kFanCount / utility::kPwmPinCount;
 // https://noctua.at/pub/media/wysiwyg/Noctua_PWM_specifications_white_paper.pdf
 constexpr uint kFanSpeedStepRpm = 30 * 1000 / utility::kPoolIntervalMs;
 constexpr uint kTargetRpm = 1900;
-constexpr uint kRpmTolerance = 50;
+constexpr uint kRpmTolerance = 60;
 constexpr uint kMaxTargetRpm = kTargetRpm + kFanSpeedStepRpm;
 constexpr auto kStartCycle = 500;
 constexpr auto kP = .5F;
@@ -45,10 +45,18 @@ SingleFanSpeedManager::SingleFanSpeedManager(uint pwm_gpio_pin,
 
 uint SingleFanSpeedManager::Next() noexcept {
     const auto current_speed = speed_helper_.GetFanSpeedRpm();
-    if (current_speed >= (target_rpm_ - rpm_tolerance_) &&
+    if (current_speed == 0) {
+        // skip pid if we can't get fan speed.
+        log_debug("skip.fan.pwm_gpio.%d.no.speed\n", int(pwm_.GetGpioPin()));
+        pwm_.SetDutyCycle(kStartCycle);
+        return 0;
+    }
+
+    if (current_speed >= target_rpm_ &&
         current_speed < (target_rpm_ + rpm_tolerance_)) {
         // skip pid if we already at target_rpm_.
-        log_debug("skip.fan.pwm_gpio.%d\n", int(pwm_.GetGpioPin()));
+        log_debug("skip.fan.pwm_gpio.%d.speed.%d\n", int(pwm_.GetGpioPin()),
+                  int(current_speed));
         return current_speed;
     }
 

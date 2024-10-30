@@ -19,6 +19,7 @@ namespace utility {
 class Ssd1306Device {
     constexpr static const uint8_t kI2cAddr = 0x3C;
     constexpr static const uint32_t kI2cFreq = 400000;  // 400kHz
+    constexpr static const uint8_t kDefaultContrast = 0x7F;
 
 public:
     explicit Ssd1306Device(i2c_inst_t *i2c, uint8_t i2c_scl_pin,
@@ -38,9 +39,12 @@ public:
         disp_.external_vcc = false;
         ssd1306_init(&disp_, width_, height_, kI2cAddr, i2c_inst_);
         ssd1306_clear(&disp_);
+        ssd1306_contrast(&disp_, kDefaultContrast);
     }
 
     void Clear() noexcept { ssd1306_clear(&disp_); }
+
+    void SetContrast(uint8_t val) noexcept { ssd1306_contrast(&disp_, val); }
 
     void DrawString(const char *str, uint16_t x, uint16_t y) noexcept {
         ssd1306_draw_string(&disp_, x, y, 1,
@@ -80,20 +84,31 @@ public:
     LcdDrawer(uint16_t width, uint16_t height) noexcept
         : device_(width, height) {}
 
+    void SetContrast(uint8_t val) noexcept { device_.SetContrast(val); }
+
     void DrawRpm(uint32_t rpm0, uint32_t rpm1, uint32_t rpm2, uint32_t rpm3,
                  uint32_t target_rpm) noexcept {
         device_.Clear();
         char buf[128] = {};
         uint16_t y = 0;
-        snprintf(buf, sizeof(buf), "Target:%d", (int)target_rpm);
-        device_.DrawString(buf, 0, y);
 
-        y += device_.GetFontHeight();
-        snprintf(buf, sizeof(buf), "Spd0:%d, Spd1:%d", (int)rpm0, (int)rpm1);
+        snprintf(buf, sizeof(buf), "Spd1:%d, Target:%d", (int)rpm0,
+                 (int)target_rpm);
         device_.DrawString(buf, 0, y);
-
         y += device_.GetFontHeight();
-        snprintf(buf, sizeof(buf), "Spd2:%d, Spd3:%d", (int)rpm2, (int)rpm3);
+
+        snprintf(buf, sizeof(buf), "Spd2:%d, Target:%d", (int)rpm1,
+                 (int)target_rpm);
+        device_.DrawString(buf, 0, y);
+        y += device_.GetFontHeight();
+
+        snprintf(buf, sizeof(buf), "Spd3:%d, Target:%d", (int)rpm2,
+                 (int)target_rpm);
+        device_.DrawString(buf, 0, y);
+        y += device_.GetFontHeight();
+
+        snprintf(buf, sizeof(buf), "Spd4:%d, Target:%d", (int)rpm3,
+                 (int)target_rpm);
         device_.DrawString(buf, 0, y);
 
         device_.EndDraw();
