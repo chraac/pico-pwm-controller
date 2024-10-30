@@ -84,6 +84,8 @@ public:
     LcdDrawer(uint16_t width, uint16_t height) noexcept
         : device_(width, height) {}
 
+    void SetContrast(uint8_t val) noexcept { device_.SetContrast(val); }
+
     void DrawRpm(uint32_t rpm0, uint32_t rpm1, uint32_t rpm2, uint32_t rpm3,
                  uint32_t target_rpm) noexcept {
         device_.Clear();

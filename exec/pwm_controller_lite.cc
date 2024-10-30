@@ -31,6 +31,7 @@ constexpr const uint kBluePin = 25;
 constexpr const uint kDefaultTargetRpm = 1900;
 constexpr const uint16_t kDefaultLcdWidth = 128;
 constexpr const uint16_t kDefaultLcdHeight = 64;
+constexpr const uint8_t kDefaultLcdContrast = 0x3F;
 
 }  // namespace
 
@@ -53,6 +54,7 @@ int main() {
 
     RgbLedHelper rgb_led{kRedPin, kGreenPin, kBluePin};
     XiaoRp2040LcdDrawer lcd_drawer{kDefaultLcdWidth, kDefaultLcdHeight};
+    lcd_drawer.SetContrast(kDefaultLcdContrast);
 
     log_info("main.entering.loop\n");
     for (auto next_interval = utility::kPoolIntervalMs;;
