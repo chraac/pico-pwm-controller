@@ -91,15 +91,24 @@ public:
         device_.Clear();
         char buf[128] = {};
         uint16_t y = 0;
-        snprintf(buf, sizeof(buf), "Target:%d", (int)target_rpm);
-        device_.DrawString(buf, 0, y);
 
-        y += device_.GetFontHeight();
-        snprintf(buf, sizeof(buf), "Spd0:%d, Spd1:%d", (int)rpm0, (int)rpm1);
+        snprintf(buf, sizeof(buf), "Spd1:%d, Target:%d", (int)rpm0,
+                 (int)target_rpm);
         device_.DrawString(buf, 0, y);
-
         y += device_.GetFontHeight();
-        snprintf(buf, sizeof(buf), "Spd2:%d, Spd3:%d", (int)rpm2, (int)rpm3);
+
+        snprintf(buf, sizeof(buf), "Spd2:%d, Target:%d", (int)rpm1,
+                 (int)target_rpm);
+        device_.DrawString(buf, 0, y);
+        y += device_.GetFontHeight();
+
+        snprintf(buf, sizeof(buf), "Spd3:%d, Target:%d", (int)rpm2,
+                 (int)target_rpm);
+        device_.DrawString(buf, 0, y);
+        y += device_.GetFontHeight();
+
+        snprintf(buf, sizeof(buf), "Spd4:%d, Target:%d", (int)rpm3,
+                 (int)target_rpm);
         device_.DrawString(buf, 0, y);
 
         device_.EndDraw();
