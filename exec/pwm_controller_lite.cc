@@ -88,14 +88,16 @@ int main() {
         }
         rgb_led.Next();
         static_assert(std::size(managers) == 4);
-        lcd_drawer.DrawRpm(speeds[0], speeds[1], speeds[2], speeds[3],
-                           kDefaultTargetRpm);
 
-        log_debug(
-            "current adc: %d, r: %dohm, temp: %.2fdeg\n", int(temp_adc.Read()),
-            int(GetResistantValue(temp_adc.Read(), temp_adc.GetMax())),
-            GetTemperature(
-                GetResistantValue(temp_adc.Read(), temp_adc.GetMax()), 3435));
+        const auto adc_read = temp_adc.Read();
+        const auto resist = GetResistantValue(adc_read, temp_adc.GetMax());
+        const auto temp = GetTemperature(
+            resist, 3435);  // 3435 is the beta value of the thermistor.
+        lcd_drawer.DrawRpmAndTemp(speeds[0], speeds[1], speeds[2], speeds[3],
+                                  kDefaultTargetRpm, temp);
+
+        log_debug("current adc: %d, r: %dohm, temp: %.2fdeg\n", int(adc_read),
+                  int(resist), temp);
 
         auto consumed_time_ms = (time_us_64() - start_us) / 1000;
         log_debug("current iteration time cost: %dms\n", int(consumed_time_ms));
