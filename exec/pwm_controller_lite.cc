@@ -48,6 +48,11 @@ constexpr const uint8_t kDefaultLcdContrast = 0x3F;
 
 constexpr const uint kDefaultTempPin = 26;
 
+uint32_t GetResistantValue(uint16_t adc_value, uint16_t adc_max) {
+    // 10k resistor
+    return 10000 * uint32_t(adc_max - adc_value) / adc_value;
+}
+
 }  // namespace
 
 int main() {
@@ -89,8 +94,11 @@ int main() {
         static_assert(std::size(managers) == 4);
         lcd_drawer.DrawRpm(speeds[0], speeds[1], speeds[2], speeds[3],
                            kDefaultTargetRpm);
+
+        log_debug("current adc: %d, r: %dohm\n", int(temp_adc.Read()),
+                  int(GetResistantValue(temp_adc.Read(), temp_adc.GetMax())));
+
         auto consumed_time_ms = (time_us_64() - start_us) / 1000;
-        log_debug("current adc: %d\n", int(temp_adc.Read()));
         log_debug("current iteration time cost: %dms\n", int(consumed_time_ms));
         next_interval =
             utility::kPoolIntervalMs -
