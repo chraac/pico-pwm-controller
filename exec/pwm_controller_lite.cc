@@ -5,6 +5,7 @@
 
 #include <iterator>
 
+#include "adc_helper.hh"
 #include "fan_speed_manager.hh"
 #include "lcd_helper.hh"
 #include "logger.hh"
@@ -45,6 +46,8 @@ constexpr const uint16_t kDefaultLcdWidth = 128;
 constexpr const uint16_t kDefaultLcdHeight = 64;
 constexpr const uint8_t kDefaultLcdContrast = 0x3F;
 
+constexpr const uint kDefaultTempPin = 26;
+
 }  // namespace
 
 int main() {
@@ -68,6 +71,8 @@ int main() {
     XiaoRp2040LcdDrawer lcd_drawer{kDefaultLcdWidth, kDefaultLcdHeight};
     lcd_drawer.SetContrast(kDefaultLcdContrast);
 
+    AdcHelper temp_adc{kDefaultTempPin};
+
     log_info("main.entering.loop\n");
     for (auto next_interval = utility::kPoolIntervalMs;;
          sleep_ms(next_interval)) {
@@ -85,6 +90,7 @@ int main() {
         lcd_drawer.DrawRpm(speeds[0], speeds[1], speeds[2], speeds[3],
                            kDefaultTargetRpm);
         auto consumed_time_ms = (time_us_64() - start_us) / 1000;
+        log_debug("current adc: %d\n", int(temp_adc.Read()));
         log_debug("current iteration time cost: %dms\n", int(consumed_time_ms));
         next_interval =
             utility::kPoolIntervalMs -
