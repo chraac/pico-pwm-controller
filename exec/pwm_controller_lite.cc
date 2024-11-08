@@ -14,6 +14,7 @@ using namespace utility;
 
 namespace {
 
+#if PICO_LITE_BOARD_VERSION == 90
 constexpr const uint kPwm0Pin = 3;
 constexpr const uint kPwm1Pin = 2;
 constexpr const uint kPwm2Pin = 26;
@@ -23,6 +24,17 @@ constexpr const uint kFanSpd0Pin = 4;
 constexpr const uint kFanSpd1Pin = 1;
 constexpr const uint kFanSpd2Pin = 27;
 constexpr const uint kFanSpd3Pin = 29;
+#else
+constexpr const uint kPwm0Pin = 3;
+constexpr const uint kPwm1Pin = 2;
+constexpr const uint kPwm2Pin = 27;
+constexpr const uint kPwm3Pin = 29;
+
+constexpr const uint kFanSpd0Pin = 4;
+constexpr const uint kFanSpd1Pin = 1;
+constexpr const uint kFanSpd2Pin = 28;
+constexpr const uint kFanSpd3Pin = 0;
+#endif
 
 constexpr const uint kRedPin = 17;
 constexpr const uint kGreenPin = 16;
