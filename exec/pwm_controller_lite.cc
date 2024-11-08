@@ -10,6 +10,7 @@
 #include "lcd_helper.hh"
 #include "logger.hh"
 #include "rgb_led_helper.hh"
+#include "temp_helper.hh"
 
 using namespace utility;
 
@@ -47,11 +48,6 @@ constexpr const uint16_t kDefaultLcdHeight = 64;
 constexpr const uint8_t kDefaultLcdContrast = 0x3F;
 
 constexpr const uint kDefaultTempPin = 26;
-
-uint32_t GetResistantValue(uint16_t adc_value, uint16_t adc_max) {
-    // 10k resistor
-    return 10000 * uint32_t(adc_max - adc_value) / adc_value;
-}
 
 }  // namespace
 
@@ -95,8 +91,11 @@ int main() {
         lcd_drawer.DrawRpm(speeds[0], speeds[1], speeds[2], speeds[3],
                            kDefaultTargetRpm);
 
-        log_debug("current adc: %d, r: %dohm\n", int(temp_adc.Read()),
-                  int(GetResistantValue(temp_adc.Read(), temp_adc.GetMax())));
+        log_debug(
+            "current adc: %d, r: %dohm, temp: %.2fdeg\n", int(temp_adc.Read()),
+            int(GetResistantValue(temp_adc.Read(), temp_adc.GetMax())),
+            GetTemperature(
+                GetResistantValue(temp_adc.Read(), temp_adc.GetMax()), 3435));
 
         auto consumed_time_ms = (time_us_64() - start_us) / 1000;
         log_debug("current iteration time cost: %dms\n", int(consumed_time_ms));
