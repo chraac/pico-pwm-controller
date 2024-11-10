@@ -18,7 +18,7 @@ struct ThermistorParams {
     constexpr explicit ThermistorParams(uint32_t beta, float temp,
                                         uint32_t resist)
         : beta(float(beta)),                 // beta value
-          beta_over_t0(float(beta) / beta),  // beta / T0
+          beta_over_t0(float(beta) / temp),  // beta / T0
                                              // ln(R0)
           ln_cal_resist(std::log(float(resist))) {}
 
