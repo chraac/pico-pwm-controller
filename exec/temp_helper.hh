@@ -13,14 +13,14 @@ uint32_t GetResistantValue(uint16_t adc_value, uint16_t adc_max) {
 struct ThermistorParams {
     const float beta;          // thermistor beta value
     const float beta_over_t0;  // beta / T0
-    const float ln_cal_resist;
+    const float ln_r0;         // ln(R0)
 
     constexpr explicit ThermistorParams(uint32_t beta, float temp,
                                         uint32_t resist)
         : beta(float(beta)),                 // beta value
           beta_over_t0(float(beta) / temp),  // beta / T0
                                              // ln(R0)
-          ln_cal_resist(std::log(float(resist))) {}
+          ln_r0(std::log(float(resist))) {}
 
     float GetTemperature(uint32_t resist) const {
         // Steinhart-Hart equation
@@ -28,8 +28,7 @@ struct ThermistorParams {
         // T = 1 / (1/T0 + 1/B * ln(R/R0))
         // T = 1 / (1/T0 + 1/B * (ln(R) - ln(R0)))
         // T = B / (B/T0 + ln(R) - ln(R0))
-        return (beta /
-                (beta_over_t0 + std::log(float(resist)) - ln_cal_resist)) -
+        return (beta / (beta_over_t0 + std::log(float(resist)) - ln_r0)) -
                273.15f;
     }
 };
