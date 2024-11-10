@@ -91,8 +91,7 @@ int main() {
 
         const auto adc_read = temp_adc.Read();
         const auto resist = GetResistantValue(adc_read, temp_adc.GetMax());
-        const auto temp = GetTemperature(
-            resist, 3435);  // 3435 is the beta value of the thermistor.
+        const auto temp = GetTemperature(resist);
         lcd_drawer.DrawRpmAndTemp(speeds[0], speeds[1], speeds[2], speeds[3],
                                   kDefaultTargetRpm, temp);
 

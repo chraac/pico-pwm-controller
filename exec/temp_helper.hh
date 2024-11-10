@@ -10,15 +10,54 @@ uint32_t GetResistantValue(uint16_t adc_value, uint16_t adc_max) {
     return 10000 * uint32_t(adc_max - adc_value) / adc_value;
 }
 
-float GetTemperature(uint32_t resist, uint32_t therm_beta,
-                     float cal_temp = 25.f, uint32_t cal_resist = 10000) {
-    // Steinhart-Hart equation
-    // 1/T = 1/T0 + 1/B * ln(R/R0)
-    // T = 1 / (1/T0 + 1/B * ln(R/R0))
-    cal_temp += 273.15f;  // Convert to Celsius
-    return (1.f / (1.f / cal_temp +
-                   std::log(float(resist) / float(cal_resist)) / therm_beta)) -
-           273.15f;
+struct ThermistorParams {
+    const float beta;          // thermistor beta value
+    const float beta_over_t0;  // beta / T0
+    const float ln_cal_resist;
+
+    constexpr explicit ThermistorParams(uint32_t beta, float temp,
+                                        uint32_t resist)
+        : beta(float(beta)),                 // beta value
+          beta_over_t0(float(beta) / beta),  // beta / T0
+                                             // ln(R0)
+          ln_cal_resist(std::log(float(resist))) {}
+
+    float GetTemperature(uint32_t resist) const {
+        // Steinhart-Hart equation
+        // 1/T = 1/T0 + 1/B * ln(R/R0)
+        // T = 1 / (1/T0 + 1/B * ln(R/R0))
+        // T = 1 / (1/T0 + 1/B * (ln(R) - ln(R0)))
+        // T = B / (B/T0 + ln(R) - ln(R0))
+        return (beta /
+                (beta_over_t0 + std::log(float(resist)) - ln_cal_resist)) -
+               273.15f;
+    }
+};
+
+// 10k resistor, 3435 beta value
+constexpr const ThermistorParams kNtc10k3435{
+    3435,
+    25.f,
+    10000,
+};
+
+// 10k resistor, 3950 beta value
+constexpr const ThermistorParams kNtc10k3950{
+    3950,
+    25.f,
+    10000,
+};
+
+// 100k resistor, 3950 beta value
+constexpr const ThermistorParams kNtc100k3950{
+    3950,
+    25.f,
+    100000,
+};
+
+float GetTemperature(uint32_t resist,
+                     const ThermistorParams &params = kNtc10k3435) {
+    return params.GetTemperature(resist);
 }
 
 }  // namespace utility
