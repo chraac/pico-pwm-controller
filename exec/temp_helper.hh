@@ -19,7 +19,7 @@ public:
     constexpr explicit ThermistorParams(uint32_t beta, float temp,
                                         uint32_t resist)
         : beta_(float(beta)),                 // beta value
-          beta_over_t0_(float(beta) / temp),  // beta / T0
+          beta_over_t0_(float(beta) / (temp + 273.15f)),  // beta / T0
                                               // ln(R0)
           ln_r0_(std::log(float(resist))) {}
 
