@@ -86,8 +86,9 @@ public:
 
     void SetContrast(uint8_t val) noexcept { device_.SetContrast(val); }
 
-    void DrawRpm(uint32_t rpm0, uint32_t rpm1, uint32_t rpm2, uint32_t rpm3,
-                 uint32_t target_rpm) noexcept {
+    void DrawRpmAndTemp(uint32_t rpm0, uint32_t rpm1, uint32_t rpm2,
+                        uint32_t rpm3, uint32_t target_rpm,
+                        float temp) noexcept {
         device_.Clear();
         char buf[128] = {};
         uint16_t y = 0;
@@ -109,6 +110,10 @@ public:
 
         snprintf(buf, sizeof(buf), "Spd4:%d, Tag:%d", (int)rpm3,
                  (int)target_rpm);
+        device_.DrawString(buf, 0, y);
+        y += device_.GetFontHeight();
+
+        snprintf(buf, sizeof(buf), "Temp:%.2fdeg", temp);
         device_.DrawString(buf, 0, y);
 
         device_.EndDraw();
