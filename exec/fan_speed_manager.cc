@@ -4,6 +4,7 @@
 #include <iterator>
 
 #include "logger.hh"
+#include "temp_helper.hh"
 
 namespace {
 constexpr uint kButton1Pin = 14;
@@ -34,17 +35,26 @@ constexpr auto kD = .02F;
 namespace utility {
 
 SingleFanSpeedManager::SingleFanSpeedManager(uint pwm_gpio_pin,
-                                             uint spd_gpio_pin)
+                                             uint spd_gpio_pin, bool use_temp)
     : pwm_(pwm_gpio_pin, kPwmFreqKhz),
       pid_(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD),
       speed_helper_(spd_gpio_pin),
       target_rpm_(kTargetRpm),
-      rpm_tolerance_(kRpmTolerance) {
+      rpm_tolerance_(kRpmTolerance),
+      use_temp_(use_temp) {
     pwm_.SetDutyCycle(kStartCycle);
 }
 
-uint SingleFanSpeedManager::Next() noexcept {
+uint SingleFanSpeedManager::Next(uint32_t temp) noexcept {
     const auto current_speed = speed_helper_.GetFanSpeedRpm();
+    if (use_temp_) {
+        auto cycle = kLinearFanPwmCurve.GetCurveValue(temp);
+        pwm_.SetDutyCycle(cycle);
+        log_debug("pwm.%d.cycle.%d.from.temp\n", int(pwm_.GetGpioPin()),
+                  int(cycle));
+        return current_speed;
+    }
+
     if (current_speed == 0) {
         // skip pid if we can't get fan speed.
         log_debug("skip.fan.pwm_gpio.%d.no.speed\n", int(pwm_.GetGpioPin()));

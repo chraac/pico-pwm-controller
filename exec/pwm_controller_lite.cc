@@ -58,10 +58,10 @@ int main() {
     log_info("main.init.finished\n");
 
     SingleFanSpeedManager managers[] = {
-        SingleFanSpeedManager{kPwm0Pin, kFanSpd0Pin},
-        SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin},
-        SingleFanSpeedManager{kPwm2Pin, kFanSpd2Pin},
-        SingleFanSpeedManager{kPwm3Pin, kFanSpd3Pin},
+        SingleFanSpeedManager{kPwm0Pin, kFanSpd0Pin, true},
+        SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin, true},
+        SingleFanSpeedManager{kPwm2Pin, kFanSpd2Pin, false},
+        SingleFanSpeedManager{kPwm3Pin, kFanSpd3Pin, false},
     };
 
     for (auto &fan_manager : managers) {
@@ -78,20 +78,21 @@ int main() {
     for (auto next_interval = utility::kPoolIntervalMs;;
          sleep_ms(next_interval)) {
         const auto start_us = time_us_64();
+
+        const auto adc_read = temp_adc.Read();
+        const auto resist = GetResistantValue(adc_read, temp_adc.GetMax());
+        const auto temp = GetTemperature(resist);
+
         uint speeds[std::size(managers)] = {};
         for (size_t i = 0; i < std::size(managers); ++i) {
             auto &fan_manager = managers[i];
-            auto rpm = fan_manager.Next();
+            auto rpm = fan_manager.Next(temp);
             log_info("fan.pwm_gpio.%d.rpm.%d\n",
                      int(fan_manager.GetPwmGpioPin()), int(rpm));
             speeds[i] = rpm;
         }
         rgb_led.Next();
         static_assert(std::size(managers) == 4);
-
-        const auto adc_read = temp_adc.Read();
-        const auto resist = GetResistantValue(adc_read, temp_adc.GetMax());
-        const auto temp = GetTemperature(resist);
         lcd_drawer.DrawRpmAndTemp(speeds[0], speeds[1], speeds[2], speeds[3],
                                   kDefaultTargetRpm, temp);
 

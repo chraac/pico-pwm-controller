@@ -9,7 +9,7 @@
 
 namespace utility {
 
-uint32_t GetResistantValue(uint16_t adc_value, uint16_t adc_max) {
+inline uint32_t GetResistantValue(uint16_t adc_value, uint16_t adc_max) {
     // 10k resistor
     return 10000 * uint32_t(adc_max - adc_value) / adc_value;
 }
@@ -18,9 +18,9 @@ class ThermistorParams {
 public:
     constexpr explicit ThermistorParams(uint32_t beta, float temp,
                                         uint32_t resist)
-        : beta_(float(beta)),                 // beta value
+        : beta_(float(beta)),                             // beta value
           beta_over_t0_(float(beta) / (temp + 273.15f)),  // beta / T0
-                                              // ln(R0)
+                                                          // ln(R0)
           ln_r0_(std::log(float(resist))) {}
 
     float GetTemperature(uint32_t resist) const {
@@ -63,8 +63,8 @@ constexpr const ThermistorParams kNtc100k3950{
     100000,
 };
 
-float GetTemperature(uint32_t resist,
-                     const ThermistorParams &params = kNtc10k3435) {
+inline float GetTemperature(uint32_t resist,
+                            const ThermistorParams &params = kNtc10k3435) {
     return params.GetTemperature(resist);
 }
 
