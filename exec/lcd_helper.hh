@@ -2,6 +2,8 @@
 
 #include <hardware/i2c.h>
 
+#include <array>
+
 #include "base_types.hh"
 
 #ifdef __cplusplus
@@ -76,42 +78,32 @@ public:
         : Ssd1306Device(i2c1, kI2cSclPin, kI2cSdaPin, width, height) {}
 };
 
-template <class __DeviceType>
+template <class __DeviceType, size_t __ItemCount>
 class LcdDrawer {
     using DeviceType = __DeviceType;
 
 public:
+    struct TempItem {
+        bool is_cycle;
+        uint32_t target;
+        uint32_t rpm;
+    };
+
+    using TempItemArray = std::array<TempItem, __ItemCount>;
+
     LcdDrawer(uint16_t width, uint16_t height) noexcept
         : device_(width, height) {}
 
     void SetContrast(uint8_t val) noexcept { device_.SetContrast(val); }
 
-    void DrawRpmAndTemp(uint32_t rpm0, uint32_t rpm1, uint32_t rpm2,
-                        uint32_t rpm3, uint32_t target_rpm,
-                        float temp) noexcept {
+    void DrawTempAndItems(float temp, const TempItemArray &items) noexcept {
         device_.Clear();
         char buf[128] = {};
         uint16_t y = 0;
 
-        snprintf(buf, sizeof(buf), "Spd1:%d, Tag:%d", (int)rpm0,
-                 (int)target_rpm);
-        device_.DrawString(buf, 0, y);
-        y += device_.GetFontHeight();
-
-        snprintf(buf, sizeof(buf), "Spd2:%d, Tag:%d", (int)rpm1,
-                 (int)target_rpm);
-        device_.DrawString(buf, 0, y);
-        y += device_.GetFontHeight();
-
-        snprintf(buf, sizeof(buf), "Spd3:%d, Tag:%d", (int)rpm2,
-                 (int)target_rpm);
-        device_.DrawString(buf, 0, y);
-        y += device_.GetFontHeight();
-
-        snprintf(buf, sizeof(buf), "Spd4:%d, Tag:%d", (int)rpm3,
-                 (int)target_rpm);
-        device_.DrawString(buf, 0, y);
-        y += device_.GetFontHeight();
+        for (size_t i = 0; i < items.size(); ++i) {
+            y += DrawSpeed(i, items[i], 0, y);
+        }
 
         snprintf(buf, sizeof(buf), "Temp:%.2fdeg", temp);
         device_.DrawString(buf, 0, y);
@@ -120,12 +112,28 @@ public:
     }
 
 private:
+    uint16_t DrawSpeed(size_t index, const TempItem &item, uint16_t x,
+                       uint16_t y) noexcept {
+        char buf[128] = {};
+        if (item.is_cycle) {
+            snprintf(buf, sizeof(buf), "Spd%d: %d, Cyc: %d%%", (int)index,
+                     (int)item.rpm, (int)item.target);
+        } else {
+            snprintf(buf, sizeof(buf), "Spd%d: %d, Tag: %d", (int)index,
+                     (int)item.rpm, (int)item.target);
+        }
+
+        device_.DrawString(buf, x, y);
+        return device_.GetFontHeight();
+    }
+
     DeviceType device_;
 
     DISALLOW_COPY(LcdDrawer);
     DISALLOW_MOVE(LcdDrawer);
 };
 
-using XiaoRp2040LcdDrawer = LcdDrawer<XiaoRp2040Ssd1306Device>;
+template <size_t __ItemCount>
+using XiaoRp2040LcdDrawer = LcdDrawer<XiaoRp2040Ssd1306Device, __ItemCount>;
 
 }  // namespace utility

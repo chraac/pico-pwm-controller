@@ -68,11 +68,18 @@ int main() {
         fan_manager.SetTargetRpm(kDefaultTargetRpm);
     }
 
-    RgbLedHelper rgb_led{kRedPin, kGreenPin, kBluePin};
-    XiaoRp2040LcdDrawer lcd_drawer{kDefaultLcdWidth, kDefaultLcdHeight};
-    lcd_drawer.SetContrast(kDefaultLcdContrast);
-
     AdcHelper temp_adc{kDefaultTempPin};
+    RgbLedHelper rgb_led{kRedPin, kGreenPin, kBluePin};
+
+    using LiteLcdDrawer = XiaoRp2040LcdDrawer<std::size(managers)>;
+    LiteLcdDrawer lcd_drawer{kDefaultLcdWidth, kDefaultLcdHeight};
+    lcd_drawer.SetContrast(kDefaultLcdContrast);
+    LiteLcdDrawer::TempItemArray drawer_items = {
+        LiteLcdDrawer::TempItem{true},
+        LiteLcdDrawer::TempItem{true},
+        LiteLcdDrawer::TempItem{false},
+        LiteLcdDrawer::TempItem{false},
+    };
 
     log_info("main.entering.loop\n");
     for (auto next_interval = utility::kPoolIntervalMs;;
@@ -83,18 +90,21 @@ int main() {
         const auto resist = GetResistantValue(adc_read, temp_adc.GetMax());
         const auto temp = GetTemperature(resist);
 
-        uint speeds[std::size(managers)] = {};
+        static_assert(std::size(managers) == 4);
         for (size_t i = 0; i < std::size(managers); ++i) {
             auto &fan_manager = managers[i];
             auto rpm = fan_manager.Next(temp);
             log_info("fan.pwm_gpio.%d.rpm.%d\n",
                      int(fan_manager.GetPwmGpioPin()), int(rpm));
-            speeds[i] = rpm;
+            auto &draw_item = drawer_items[i];
+            draw_item.rpm = rpm;
+            draw_item.target = draw_item.is_cycle
+                                   ? (fan_manager.GetPwmCycle() / 100)
+                                   : kDefaultTargetRpm;
         }
+
         rgb_led.Next();
-        static_assert(std::size(managers) == 4);
-        lcd_drawer.DrawRpmAndTemp(speeds[0], speeds[1], speeds[2], speeds[3],
-                                  kDefaultTargetRpm, temp);
+        lcd_drawer.DrawTempAndItems(temp, drawer_items);
 
         log_debug("current adc: %d, r: %dohm, temp: %.2fdeg\n", int(adc_read),
                   int(resist), temp);

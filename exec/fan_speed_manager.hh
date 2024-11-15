@@ -21,6 +21,7 @@ public:
     void SetTargetRpm(uint rpm) noexcept { target_rpm_ = rpm; }
     uint GetFanSpeedRpm() noexcept { return speed_helper_.GetFanSpeedRpm(); }
     uint GetPwmGpioPin() const noexcept { return pwm_.GetGpioPin(); }
+    uint32_t GetPwmCycle() const noexcept { return pwm_.GetDutyCycle(); }
 
 private:
     PwmHelper pwm_;
