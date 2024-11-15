@@ -71,9 +71,9 @@ inline float GetTemperature(uint32_t resist,
 template <class __CurveInterpolator>
 class TemperatureCurveCalculator {
     using CurveInterpolator = __CurveInterpolator;
-    using TemperatureValueType = uint32_t;
+    using TemperatureValueType = float;
     using CurveValueType = uint32_t;
-    using CurveMap = std::map<TemperatureValueType, CurveValueType>;
+    using CurveMap = std::map<CurveValueType, CurveValueType>;
 
 public:
     explicit TemperatureCurveCalculator(
@@ -81,13 +81,16 @@ public:
         : temp_to_curve_value_(init) {}
 
     CurveValueType GetCurveValue(TemperatureValueType temp) const {
-        auto l = temp_to_curve_value_.lower_bound(temp);
-        if (l == temp_to_curve_value_.end()) {
-            l = temp_to_curve_value_.begin();
-        }
-        auto r = temp_to_curve_value_.upper_bound(temp);
+        auto r = temp_to_curve_value_.lower_bound(CurveValueType(temp));
         if (r == temp_to_curve_value_.end()) {
             r = std::prev(temp_to_curve_value_.end());
+        }
+
+        auto l = std::prev(r);
+        if (TemperatureValueType(r->first) == temp) {
+            l = r;
+        } else if (l == temp_to_curve_value_.end()) {
+            l = temp_to_curve_value_.begin();
         }
 
         return CurveInterpolator()(l->first, l->second, r->first, r->second,
@@ -100,14 +103,14 @@ private:
 
 struct LinearInterpolator {
     uint32_t operator()(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1,
-                        uint32_t x) const {
-        return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
+                        float x) const {
+        return y0 + float(y1 - y0) * (x - float(x0)) / float(x1 - x0);
     }
 };
 
 struct LowerBoundInterpolator {
     uint32_t operator()(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1,
-                        uint32_t x) const {
+                        float x) const {
         (void)x0;
         (void)x1;
         (void)y1;

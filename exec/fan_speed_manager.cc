@@ -45,13 +45,13 @@ SingleFanSpeedManager::SingleFanSpeedManager(uint pwm_gpio_pin,
     pwm_.SetDutyCycle(kStartCycle);
 }
 
-uint SingleFanSpeedManager::Next(uint32_t temp) noexcept {
+uint SingleFanSpeedManager::Next(float temp) noexcept {
     const auto current_speed = speed_helper_.GetFanSpeedRpm();
     if (use_temp_) {
         auto cycle = kLinearFanPwmCurve.GetCurveValue(temp);
         pwm_.SetDutyCycle(cycle);
-        log_debug("pwm.%d.cycle.%d.from.temp\n", int(pwm_.GetGpioPin()),
-                  int(cycle));
+        log_debug("pwm.%d.cycle.%d.temp.%.2f\n", int(pwm_.GetGpioPin()),
+                  int(cycle), temp);
         return current_speed;
     }
 

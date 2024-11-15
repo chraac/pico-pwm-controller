@@ -17,7 +17,7 @@ class SingleFanSpeedManager {
 public:
     explicit SingleFanSpeedManager(uint pwm_gpio_pin, uint spd_gpio_pin,
                                    bool use_temp) noexcept;
-    uint Next(uint32_t temp) noexcept;
+    uint Next(float temp) noexcept;
     void SetTargetRpm(uint rpm) noexcept { target_rpm_ = rpm; }
     uint GetFanSpeedRpm() noexcept { return speed_helper_.GetFanSpeedRpm(); }
     uint GetPwmGpioPin() const noexcept { return pwm_.GetGpioPin(); }
