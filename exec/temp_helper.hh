@@ -126,7 +126,8 @@ using LowerBoundTemperatureCurveCalculator =
     TemperatureCurveCalculator<LowerBoundInterpolator>;
 
 const LinearTemperatureCurveCalculator kLinearFanPwmCurve{
-    {20, 1500}, {30, 2500}, {40, 4500}, {45, 6500}, {55, 8000}, {65, 10000},
+    {10, 1500}, {20, 2000}, {30, 2600}, {35, 3300}, {40, 4200},
+    {45, 5200}, {50, 6400}, {55, 7600}, {60, 8800}, {65, 10000},
 };
 
 const LinearTemperatureCurveCalculator kLinearFanRpmCurve{
