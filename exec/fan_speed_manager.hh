@@ -22,6 +22,7 @@ public:
     uint GetFanSpeedRpm() noexcept { return speed_helper_.GetFanSpeedRpm(); }
     uint GetPwmGpioPin() const noexcept { return pwm_.GetGpioPin(); }
     uint32_t GetPwmCycle() const noexcept { return pwm_.GetDutyCycle(); }
+    bool IsControlByTemp() const noexcept { return use_temp_; }
 
 private:
     PwmHelper pwm_;

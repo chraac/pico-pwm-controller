@@ -60,7 +60,7 @@ int main() {
     SingleFanSpeedManager managers[] = {
         SingleFanSpeedManager{kPwm0Pin, kFanSpd0Pin, true},
         SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin, true},
-        SingleFanSpeedManager{kPwm2Pin, kFanSpd2Pin, false},
+        SingleFanSpeedManager{kPwm2Pin, kFanSpd2Pin, true},
         SingleFanSpeedManager{kPwm3Pin, kFanSpd3Pin, false},
     };
 
@@ -75,10 +75,10 @@ int main() {
     LiteLcdDrawer lcd_drawer{kDefaultLcdWidth, kDefaultLcdHeight};
     lcd_drawer.SetContrast(kDefaultLcdContrast);
     LiteLcdDrawer::TempItemArray drawer_items = {
-        LiteLcdDrawer::TempItem{true},
-        LiteLcdDrawer::TempItem{true},
-        LiteLcdDrawer::TempItem{false},
-        LiteLcdDrawer::TempItem{false},
+        LiteLcdDrawer::TempItem{managers[0].IsControlByTemp()},
+        LiteLcdDrawer::TempItem{managers[1].IsControlByTemp()},
+        LiteLcdDrawer::TempItem{managers[2].IsControlByTemp()},
+        LiteLcdDrawer::TempItem{managers[3].IsControlByTemp()},
     };
 
     log_info("main.entering.loop\n");
