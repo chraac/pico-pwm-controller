@@ -88,7 +88,7 @@ int main() {
 
         const auto adc_read = temp_adc.Read();
         const auto resist = GetResistantValue(adc_read, temp_adc.GetMax());
-        const auto temp = GetTemperature(resist, utility::kNtc100k3950);
+        const auto temp = utility::kNtc100k3950.GetTemperature(resist);
 
         static_assert(std::size(managers) == 4);
         for (size_t i = 0; i < std::size(managers); ++i) {

@@ -63,11 +63,6 @@ constexpr const ThermistorParams kNtc100k3950{
     100000,
 };
 
-inline float GetTemperature(uint32_t resist,
-                            const ThermistorParams &params = kNtc10k3435) {
-    return params.GetTemperature(resist);
-}
-
 template <class __CurveInterpolator>
 class TemperatureCurveCalculator {
     using CurveInterpolator = __CurveInterpolator;
