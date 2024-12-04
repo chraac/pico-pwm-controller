@@ -9,7 +9,7 @@
 
 namespace utility {
 
-uint32_t GetResistantValue(uint16_t adc_value, uint16_t adc_max) {
+inline uint32_t GetResistantValue(uint16_t adc_value, uint16_t adc_max) {
     // 10k resistor
     return 10000 * uint32_t(adc_max - adc_value) / adc_value;
 }
@@ -18,9 +18,9 @@ class ThermistorParams {
 public:
     constexpr explicit ThermistorParams(uint32_t beta, float temp,
                                         uint32_t resist)
-        : beta_(float(beta)),                 // beta value
+        : beta_(float(beta)),                             // beta value
           beta_over_t0_(float(beta) / (temp + 273.15f)),  // beta / T0
-                                              // ln(R0)
+                                                          // ln(R0)
           ln_r0_(std::log(float(resist))) {}
 
     float GetTemperature(uint32_t resist) const {
@@ -63,17 +63,12 @@ constexpr const ThermistorParams kNtc100k3950{
     100000,
 };
 
-float GetTemperature(uint32_t resist,
-                     const ThermistorParams &params = kNtc10k3435) {
-    return params.GetTemperature(resist);
-}
-
 template <class __CurveInterpolator>
 class TemperatureCurveCalculator {
     using CurveInterpolator = __CurveInterpolator;
-    using TemperatureValueType = uint32_t;
+    using TemperatureValueType = float;
     using CurveValueType = uint32_t;
-    using CurveMap = std::map<TemperatureValueType, CurveValueType>;
+    using CurveMap = std::map<CurveValueType, CurveValueType>;
 
 public:
     explicit TemperatureCurveCalculator(
@@ -81,13 +76,16 @@ public:
         : temp_to_curve_value_(init) {}
 
     CurveValueType GetCurveValue(TemperatureValueType temp) const {
-        auto l = temp_to_curve_value_.lower_bound(temp);
-        if (l == temp_to_curve_value_.end()) {
-            l = temp_to_curve_value_.begin();
-        }
-        auto r = temp_to_curve_value_.upper_bound(temp);
+        auto r = temp_to_curve_value_.lower_bound(CurveValueType(temp));
         if (r == temp_to_curve_value_.end()) {
             r = std::prev(temp_to_curve_value_.end());
+        }
+
+        auto l = std::prev(r);
+        if (TemperatureValueType(r->first) == temp) {
+            l = r;
+        } else if (l == temp_to_curve_value_.end()) {
+            l = temp_to_curve_value_.begin();
         }
 
         return CurveInterpolator()(l->first, l->second, r->first, r->second,
@@ -100,14 +98,14 @@ private:
 
 struct LinearInterpolator {
     uint32_t operator()(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1,
-                        uint32_t x) const {
-        return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
+                        float x) const {
+        return y0 + float(y1 - y0) * (x - float(x0)) / float(x1 - x0);
     }
 };
 
 struct LowerBoundInterpolator {
     uint32_t operator()(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1,
-                        uint32_t x) const {
+                        float x) const {
         (void)x0;
         (void)x1;
         (void)y1;
@@ -123,7 +121,8 @@ using LowerBoundTemperatureCurveCalculator =
     TemperatureCurveCalculator<LowerBoundInterpolator>;
 
 const LinearTemperatureCurveCalculator kLinearFanPwmCurve{
-    {20, 10}, {30, 20}, {40, 40}, {50, 60}, {60, 80}, {70, 100}, {80, 100},
+    {10, 1500}, {20, 2000}, {30, 2600}, {35, 3100}, {40, 3600},
+    {45, 4400}, {50, 5500}, {55, 6800}, {60, 8100}, {65, 10000},
 };
 
 const LinearTemperatureCurveCalculator kLinearFanRpmCurve{

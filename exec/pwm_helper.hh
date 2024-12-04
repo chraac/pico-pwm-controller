@@ -43,10 +43,14 @@ public:
                       uint32_t denom = kDefaultCycleDenom) noexcept {
         const auto max_cyc = pwm_config_.top;
         pwm_set_gpio_level(gpio_pin_, num * max_cyc / denom);
+        cycle_ = num;
     }
+
+    uint32_t GetDutyCycle() const noexcept { return cycle_; }
 
 private:
     pwm_config pwm_config_;
+    uint32_t cycle_ = 0;
 
     void operator=(PwmHelper &&) = delete;
     DISALLOW_COPY(PwmHelper);

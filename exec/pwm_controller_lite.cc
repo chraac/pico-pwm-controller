@@ -58,42 +58,53 @@ int main() {
     log_info("main.init.finished\n");
 
     SingleFanSpeedManager managers[] = {
-        SingleFanSpeedManager{kPwm0Pin, kFanSpd0Pin},
-        SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin},
-        SingleFanSpeedManager{kPwm2Pin, kFanSpd2Pin},
-        SingleFanSpeedManager{kPwm3Pin, kFanSpd3Pin},
+        SingleFanSpeedManager{kPwm0Pin, kFanSpd0Pin, true},
+        SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin, true},
+        SingleFanSpeedManager{kPwm2Pin, kFanSpd2Pin, true},
+        SingleFanSpeedManager{kPwm3Pin, kFanSpd3Pin, false},
     };
 
     for (auto &fan_manager : managers) {
         fan_manager.SetTargetRpm(kDefaultTargetRpm);
     }
 
-    RgbLedHelper rgb_led{kRedPin, kGreenPin, kBluePin};
-    XiaoRp2040LcdDrawer lcd_drawer{kDefaultLcdWidth, kDefaultLcdHeight};
-    lcd_drawer.SetContrast(kDefaultLcdContrast);
-
     AdcHelper temp_adc{kDefaultTempPin};
+    RgbLedHelper rgb_led{kRedPin, kGreenPin, kBluePin};
+
+    using LiteLcdDrawer = XiaoRp2040LcdDrawer<std::size(managers)>;
+    LiteLcdDrawer lcd_drawer{kDefaultLcdWidth, kDefaultLcdHeight};
+    lcd_drawer.SetContrast(kDefaultLcdContrast);
+    LiteLcdDrawer::TempItemArray drawer_items = {
+        LiteLcdDrawer::TempItem{managers[0].IsControlByTemp()},
+        LiteLcdDrawer::TempItem{managers[1].IsControlByTemp()},
+        LiteLcdDrawer::TempItem{managers[2].IsControlByTemp()},
+        LiteLcdDrawer::TempItem{managers[3].IsControlByTemp()},
+    };
 
     log_info("main.entering.loop\n");
     for (auto next_interval = utility::kPoolIntervalMs;;
          sleep_ms(next_interval)) {
         const auto start_us = time_us_64();
-        uint speeds[std::size(managers)] = {};
-        for (size_t i = 0; i < std::size(managers); ++i) {
-            auto &fan_manager = managers[i];
-            auto rpm = fan_manager.Next();
-            log_info("fan.pwm_gpio.%d.rpm.%d\n",
-                     int(fan_manager.GetPwmGpioPin()), int(rpm));
-            speeds[i] = rpm;
-        }
-        rgb_led.Next();
-        static_assert(std::size(managers) == 4);
 
         const auto adc_read = temp_adc.Read();
         const auto resist = GetResistantValue(adc_read, temp_adc.GetMax());
-        const auto temp = GetTemperature(resist);
-        lcd_drawer.DrawRpmAndTemp(speeds[0], speeds[1], speeds[2], speeds[3],
-                                  kDefaultTargetRpm, temp);
+        const auto temp = utility::kNtc100k3950.GetTemperature(resist);
+
+        static_assert(std::size(managers) == 4);
+        for (size_t i = 0; i < std::size(managers); ++i) {
+            auto &fan_manager = managers[i];
+            auto rpm = fan_manager.Next(temp);
+            log_info("fan.pwm_gpio.%d.rpm.%d\n",
+                     int(fan_manager.GetPwmGpioPin()), int(rpm));
+            auto &draw_item = drawer_items[i];
+            draw_item.rpm = rpm;
+            draw_item.target = draw_item.is_cycle
+                                   ? (fan_manager.GetPwmCycle() / 100)
+                                   : kDefaultTargetRpm;
+        }
+
+        rgb_led.Next();
+        lcd_drawer.DrawTempAndItems(temp, drawer_items);
 
         log_debug("current adc: %d, r: %dohm, temp: %.2fdeg\n", int(adc_read),
                   int(resist), temp);

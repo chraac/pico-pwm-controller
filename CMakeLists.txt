@@ -26,7 +26,7 @@ add_compile_options(-Wall
     # -Wno-maybe-uninitialized
 )
 
-add_compile_definitions(PICO_LITE_BOARD_VERSION=92)
+add_compile_definitions(PICO_LITE_BOARD_VERSION=93)
 
 add_subdirectory(thirdparty)
 add_subdirectory(exec)
