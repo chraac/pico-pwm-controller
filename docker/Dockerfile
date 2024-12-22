@@ -12,7 +12,7 @@ RUN mkdir ${PICO_BASE_PATH}
 WORKDIR ${PICO_BASE_PATH}
 RUN git clone https://github.com/raspberrypi/pico-sdk.git
 
-ARG TAG_NAME=2.0.0
+ARG TAG_NAME=2.1.0
 WORKDIR ${PICO_SDK_PATH}
 RUN git fetch --tags && git checkout -b v${TAG_NAME} tags/${TAG_NAME}
 RUN git submodule update --init
