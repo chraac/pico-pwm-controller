@@ -2,6 +2,8 @@
 
 A PWM fan controller runs on raspberry-pico
 
+[![Builder](https://github.com/chraac/pico-pwm-controller/actions/workflows/docker.yml/badge.svg)](https://github.com/chraac/pico-pwm-controller/actions/workflows/docker.yml)
+
 ## Build Project
 
 1. Install [docker compose](https://docs.docker.com/compose/install/)
