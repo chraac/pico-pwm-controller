@@ -205,70 +205,22 @@ If Cal overflows 0x7FFF, double the LSB and halve Cal until it fits.
 | Power       | `raw × 25 × Current_LSB`          |
 | Cal reg     | `0.00512 / (Current_LSB × R)`     |
 
-## 9. Minimal driver skeleton (project style)
+## 9. Driver header
 
-```cpp
-// ina226_helper.hh
-#pragma once
+Implemented in [exec/ina226_helper.hh](../exec/ina226_helper.hh) —
+`utility::Ina226Device`, header-only, in the same style as
+`Ssd1306Device`. API summary:
 
-#include <hardware/i2c.h>
-
-#include "base_types.hh"
-
-namespace utility {
-
-class Ina226Device {
-    constexpr static const uint8_t kI2cAddr = 0x40;
-    constexpr static const float kShuntOhms = 0.001f;  // R001 (1 mΩ) shunt
-
-    // register pointers
-    enum Reg : uint8_t {
-        kConfig = 0x00, kShuntV = 0x01, kBusV = 0x02, kPower = 0x03,
-        kCurrent = 0x04, kCalib = 0x05, kMaskEnable = 0x06,
-        kAlertLimit = 0x07, kMfgId = 0xFE, kDieId = 0xFF,
-    };
-
-public:
-    explicit Ina226Device(i2c_inst_t *i2c) noexcept : i2c_inst_(i2c) {}
-
-    bool Probe() noexcept {  // true if a likely INA226 answers
-        return Read16(kMfgId) == 0x5449 && Read16(kDieId) == 0x2260;
-    }
-
-    // 16x avg, 1.1ms conversions, shunt+bus continuous -> ~35ms/update
-    void Configure(uint16_t cfg = 0x247F) noexcept { Write16(kConfig, cfg); }
-
-    float GetBusVolts() noexcept { return Read16(kBusV) * 1.25e-3f; }
-    float GetShuntMilliVolts() noexcept {
-        return static_cast<int16_t>(Read16(kShuntV)) * 2.5e-3f;
-    }
-    // simplest current path: no calibration register needed
-    float GetAmps() noexcept {
-        return GetShuntMilliVolts() / (kShuntOhms * 1000.0f);
-    }
-
-private:
-    uint16_t Read16(uint8_t reg) noexcept {
-        uint8_t val[2] = {};
-        i2c_write_blocking(i2c_inst_, kI2cAddr, &reg, 1, true);
-        i2c_read_blocking(i2c_inst_, kI2cAddr, val, 2, false);
-        return static_cast<uint16_t>(val[0] << 8) | val[1];
-    }
-
-    void Write16(uint8_t reg, uint16_t value) noexcept {
-        uint8_t buf[3] = {reg, static_cast<uint8_t>(value >> 8),
-                          static_cast<uint8_t>(value & 0xFF)};
-        i2c_write_blocking(i2c_inst_, kI2cAddr, buf, 3, false);
-    }
-
-    i2c_inst_t *i2c_inst_;
-
-    DISALLOW_COPY(Ina226Device);
-    DISALLOW_MOVE(Ina226Device);
-};
-
-}  // namespace utility
-```
+| Method                          | Notes                                            |
+| ------------------------------- | ------------------------------------------------ |
+| `Probe()`                       | checks Mfg ID `0x5449` / Die ID `0x2260`         |
+| `Reset()` / `Configure(cfg)`    | write Config register, default `0x247F`          |
+| `GetBusVolts()`                 | Bus V × 1.25 mV                                  |
+| `GetShuntMilliVolts()`          | Shunt V (int16) × 2.5 µV                         |
+| `GetAmps()`                     | `V_shunt / 1 mΩ`, no calibration needed          |
+| `SetCalibration(max_current)`   | programs Cal reg; enables the two below          |
+| `GetCurrentAmps()`/`GetPowerWatts()` | on-chip regs 0x04 / 0x03                    |
+| `IsConversionReady()`           | Mask/Enable CVRF bit                             |
 
 Usage alongside the existing LCD (same `i2c1`, initialized by
 `Ssd1306Device` first):
@@ -276,7 +228,8 @@ Usage alongside the existing LCD (same `i2c1`, initialized by
 ```cpp
 utility::Ina226Device ina(i2c1);
 if (ina.Probe()) {
-    ina.Configure();
+    ina.Configure();              // 16x avg, 1.1ms conv, continuous
+    ina.SetCalibration(20.0f);    // optional, for on-chip current/power regs
     // poll every ~50 ms
     float amps = ina.GetAmps();
     float volts = ina.GetBusVolts();

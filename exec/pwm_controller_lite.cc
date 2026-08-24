@@ -7,6 +7,7 @@
 
 #include "adc_helper.hh"
 #include "fan_speed_manager.hh"
+#include "ina226_helper.hh"
 #include "lcd_helper.hh"
 #include "logger.hh"
 #include "rgb_led_helper.hh"
