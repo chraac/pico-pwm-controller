@@ -72,18 +72,18 @@ uint16_t raw = (val[0] << 8) | val[1];
 
 ## 4. Register map
 
-| Ptr   | Register            | R/W | Reset    | Format                                  |
-| ----- | ------------------- | --- | -------- | --------------------------------------- |
-| 0x00  | Configuration       | R/W | 0x4127   | bit field, see §5                       |
-| 0x01  | Shunt Voltage       | R   | 0x0000   | two's complement, LSB = 2.5 µV          |
-| 0x02  | Bus Voltage         | R   | 0x0000   | unsigned, LSB = 1.25 mV (0–36 V range)  |
-| 0x03  | Power               | R   | 0x0000   | unsigned, LSB = 25 × Current_LSB        |
-| 0x04  | Current             | R   | 0x0000   | two's complement, LSB = Current_LSB     |
-| 0x05  | Calibration         | R/W | 0x0000   | 15-bit value, see §7                    |
-| 0x06  | Mask/Enable (Alert) | R/W | 0x0000   | bit field, see §6                       |
-| 0x07  | Alert Limit         | R/W | 0x0000   | same LSB as the selected compared reg   |
-| 0xFE  | Manufacturer ID     | R   | 0x5449   | ASCII "TI" — good probe for detection   |
-| 0xFF  | Die ID              | R   | 0x2260   | fixed — good probe for detection        |
+| Ptr  | Register            | R/W | Reset  | Format                                 |
+| ---- | ------------------- | --- | ------ | -------------------------------------- |
+| 0x00 | Configuration       | R/W | 0x4127 | bit field, see §5                      |
+| 0x01 | Shunt Voltage       | R   | 0x0000 | two's complement, LSB = 2.5 µV         |
+| 0x02 | Bus Voltage         | R   | 0x0000 | unsigned, LSB = 1.25 mV (0–36 V range) |
+| 0x03 | Power               | R   | 0x0000 | unsigned, LSB = 25 × Current_LSB       |
+| 0x04 | Current             | R   | 0x0000 | two's complement, LSB = Current_LSB    |
+| 0x05 | Calibration         | R/W | 0x0000 | 15-bit value, see §7                   |
+| 0x06 | Mask/Enable (Alert) | R/W | 0x0000 | bit field, see §6                      |
+| 0x07 | Alert Limit         | R/W | 0x0000 | same LSB as the selected compared reg  |
+| 0xFE | Manufacturer ID     | R   | 0x5449 | ASCII "TI" — good probe for detection  |
+| 0xFF | Die ID              | R   | 0x2260 | fixed — good probe for detection       |
 
 Quick sanity probe after wiring:
 
@@ -128,20 +128,20 @@ cfg = (4 << 9) | (4 << 6) | (4 << 3) | 7  =  0x247F... check bits:
 
 Alert-function select + status flags:
 
-| Bit  | Name  | Meaning                                              |
-| ---- | ----- | ---------------------------------------------------- |
-| 15   | SOL   | Shunt over-voltage (limit = shunt LSB 2.5 µV steps)  |
-| 14   | SUL   | Shunt under-voltage                                  |
-| 13   | BOL   | Bus over-voltage (1.25 mV steps)                     |
-| 12   | BUL   | Bus under-voltage                                    |
-| 11   | POL   | Power over-limit (25 × Current_LSB steps)            |
-| 10   | CNVR  | Alert on conversion ready                            |
-| 9–5  | —     | reserved, 0                                          |
-| 4    | AFF   | (read) alert function flag                           |
-| 3    | CVRF  | (read) conversion ready flag — cleared by read       |
-| 2    | OVF   | (read) math overflow (current/power calc saturated)  |
-| 1    | APOL  | alert pin polarity: 0 = active-low, 1 = active-high  |
-| 0    | LEN   | 0 = transparent, 1 = latch alert until read         |
+| Bit | Name | Meaning                                             |
+| --- | ---- | --------------------------------------------------- |
+| 15  | SOL  | Shunt over-voltage (limit = shunt LSB 2.5 µV steps) |
+| 14  | SUL  | Shunt under-voltage                                 |
+| 13  | BOL  | Bus over-voltage (1.25 mV steps)                    |
+| 12  | BUL  | Bus under-voltage                                   |
+| 11  | POL  | Power over-limit (25 × Current_LSB steps)           |
+| 10  | CNVR | Alert on conversion ready                           |
+| 9–5 | —    | reserved, 0                                         |
+| 4   | AFF  | (read) alert function flag                          |
+| 3   | CVRF | (read) conversion ready flag — cleared by read      |
+| 2   | OVF  | (read) math overflow (current/power calc saturated) |
+| 1   | APOL | alert pin polarity: 0 = active-low, 1 = active-high |
+| 0   | LEN  | 0 = transparent, 1 = latch alert until read         |
 
 Only **one** of SOL/SUL/BOL/BUL/POL/CNVR may be selected at a time.
 Polling without the alert pin: read 0x06 and check bit 3 (CVRF).
@@ -197,13 +197,13 @@ If Cal overflows 0x7FFF, double the LSB and halve Cal until it fits.
 
 ## 8. Register-scale cheat sheet
 
-| Quantity    | Raw → physical                    |
-| ----------- | --------------------------------- |
-| Bus voltage | `raw × 1.25 mV`                   |
-| Shunt volt. | `raw(int16) × 2.5 µV`             |
-| Current     | `raw(int16) × Current_LSB`        |
-| Power       | `raw × 25 × Current_LSB`          |
-| Cal reg     | `0.00512 / (Current_LSB × R)`     |
+| Quantity    | Raw → physical                |
+| ----------- | ----------------------------- |
+| Bus voltage | `raw × 1.25 mV`               |
+| Shunt volt. | `raw(int16) × 2.5 µV`         |
+| Current     | `raw(int16) × Current_LSB`    |
+| Power       | `raw × 25 × Current_LSB`      |
+| Cal reg     | `0.00512 / (Current_LSB × R)` |
 
 ## 9. Driver header
 
@@ -211,17 +211,17 @@ Implemented in [exec/ina226_helper.hh](../exec/ina226_helper.hh) —
 `utility::Ina226Device`, header-only, in the same style as
 `Ssd1306Device`. API summary:
 
-| Method                          | Notes                                            |
-| -------------------------------- | -------------------------------------------- |
-| `Probe()`                       | checks Mfg ID `0x5449` / Die ID `0x2260`         |
-| `Reset()` / `Configure(cfg)`    | write Config register, default `0x247F`          |
-| `GetBusVolts()`                 | Bus V × 1.25 mV                                  |
-| `GetShuntMilliVolts()`          | Shunt V (int16) × 2.5 µV                         |
-| `GetAmps()`                     | `V_shunt / 1 mΩ`, no calibration needed          |
-| `SetCalibration(max_current)`   | programs Cal reg; enables both regs below        |
-| `GetCurrentAmps()`              | on-chip current reg 0x04                         |
-| `GetPowerWatts()`               | on-chip power reg 0x03                           |
-| `IsConversionReady()`           | Mask/Enable CVRF bit                             |
+| Method                        | Notes                                     |
+| ----------------------------- | ----------------------------------------- |
+| `Probe()`                     | checks Mfg ID `0x5449` / Die ID `0x2260`  |
+| `Reset()` / `Configure(cfg)`  | write Config register, default `0x247F`   |
+| `GetBusVolts()`               | Bus V × 1.25 mV                           |
+| `GetShuntMilliVolts()`        | Shunt V (int16) × 2.5 µV                  |
+| `GetAmps()`                   | `V_shunt / 1 mΩ`, no calibration needed   |
+| `SetCalibration(max_current)` | programs Cal reg; enables both regs below |
+| `GetCurrentAmps()`            | on-chip current reg 0x04                  |
+| `GetPowerWatts()`             | on-chip power reg 0x03                    |
+| `IsConversionReady()`         | Mask/Enable CVRF bit                      |
 
 Usage alongside the existing LCD (same `i2c1`, initialized by
 `Ssd1306Device` first):
