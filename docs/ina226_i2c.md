@@ -162,9 +162,11 @@ float amps = v_shunt_mV / shunt_ohms / 1000.0f;
 Full-scale shunt input is ±81.92 mV. Max measurable current =
 `81.92 mV / R_shunt`.
 
-> Module note: common INA226 breakouts ship an **R100 (0.1 Ω)** shunt →
-> max ≈ **0.82 A**. Fine for a fan rail (~0.1–0.5 A); not fine for 10 A.
-> Check the marking on your shunt: `R100` = 0.1 Ω, `R002`/`2mΩ` = 0.002 Ω.
+> This project's shunt: **R001 = 1 mΩ** → max ≈ **81.92 A**, resolution
+> 2.5 µV / 1 mΩ = **2.5 mA per LSB**. At fan-rail currents (~0.1–0.5 A)
+> the shunt drops only 0.1–0.5 mV, so prefer longer conversion times /
+> averaging (§5) to keep the readings stable.
+> Markings reference: `R100` = 0.1 Ω, `R010` = 10 mΩ, `R001` = 1 mΩ.
 
 ### 7b. Full: on-chip Current (0x04) / Power (0x03) registers
 
@@ -181,17 +183,17 @@ Power = Current × Bus_V / 25 internally (Power LSB = 25 × Current_LSB).
 Good default: `Current_LSB = max_expected_current / 32768`
 (what the RobTillaart library does via `setMaxCurrentShunt()`).
 
-Worked example — R = 0.1 Ω, max current 0.8 A:
+Worked example — R = 1 mΩ (R001), max current 20 A:
 
 ```
-Current_LSB = 0.8 / 32768        = 24.4 µA
-Cal         = 0.00512 / (24.4e-6 × 0.1) = 2097 = 0x0831
-Power LSB   = 25 × 24.4 µA       = 0.61 mA... (25 × Current_LSB in W/A sense)
+Current_LSB = 20 / 32768        = 610.4 µA
+Cal         = 0.00512 / (610.4e-6 × 0.001) = 8389 = 0x20C5
+Power LSB   = 25 × 610.4 µA     = 15.26 mW per count
 ```
 
 Constraint: `R_shunt × max_current ≤ 81.92 mV` (else ERR_SHUNTVOLTAGE_HIGH
-in library terms / you lose range). If Cal overflows 0x7FFF, double the LSB
-and halve Cal until it fits.
+in library terms / you lose range) — here 1 mΩ × 20 A = 20 mV ✓.
+If Cal overflows 0x7FFF, double the LSB and halve Cal until it fits.
 
 ## 8. Register-scale cheat sheet
 
@@ -217,7 +219,7 @@ namespace utility {
 
 class Ina226Device {
     constexpr static const uint8_t kI2cAddr = 0x40;
-    constexpr static const float kShuntOhms = 0.1f;  // R100 module
+    constexpr static const float kShuntOhms = 0.001f;  // R001 (1 mΩ) shunt
 
     // register pointers
     enum Reg : uint8_t {
