@@ -212,14 +212,15 @@ Implemented in [exec/ina226_helper.hh](../exec/ina226_helper.hh) —
 `Ssd1306Device`. API summary:
 
 | Method                          | Notes                                            |
-| ------------------------------- | ------------------------------------------------ |
+| -------------------------------- | -------------------------------------------- |
 | `Probe()`                       | checks Mfg ID `0x5449` / Die ID `0x2260`         |
 | `Reset()` / `Configure(cfg)`    | write Config register, default `0x247F`          |
 | `GetBusVolts()`                 | Bus V × 1.25 mV                                  |
 | `GetShuntMilliVolts()`          | Shunt V (int16) × 2.5 µV                         |
 | `GetAmps()`                     | `V_shunt / 1 mΩ`, no calibration needed          |
-| `SetCalibration(max_current)`   | programs Cal reg; enables the two below          |
-| `GetCurrentAmps()`/`GetPowerWatts()` | on-chip regs 0x04 / 0x03                    |
+| `SetCalibration(max_current)`   | programs Cal reg; enables both regs below        |
+| `GetCurrentAmps()`              | on-chip current reg 0x04                         |
+| `GetPowerWatts()`               | on-chip power reg 0x03                           |
 | `IsConversionReady()`           | Mask/Enable CVRF bit                             |
 
 Usage alongside the existing LCD (same `i2c1`, initialized by
