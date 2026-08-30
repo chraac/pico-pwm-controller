@@ -1,5 +1,35 @@
 cmake_minimum_required(VERSION 3.12)
 
+# Board / platform selection. Must run BEFORE the SDK include below: the SDK
+# resolves PICO_PLATFORM and locks in the toolchain at include time (before
+# project()), so setting it afterwards has no effect.
+# PICO_BOARD / PICO_PLATFORM may be passed via -D or environment. Platform
+# options: rp2040 / rp2350-arm-s / rp2350-arm-ns / rp2350-riscv.
+if (NOT PICO_BOARD AND DEFINED ENV{PICO_BOARD})
+    set(PICO_BOARD $ENV{PICO_BOARD})
+endif()
+if (NOT PICO_PLATFORM AND DEFINED ENV{PICO_PLATFORM})
+    set(PICO_PLATFORM $ENV{PICO_PLATFORM})
+endif()
+
+if (NOT PICO_BOARD)
+    message("PICO_BOARD not set, defaulting to seeed_xiao_rp2040")
+    set(PICO_BOARD "seeed_xiao_rp2040")
+    if (NOT PICO_PLATFORM)
+        set(PICO_PLATFORM "rp2040")
+    endif()
+elseif (PICO_BOARD STREQUAL "seeed_xiao_rp2040")
+    if (NOT PICO_PLATFORM)
+        set(PICO_PLATFORM "rp2040")
+    endif()
+elseif (PICO_BOARD STREQUAL "seeed_xiao_rp2350")
+    if (NOT PICO_PLATFORM)
+        set(PICO_PLATFORM "rp2350-arm-s")
+    endif()
+else()
+    message(FATAL_ERROR "PICO_BOARD ${PICO_BOARD} not supported. Only seeed_xiao_rp2040 and seeed_xiao_rp2350 are supported.")
+endif()
+
 # Pull in SDK (must be before project)
 include(cmake/pico_sdk_import.cmake)
 
@@ -17,17 +47,6 @@ if(PICO_SDK_VERSION_STRING VERSION_LESS "1.3.0")
     message(FATAL_ERROR "Raspberry Pi Pico SDK version 1.3.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
 endif()
 
-if (NOT PICO_BOARD)
-    message("PICO_BOARD not set, defaulting to seeed_xiao_rp2040")
-    set(PICO_BOARD "seeed_xiao_rp2040")
-    set(PICO_PLATFORM "rp2040")
-elseif (PICO_BOARD STREQUAL "seeed_xiao_rp2040")
-    set(PICO_PLATFORM "rp2040")
-elseif (PICO_BOARD STREQUAL "seeed_xiao_rp2350")
-    set(PICO_PLATFORM "rp2350-arm-s")
-else()
-    message(FATAL_ERROR "PICO_BOARD ${PICO_BOARD} not supported. Only seeed_xiao_rp2040 and seeed_xiao_rp2350 are supported.")
-endif()
 
 # Initialize the SDK
 pico_sdk_init()
