@@ -35,6 +35,9 @@ class Ina226Device {
     };
 
 public:
+    constexpr static const uint8_t kI2cDefaultSclPin = 7;
+    constexpr static const uint8_t kI2cDefaultSdaPin = 6;
+
     explicit Ina226Device(i2c_inst_t *i2c, uint8_t i2c_scl_pin,
                            uint8_t i2c_sda_pin) noexcept
         : i2c_inst_(i2c),
