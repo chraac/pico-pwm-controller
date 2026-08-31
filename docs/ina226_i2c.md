@@ -223,11 +223,12 @@ Implemented in [exec/ina226_helper.hh](../exec/ina226_helper.hh) —
 | `GetPowerWatts()`             | on-chip power reg 0x03                    |
 | `IsConversionReady()`         | Mask/Enable CVRF bit                      |
 
-Usage alongside the existing LCD (same `i2c1`, initialized by
-`Ssd1306Device` first):
+Usage alongside the existing LCD (same `i2c1` + GPIO6/7, same bus setup
+as `Ssd1306Device` - running it twice is safe):
 
 ```cpp
-utility::Ina226Device ina(i2c1);
+// or: utility::Ina226Device ina(i2c1, /*scl=*/7, /*sda=*/6);
+utility::XiaoRp2040Ina226Device ina;
 if (ina.Probe()) {
     ina.Configure();              // 16x avg, 1.1ms conv, continuous
     ina.SetCalibration(20.0f);    // optional, for on-chip current/power regs

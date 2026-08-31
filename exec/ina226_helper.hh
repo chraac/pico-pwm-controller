@@ -1,5 +1,6 @@
 #pragma once
 
+#include <hardware/gpio.h>
 #include <hardware/i2c.h>
 
 #include "base_types.hh"
@@ -11,6 +12,7 @@ namespace utility {
 // Register/command details: docs/ina226_i2c.md
 class Ina226Device {
     constexpr static const uint8_t kI2cAddr = 0x40;
+    constexpr static const uint32_t kI2cFreq = 400000;  // 400kHz
     constexpr static const float kShuntOhms = 0.001f;  // R001 (1 mΩ) shunt
     // 16x averaging, 1.1ms both conversions, shunt+bus continuous (~35ms/update)
     constexpr static const uint16_t kDefaultConfig = 0x247F;
@@ -33,7 +35,19 @@ class Ina226Device {
     };
 
 public:
-    explicit Ina226Device(i2c_inst_t *i2c) noexcept : i2c_inst_(i2c) {}
+    explicit Ina226Device(i2c_inst_t *i2c, uint8_t i2c_scl_pin,
+                           uint8_t i2c_sda_pin) noexcept
+        : i2c_inst_(i2c),
+          i2c_scl_pin_(i2c_scl_pin),
+          i2c_sda_pin_(i2c_sda_pin) {
+        // same bus setup as Ssd1306Device, safe to run twice when the INA226
+        // shares the LCD's i2c bus
+        i2c_init(i2c, kI2cFreq);
+        gpio_set_function(i2c_sda_pin_, GPIO_FUNC_I2C);
+        gpio_set_function(i2c_scl_pin_, GPIO_FUNC_I2C);
+        gpio_pull_up(i2c_sda_pin_);
+        gpio_pull_up(i2c_scl_pin_);
+    }
 
     // true if a likely INA226 answers (shares the bus with Ssd1306Device)
     bool Probe() noexcept {
@@ -102,10 +116,20 @@ private:
     }
 
     i2c_inst_t *i2c_inst_;
+    uint8_t i2c_scl_pin_;
+    uint8_t i2c_sda_pin_;
     float current_lsb_amps_ = 0.0f;  // 0 -> on-chip current/power read 0
 
     DISALLOW_COPY(Ina226Device);
     DISALLOW_MOVE(Ina226Device);
+};
+
+class XiaoRp2040Ina226Device : public Ina226Device {
+    constexpr static const uint8_t kI2cSclPin = 7;
+    constexpr static const uint8_t kI2cSdaPin = 6;
+
+public:
+    XiaoRp2040Ina226Device() : Ina226Device(i2c1, kI2cSclPin, kI2cSdaPin) {}
 };
 
 }  // namespace utility
