@@ -21,15 +21,26 @@ add_executable(
     ${PWM_CONTROLLER_SRC}
 )
 
+add_executable(
+    pwm_controller_pcie
+    ${PWM_CONTROLLER_SRC}
+)
+
 if(USB_STDIO)
     pico_enable_stdio_usb(pwm_controller 1)
     target_compile_definitions(pwm_controller PUBLIC USB_STDIO)
+    pico_enable_stdio_usb(pwm_controller_pcie 1)
+    target_compile_definitions(pwm_controller_pcie PUBLIC USB_STDIO)
 else()
     pico_enable_stdio_uart(pwm_controller 1)
     target_compile_definitions(pwm_controller PUBLIC UART_STDIO)
+    pico_enable_stdio_uart(pwm_controller_pcie 1)
+    target_compile_definitions(pwm_controller_pcie PUBLIC UART_STDIO)
 endif()
 
 target_link_libraries(pwm_controller pico_stdlib hardware_pwm hardware_adc hardware_i2c pico-ssd1306)
+target_link_libraries(pwm_controller_pcie pico_stdlib hardware_pwm hardware_adc hardware_i2c pico-ssd1306)
 
 # create map/bin/hex file etc.
 pico_add_extra_outputs(pwm_controller)
+pico_add_extra_outputs(pwm_controller_pcie)

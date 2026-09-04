@@ -26,14 +26,22 @@ services:
         cp -f $${REPO_BUILD_DIR}/build_debug/exec/pwm_controller.elf.map $${OUTPUT_DIR}/debug
         cp -f $${REPO_BUILD_DIR}/build_debug/exec/pwm_controller.uf2 $${OUTPUT_DIR}/debug
         cp -f $${REPO_BUILD_DIR}/build_debug/exec/pwm_controller.bin $${OUTPUT_DIR}/debug
+        cp -f $${REPO_BUILD_DIR}/build_debug/exec/pwm_controller_pcie.elf $${OUTPUT_DIR}/debug
+        cp -f $${REPO_BUILD_DIR}/build_debug/exec/pwm_controller_pcie.elf.map $${OUTPUT_DIR}/debug
+        cp -f $${REPO_BUILD_DIR}/build_debug/exec/pwm_controller_pcie.uf2 $${OUTPUT_DIR}/debug
+        cp -f $${REPO_BUILD_DIR}/build_debug/exec/pwm_controller_pcie.bin $${OUTPUT_DIR}/debug
         mkdir -p ../build_release
         rm -rf ../build_release/*
         cd ../build_release
         cmake $${REPO_DIR} -DCMAKE_BUILD_TYPE=Release -DPICO_BOARD=${PICO_BOARD}
         make -j$$(nproc)
         mkdir -p $${OUTPUT_DIR}/release
-        cp -f $$REPO_BUILD_DIR/build_release/exec/pwm_controller.elf $${OUTPUT_DIR}/release
-        cp -f $$REPO_BUILD_DIR/build_release/exec/pwm_controller.elf.map $${OUTPUT_DIR}/release
-        cp -f $$REPO_BUILD_DIR/build_release/exec/pwm_controller.uf2 $${OUTPUT_DIR}/release
-        cp -f $$REPO_BUILD_DIR/build_release/exec/pwm_controller.bin $${OUTPUT_DIR}/release
+        cp -f $${REPO_BUILD_DIR}/build_release/exec/pwm_controller.elf $${OUTPUT_DIR}/release
+        cp -f $${REPO_BUILD_DIR}/build_release/exec/pwm_controller.elf.map $${OUTPUT_DIR}/release
+        cp -f $${REPO_BUILD_DIR}/build_release/exec/pwm_controller.uf2 $${OUTPUT_DIR}/release
+        cp -f $${REPO_BUILD_DIR}/build_release/exec/pwm_controller.bin $${OUTPUT_DIR}/release
+        cp -f $${REPO_BUILD_DIR}/build_release/exec/pwm_controller_pcie.elf $${OUTPUT_DIR}/release
+        cp -f $${REPO_BUILD_DIR}/build_release/exec/pwm_controller_pcie.elf.map $${OUTPUT_DIR}/release
+        cp -f $${REPO_BUILD_DIR}/build_release/exec/pwm_controller_pcie.uf2 $${OUTPUT_DIR}/release
+        cp -f $${REPO_BUILD_DIR}/build_release/exec/pwm_controller_pcie.bin $${OUTPUT_DIR}/release
     restart: "no"
