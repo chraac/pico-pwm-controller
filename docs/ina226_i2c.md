@@ -183,7 +183,8 @@ Power = Current × Bus_V / 25 internally (Power LSB = 25 × Current_LSB).
 Good default: `Current_LSB = max_expected_current / 32768`
 (what the RobTillaart library does via `setMaxCurrentShunt()`).
 
-Worked example — R = 1 mΩ (R001), max current 20 A:
+Worked example — R = 1 mΩ (R001), max current 20 A
+(what `pwm_controller_lite.cc` uses, `kIna226MaxCurrentAmps`):
 
 ```
 Current_LSB = 20 / 32768        = 610.4 µA
@@ -211,37 +212,46 @@ Implemented in [exec/ina226_helper.hh](../exec/ina226_helper.hh) —
 `utility::Ina226Device`, header-only, in the same style as
 `Ssd1306Device`. API summary:
 
-| Method                        | Notes                                     |
-| ----------------------------- | ----------------------------------------- |
-| `Probe()`                     | checks Mfg ID `0x5449` / Die ID `0x2260`  |
-| `Reset()` / `Configure(cfg)`  | write Config register, default `0x247F`   |
-| `GetBusVolts()`               | Bus V × 1.25 mV                           |
-| `GetShuntMilliVolts()`        | Shunt V (int16) × 2.5 µV                  |
-| `GetAmps()`                   | `V_shunt / 1 mΩ`, no calibration needed   |
-| `SetCalibration(max_current)` | programs Cal reg; enables both regs below |
-| `GetCurrentAmps()`            | on-chip current reg 0x04                  |
-| `GetPowerWatts()`             | on-chip power reg 0x03                    |
-| `IsConversionReady()`         | Mask/Enable CVRF bit                      |
+| Method                        | Notes                                        |
+| ----------------------------- | -------------------------------------------- |
+| ctor `(i2c, scl_pin, sda_pin)` | inits the bus + pins like `Ssd1306Device`   |
+| `kI2cDefaultSclPin/SdaPin`    | 7 / 6 - the shared LCD bus pins              |
+| `Probe()`                     | checks Mfg ID `0x5449` / Die ID `0x2260`     |
+| `Reset()` / `Configure(cfg)`  | write Config register, default `0x247F`      |
+| `GetBusVolts()`               | Bus V × 1.25 mV                              |
+| `GetShuntMilliVolts()`        | Shunt V (int16) × 2.5 µV                     |
+| `GetAmps()`                   | `V_shunt / 1 mΩ`, no calibration needed      |
+| `SetCalibration(max_current)` | programs Cal reg; **required** for the two below |
+| `GetCurrentAmps()`            | on-chip current reg 0x04                     |
+| `GetPowerWatts()`             | on-chip power reg 0x03                       |
+| `IsConversionReady()`         | Mask/Enable CVRF bit                         |
 
 Usage alongside the existing LCD (same `i2c1` + GPIO6/7, same bus setup
 as `Ssd1306Device` - running it twice is safe):
 
 ```cpp
-// or: utility::Ina226Device ina(i2c1, /*scl=*/7, /*sda=*/6);
-utility::XiaoRp2040Ina226Device ina;
-if (ina.Probe()) {
-    ina.Configure();              // 16x avg, 1.1ms conv, continuous
-    ina.SetCalibration(20.0f);    // optional, for on-chip current/power regs
-    // poll every ~50 ms
-    float amps = ina.GetAmps();
-    float volts = ina.GetBusVolts();
+// or: utility::XiaoRp2040Ina226Device ina;
+utility::Ina226Device ina(i2c1, utility::Ina226Device::kI2cDefaultSclPin,
+                          utility::Ina226Device::kI2cDefaultSdaPin);
+if (!ina.Probe()) {
+    // log/handle missing chip
 }
+ina.Configure();              // 16x avg, 1.1ms conv, continuous
+ina.SetCalibration(20.0f);    // needed before the two getters below
+// poll every ~50 ms
+float amps = ina.GetCurrentAmps();
+float watts = ina.GetPowerWatts();
+float volts = ina.GetBusVolts();
 ```
 
 ## 10. Gotchas
 
-- No calibration written → Current (0x04) and Power (0x03) registers read 0.
-  Use §7a if you only need current.
+- No calibration written -> Current (0x04) and Power (0x03) registers read
+  0, **silently** - while Bus Voltage (0x02) keeps working. Symptom seen in
+  the wild: `0.000A / 0.000W` but a sane bus voltage reading; looks like a
+  wiring fault but is just the un-programmed Cal register. Use §7a
+  (`GetAmps()`) if you only need current, or call `SetCalibration()`
+  before reading 0x04/0x03.
 - Shunt Voltage and Current registers are **signed** (current can be
   negative depending on IN+/IN− orientation). Cast to `int16_t`.
 - CVRF/conversion-ready: in continuous mode registers refresh every
