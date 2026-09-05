@@ -17,27 +17,11 @@ using namespace utility;
 
 namespace {
 
-#if PICO_LITE_BOARD_VERSION == 90
-constexpr const uint kPwm0Pin = 3;
-constexpr const uint kPwm1Pin = 2;
-constexpr const uint kPwm2Pin = 26;
-constexpr const uint kPwm3Pin = 28;
+constexpr const uint kPwm0Pin = 13;
+constexpr const uint kPwm1Pin = 11;
 
-constexpr const uint kFanSpd0Pin = 4;
-constexpr const uint kFanSpd1Pin = 1;
-constexpr const uint kFanSpd2Pin = 27;
-constexpr const uint kFanSpd3Pin = 29;
-#else
-constexpr const uint kPwm0Pin = 3;
-constexpr const uint kPwm1Pin = 2;
-constexpr const uint kPwm2Pin = 27;
-constexpr const uint kPwm3Pin = 29;
-
-constexpr const uint kFanSpd0Pin = 4;
-constexpr const uint kFanSpd1Pin = 1;
-constexpr const uint kFanSpd2Pin = 28;
-constexpr const uint kFanSpd3Pin = 0;
-#endif
+constexpr const uint kFanSpd0Pin = 12;
+constexpr const uint kFanSpd1Pin = 10;
 
 constexpr const uint kRedPin = 17;
 constexpr const uint kGreenPin = 16;
@@ -54,6 +38,8 @@ constexpr const uint kDefaultTempPin = 26;
 // registers, see docs/ina226_i2c.md §7b. Must satisfy:
 // kIna226MaxCurrentAmps * kShuntOhms (1 mΩ) <= 81.92 mV -> <= 81.92 A
 constexpr const float kIna226MaxCurrentAmps = 20.0f;
+constexpr const uint kI2cDefaultSclPin = 15;
+constexpr const uint kI2cDefaultSdaPin = 14;
 
 }  // namespace
 
@@ -64,7 +50,7 @@ int main() {
     log_info("main.init.finished\n");
 
     RgbLedHelper rgb_led{kRedPin, kGreenPin, kBluePin};
-    Ina226Device ina226{i2c1, Ina226Device::kI2cDefaultSclPin, Ina226Device::kI2cDefaultSdaPin};
+    Ina226Device ina226{i2c1, kI2cDefaultSclPin, kI2cDefaultSdaPin};
     if (!ina226.Probe()) {
         log_info("ina226.probe.failed\n");
     }
