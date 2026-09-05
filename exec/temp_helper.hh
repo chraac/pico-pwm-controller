@@ -130,7 +130,7 @@ const LinearTemperatureCurveCalculator kLinearFanRpmCurve{
     {60, 1600}, {70, 1800}, {80, 2000},
 };
 
-const LinearTemperatureCurveCalculator kLinearFanPwrCurve{
+const LinearTemperatureCurveCalculator kLinearFanPwrToTempCurve{
     {5, 1500}, {10, 2000}, {30, 2600}, {50, 3100}, {70, 3600},
     {80, 4400}, {90, 5500}, {110, 6800}, {120, 8100}, {145, 10000},
 };
