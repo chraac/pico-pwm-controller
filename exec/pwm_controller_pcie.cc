@@ -32,8 +32,6 @@ constexpr const uint16_t kDefaultLcdWidth = 128;
 constexpr const uint16_t kDefaultLcdHeight = 64;
 constexpr const uint8_t kDefaultLcdContrast = 0x3F;
 
-constexpr const uint kDefaultTempPin = 26;
-
 // Current_LSB = kIna226MaxCurrentAmps / 32768 for the on-chip current/power
 // registers, see docs/ina226_i2c.md §7b. Must satisfy:
 // kIna226MaxCurrentAmps * kShuntOhms (1 mΩ) <= 81.92 mV -> <= 81.92 A
