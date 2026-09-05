@@ -64,36 +64,37 @@ constexpr const ThermistorParams kNtc100k3950{
 };
 
 template <class __CurveInterpolator>
-class TemperatureCurveCalculator {
+class CurveCalculator {
     using CurveInterpolator = __CurveInterpolator;
-    using TemperatureValueType = float;
+    using InputValueType = float;
     using CurveValueType = uint32_t;
     using CurveMap = std::map<CurveValueType, CurveValueType>;
 
 public:
-    explicit TemperatureCurveCalculator(
-        std::initializer_list<CurveMap::value_type> init)
-        : temp_to_curve_value_(init) {}
+    explicit CurveCalculator(std::initializer_list<CurveMap::value_type> init)
+        : input_to_curve_value_(init) {}
 
-    CurveValueType GetCurveValue(TemperatureValueType temp) const {
-        auto r = temp_to_curve_value_.lower_bound(CurveValueType(temp));
-        if (r == temp_to_curve_value_.end()) {
-            r = std::prev(temp_to_curve_value_.end());
+    CurveValueType GetCurveValue(InputValueType input) const {
+        auto r = input_to_curve_value_.lower_bound(CurveValueType(input));
+        if (r == input_to_curve_value_.end()) {
+            r = std::prev(input_to_curve_value_.end());
+        } else if (r == input_to_curve_value_.begin() &&
+                   InputValueType(r->first) > input) {
+            // below the first point, clamp to it (prev(begin) is UB)
+            return r->second;
         }
 
         auto l = std::prev(r);
-        if (TemperatureValueType(r->first) == temp) {
+        if (InputValueType(r->first) == input) {
             l = r;
-        } else if (l == temp_to_curve_value_.end()) {
-            l = temp_to_curve_value_.begin();
         }
 
         return CurveInterpolator()(l->first, l->second, r->first, r->second,
-                                   temp);
+                                   input);
     }
 
 private:
-    const CurveMap temp_to_curve_value_;
+    const CurveMap input_to_curve_value_;
 };
 
 struct LinearInterpolator {
@@ -114,23 +115,22 @@ struct LowerBoundInterpolator {
     }
 };
 
-using LinearTemperatureCurveCalculator =
-    TemperatureCurveCalculator<LinearInterpolator>;
+using LinearCurveCalculator = CurveCalculator<LinearInterpolator>;
 
-using LowerBoundTemperatureCurveCalculator =
-    TemperatureCurveCalculator<LowerBoundInterpolator>;
+using LowerBoundCurveCalculator = CurveCalculator<LowerBoundInterpolator>;
 
-const LinearTemperatureCurveCalculator kLinearFanPwmCurve{
+const LinearCurveCalculator kLinearFanTempToPwmCurve{
     {10, 1500}, {20, 2000}, {30, 2600}, {35, 3100}, {40, 3600},
     {45, 4400}, {50, 5500}, {55, 6800}, {60, 8100}, {65, 10000},
 };
 
-const LinearTemperatureCurveCalculator kLinearFanRpmCurve{
+const LinearCurveCalculator kLinearFanTempToRpmCurve{
     {20, 800},  {30, 1000}, {40, 1100}, {50, 1400},
     {60, 1600}, {70, 1800}, {80, 2000},
 };
 
-const LinearTemperatureCurveCalculator kLinearFanPwrToTempCurve{
+// fan power draw in watts (INA226) -> pwm
+const LinearCurveCalculator kLinearFanPwrToPwmCurve{
     {5, 1500}, {10, 2000}, {30, 2600}, {50, 3100}, {70, 3600},
     {80, 4400}, {90, 5500}, {110, 6800}, {120, 8100}, {145, 10000},
 };
