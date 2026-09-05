@@ -131,8 +131,8 @@ const LinearTemperatureCurveCalculator kLinearFanRpmCurve{
 };
 
 const LinearTemperatureCurveCalculator kLinearFanPwrCurve{
-    {20, 5},  {30, 30}, {40, 50}, {50, 80},
-    {60, 100}, {70, 120}, {100, 145},
+    {5, 1500}, {10, 2000}, {30, 2600}, {50, 3100}, {70, 3600},
+    {80, 4400}, {90, 5500}, {110, 6800}, {120, 8100}, {145, 10000},
 };
 
 }  // namespace utility
