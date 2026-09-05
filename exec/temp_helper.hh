@@ -86,7 +86,7 @@ public:
 
         auto l = std::prev(r);
         if (InputValueType(r->first) == input) {
-            l = r;
+            return r->second;  // exact key: interpolator would divide by zero
         }
 
         return CurveInterpolator()(l->first, l->second, r->first, r->second,
