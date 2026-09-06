@@ -56,8 +56,8 @@ int main() {
 
     using Mode = SingleFanSpeedManager::ControlMode;
     SingleFanSpeedManager managers[] = {
-        SingleFanSpeedManager{kPwm0Pin, kFanSpd0Pin, Mode::kTempToPwm},
-        SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin, Mode::kTempToPwm},
+        SingleFanSpeedManager{kPwm0Pin, kFanSpd0Pin, Mode::kPwrToPwm},
+        SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin, Mode::kPwrToPwm},
     };
 
     log_info("main.entering.loop\n");
