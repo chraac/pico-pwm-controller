@@ -56,6 +56,12 @@ int main() {
     // on-chip current/power regs stay 0 until the calibration register is set
     ina226.SetCalibration(kIna226MaxCurrentAmps);
 
+    using Mode = SingleFanSpeedManager::ControlMode;
+    SingleFanSpeedManager managers[] = {
+        SingleFanSpeedManager{kPwm0Pin, kFanSpd0Pin, Mode::kTempToPwm},
+        SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin, Mode::kTempToPwm},
+    };
+
     log_info("main.entering.loop\n");
     for (auto next_interval = utility::kPoolIntervalMs;;
          sleep_ms(next_interval)) {

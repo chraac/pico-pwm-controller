@@ -1,6 +1,9 @@
 #pragma once
 
 #include <hardware/gpio.h>
+#include <hardware/pio.h>
+
+#include "ws2812.pio.h"
 
 namespace utility {
 
@@ -39,6 +42,44 @@ private:
 
     DISALLOW_COPY(RgbLedHelper);
     DISALLOW_MOVE(RgbLedHelper);
+};
+
+// Single WS2812/SK6812 pixel driven through PIO (see ws2812.pio).
+class Ws2812Helper {
+public:
+    explicit Ws2812Helper(const uint pin, const bool rgbw = true,
+                          PIO pio = pio0,
+                          const uint freq_hz = 800000) noexcept
+        : pio_(pio),
+          sm_(pio_claim_unused_sm(pio_, true)),
+          offset_(pio_add_program(pio_, &ws2812_program)) {
+        ws2812_program_init(pio_, sm_, offset_, pin, freq_hz, rgbw);
+    }
+
+    void SetRgb(const uint8_t red, const uint8_t green,
+                const uint8_t blue) noexcept {
+        // pixels take GRB on the wire, the white byte rides last (SK6812 RGBW)
+        const uint32_t grbw = (uint32_t(green) << 24) | (uint32_t(red) << 16) |
+                              (uint32_t(blue) << 8);
+        pio_sm_put_blocking(pio_, sm_, grbw);
+    }
+
+    void SetWhite(const uint8_t white) noexcept {
+        pio_sm_put_blocking(pio_, sm_, white);
+    }
+
+    void SetRed() noexcept { SetRgb(0xff, 0, 0); }
+    void SetGreen() noexcept { SetRgb(0, 0xff, 0); }
+    void SetBlue() noexcept { SetRgb(0, 0, 0xff); }
+    void Off() noexcept { SetRgb(0, 0, 0); }
+
+private:
+    PIO pio_;
+    uint sm_;
+    uint offset_;
+
+    DISALLOW_COPY(Ws2812Helper);
+    DISALLOW_MOVE(Ws2812Helper);
 };
 
 }  // namespace utility

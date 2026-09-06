@@ -26,6 +26,9 @@ add_executable(
     ${PWM_CONTROLLER_SRC}
 )
 
+pico_generate_pio_header(pwm_controller ${CMAKE_CURRENT_LIST_DIR}/ws2812.pio)
+pico_generate_pio_header(pwm_controller_pcie ${CMAKE_CURRENT_LIST_DIR}/ws2812.pio)
+
 if(USB_STDIO)
     pico_enable_stdio_usb(pwm_controller 1)
     target_compile_definitions(pwm_controller PUBLIC USB_STDIO)
@@ -38,8 +41,8 @@ else()
     target_compile_definitions(pwm_controller_pcie PUBLIC UART_STDIO)
 endif()
 
-target_link_libraries(pwm_controller pico_stdlib hardware_pwm hardware_adc hardware_i2c pico-ssd1306)
-target_link_libraries(pwm_controller_pcie pico_stdlib hardware_pwm hardware_adc hardware_i2c pico-ssd1306)
+target_link_libraries(pwm_controller pico_stdlib hardware_pwm hardware_adc hardware_i2c hardware_pio pico-ssd1306)
+target_link_libraries(pwm_controller_pcie pico_stdlib hardware_pwm hardware_adc hardware_i2c hardware_pio pico-ssd1306)
 
 # create map/bin/hex file etc.
 pico_add_extra_outputs(pwm_controller)
