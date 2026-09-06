@@ -61,16 +61,26 @@ int main() {
     };
 
     log_info("main.entering.loop\n");
-        for (auto next_interval = utility::kPoolIntervalMs;;
-            sleep_ms(next_interval)) {
+    for (auto next_interval = utility::kPoolIntervalMs;;
+         sleep_ms(next_interval)) {
         const auto start_us = time_us_64();
 
         const auto amps = ina226.GetCurrentAmps();
         const auto watts = ina226.GetPowerWatts();
         const auto volts = ina226.GetBusVolts();
-        rgb_led.Next();
 
-        log_info("current amps: %.3fA, power watts: %.3fW, bus volts: %.3fV\n", amps, watts, volts);
+        log_info("current amps: %.3fA, power: %.3fW, volts: %.3fV\n", amps,
+                 watts, volts);
+
+        static_assert(std::size(managers) == 2);
+        for (size_t i = 0; i < std::size(managers); ++i) {
+            auto &fan_manager = managers[i];
+            auto rpm = fan_manager.Next(watts);
+            log_info("fan.pwm_gpio.%d.rpm.%d\n",
+                     int(fan_manager.GetPwmGpioPin()), int(rpm));
+        }
+
+        rgb_led.Next();
 
         auto consumed_time_ms = (time_us_64() - start_us) / 1000;
         log_debug("current iteration time cost: %dms\n", int(consumed_time_ms));
