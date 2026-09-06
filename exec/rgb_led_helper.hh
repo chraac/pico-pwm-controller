@@ -54,6 +54,7 @@ public:
           sm_(pio_claim_unused_sm(pio_, true)),
           offset_(pio_add_program(pio_, &ws2812_program)) {
         ws2812_program_init(pio_, sm_, offset_, pin, freq_hz, rgbw);
+        SetRgb(0, 0, 0);
     }
 
     void SetRgb(const uint8_t red, const uint8_t green,
@@ -62,6 +63,7 @@ public:
         const uint32_t grbw = (uint32_t(green) << 24) | (uint32_t(red) << 16) |
                               (uint32_t(blue) << 8);
         pio_sm_put_blocking(pio_, sm_, grbw);
+        current_value_ = (red ? 1 : 0) | (green ? 2 : 0) | (blue ? 4 : 0);
     }
 
     void SetWhite(const uint8_t white) noexcept {
@@ -73,10 +75,18 @@ public:
     void SetBlue() noexcept { SetRgb(0, 0, 0xff); }
     void Off() noexcept { SetRgb(0, 0, 0); }
 
+    // steps through the 8 on/off RGB combinations, like RgbLedHelper::Next()
+    void Next() noexcept {
+        SetRgb(current_value_ & 1 ? 0xff : 0, current_value_ & 2 ? 0xff : 0,
+               current_value_ & 4 ? 0xff : 0);
+        current_value_ = (current_value_ + 1) % 8;
+    }
+
 private:
     PIO pio_;
     uint sm_;
     uint offset_;
+    uint8_t current_value_ = 0;
 
     DISALLOW_COPY(Ws2812Helper);
     DISALLOW_MOVE(Ws2812Helper);

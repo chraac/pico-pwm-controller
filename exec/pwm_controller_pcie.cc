@@ -23,9 +23,7 @@ constexpr const uint kPwm1Pin = 11;
 constexpr const uint kFanSpd0Pin = 12;
 constexpr const uint kFanSpd1Pin = 10;
 
-constexpr const uint kRedPin = 17;
-constexpr const uint kGreenPin = 16;
-constexpr const uint kBluePin = 25;
+constexpr const uint kWs2812LedPin = 16;
 
 constexpr const uint kDefaultTargetRpm = 1900;
 constexpr const uint16_t kDefaultLcdWidth = 128;
@@ -47,7 +45,7 @@ int main() {
 
     log_info("main.init.finished\n");
 
-    RgbLedHelper rgb_led{kRedPin, kGreenPin, kBluePin};
+    Ws2812Helper rgb_led{kWs2812LedPin};
     Ina226Device ina226{i2c1, kI2cDefaultSclPin, kI2cDefaultSdaPin};
     if (!ina226.Probe()) {
         log_info("ina226.probe.failed\n");
@@ -63,8 +61,8 @@ int main() {
     };
 
     log_info("main.entering.loop\n");
-    for (auto next_interval = utility::kPoolIntervalMs;;
-         sleep_ms(next_interval)) {
+        for (auto next_interval = utility::kPoolIntervalMs;;
+            sleep_ms(next_interval)) {
         const auto start_us = time_us_64();
 
         const auto amps = ina226.GetCurrentAmps();
