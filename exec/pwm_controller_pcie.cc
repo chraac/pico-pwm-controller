@@ -5,7 +5,6 @@
 
 #include <iterator>
 
-#include "adc_helper.hh"
 #include "fan_speed_manager.hh"
 #include "ina226_helper.hh"
 #include "lcd_helper.hh"

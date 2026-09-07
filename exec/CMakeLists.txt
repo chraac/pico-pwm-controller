@@ -1,17 +1,17 @@
 
-set(PWM_CONTROLLER_SRC
+set(PWM_CONTROLLER_LIB_SRC
     frequency_counter.cc
     fan_speed_manager.cc
 )
 
 if(BUILD_LITE)
     set(PWM_CONTROLLER_SRC
-        ${PWM_CONTROLLER_SRC}
+        ${PWM_CONTROLLER_LIB_SRC}
         pwm_controller_lite.cc
     )
 else()
     set(PWM_CONTROLLER_SRC
-        ${PWM_CONTROLLER_SRC}
+        ${PWM_CONTROLLER_LIB_SRC}
         pwm_controller.cc
     )
 endif()
@@ -23,7 +23,8 @@ add_executable(
 
 add_executable(
     pwm_controller_pcie
-    ${PWM_CONTROLLER_SRC}
+    ${PWM_CONTROLLER_LIB_SRC}
+    pwm_controller_pcie.cc
 )
 
 pico_generate_pio_header(pwm_controller ${CMAKE_CURRENT_LIST_DIR}/ws2812.pio)
