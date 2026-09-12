@@ -59,7 +59,7 @@ int main() {
         SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin, Mode::kPwrToPwm},
     };
 
-    using LcdDrawer = CustomLcdDrawer1<1, 0, std::size(managers)>;
+    using LcdDrawer = CustomLcdDrawer0<1, 0, std::size(managers)>;
     LcdDrawer lcd_drawer{kDefaultLcdWidth, kDefaultLcdHeight};
     lcd_drawer.SetContrast(kDefaultLcdContrast);
     LcdDrawer::TempItemArray drawer_items = {
