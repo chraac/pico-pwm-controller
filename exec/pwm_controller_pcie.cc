@@ -59,6 +59,10 @@ int main() {
         SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin, Mode::kPwrToPwm},
     };
 
+    using LcdDrawer = CustomLcdDrawer<15, 14, std::size(managers)>;
+    LcdDrawer lcd_drawer{kDefaultLcdWidth, kDefaultLcdHeight};
+    lcd_drawer.SetContrast(kDefaultLcdContrast);
+
     log_info("main.entering.loop\n");
     for (auto next_interval = utility::kPoolIntervalMs;;
          sleep_ms(next_interval)) {
