@@ -72,10 +72,10 @@ int main() {
     LiteLcdDrawer lcd_drawer{kDefaultLcdWidth, kDefaultLcdHeight};
     lcd_drawer.SetContrast(kDefaultLcdContrast);
     LiteLcdDrawer::TempItemArray drawer_items = {
-        LiteLcdDrawer::TempItem{managers[0].IsControlByPwm()},
-        LiteLcdDrawer::TempItem{managers[1].IsControlByPwm()},
-        LiteLcdDrawer::TempItem{managers[2].IsControlByPwm()},
-        LiteLcdDrawer::TempItem{managers[3].IsControlByPwm()},
+        LiteLcdDrawer::TempItem{managers[0].GetControlMode()},
+        LiteLcdDrawer::TempItem{managers[1].GetControlMode()},
+        LiteLcdDrawer::TempItem{managers[2].GetControlMode()},
+        LiteLcdDrawer::TempItem{managers[3].GetControlMode()},
     };
 
     log_info("main.entering.loop\n");
@@ -95,9 +95,10 @@ int main() {
                      int(fan_manager.GetPwmGpioPin()), int(rpm));
             auto &draw_item = drawer_items[i];
             draw_item.rpm = rpm;
-            draw_item.target = draw_item.is_cycle
-                                   ? (fan_manager.GetPwmCycle() / 100)
-                                   : fan_manager.GetTargetRpm();
+            draw_item.target =
+                draw_item.mode != FanControlMode::kTempToRpm
+                    ? (fan_manager.GetPwmCycle() / 100)
+                    : fan_manager.GetTargetRpm();
         }
 
         rgb_led.Next();

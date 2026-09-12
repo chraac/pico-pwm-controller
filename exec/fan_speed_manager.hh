@@ -3,6 +3,7 @@
 #include <array>
 
 #include "button_helper.hh"
+#include "fan_control_mode.hh"
 #include "fan_speed_helper.hh"
 #include "pid.hh"
 #include "pwm_helper.hh"
@@ -15,11 +16,8 @@ constexpr const uint kPoolIntervalMs = 400;
 
 class SingleFanSpeedManager {
 public:
-    enum class ControlMode {
-        kTempToPwm = 0,
-        kTempToRpm,
-        kPwrToPwm,
-    };
+    // alias kept so SingleFanSpeedManager::ControlMode keeps working
+    using ControlMode = FanControlMode;
 
     explicit SingleFanSpeedManager(uint pwm_gpio_pin, uint spd_gpio_pin,
                                    ControlMode mode) noexcept;

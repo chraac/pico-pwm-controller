@@ -5,6 +5,7 @@
 #include <array>
 
 #include "base_types.hh"
+#include "fan_control_mode.hh"
 
 #ifdef __cplusplus
 extern "C" {
@@ -82,7 +83,7 @@ class LcdDrawer {
 
 public:
     struct TempItem {
-        bool is_cycle;
+        FanControlMode mode;
         uint32_t target;
         uint32_t rpm;
     };
@@ -95,6 +96,16 @@ public:
     void SetContrast(uint8_t val) noexcept { device_.SetContrast(val); }
 
     void DrawTempAndItems(float temp, const TempItemArray &items) noexcept {
+        DrawItemsAndFooter("Temp:%.2fdeg", temp, items);
+    }
+
+    void DrawPwrAndItems(float pwr, const TempItemArray &items) noexcept {
+        DrawItemsAndFooter("Pwr:%.2fW", pwr, items);
+    }
+
+private:
+    void DrawItemsAndFooter(const char *footer_fmt, float footer_value,
+                            const TempItemArray &items) noexcept {
         device_.Clear();
         char buf[128] = {};
         uint16_t y = 0;
@@ -103,21 +114,21 @@ public:
             y += DrawSpeed(i, items[i], 0, y);
         }
 
-        snprintf(buf, sizeof(buf), "Temp:%.2fdeg", temp);
+        snprintf(buf, sizeof(buf), footer_fmt, footer_value);
         device_.DrawString(buf, 0, y);
 
         device_.EndDraw();
     }
 
-private:
     uint16_t DrawSpeed(size_t index, const TempItem &item, uint16_t x,
                        uint16_t y) noexcept {
         char buf[128] = {};
-        if (item.is_cycle) {
-            snprintf(buf, sizeof(buf), "Spd%d: %d, Cyc: %d%%", (int)index,
+        if (item.mode == FanControlMode::kTempToRpm) {
+            snprintf(buf, sizeof(buf), "Spd%d: %d, Tag: %d", (int)index,
                      (int)item.rpm, (int)item.target);
         } else {
-            snprintf(buf, sizeof(buf), "Spd%d: %d, Tag: %d", (int)index,
+            // both pwm modes drive the duty cycle straight from their curve
+            snprintf(buf, sizeof(buf), "Spd%d: %d, Cyc: %d%%", (int)index,
                      (int)item.rpm, (int)item.target);
         }
 

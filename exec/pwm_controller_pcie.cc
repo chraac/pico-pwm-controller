@@ -59,9 +59,13 @@ int main() {
         SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin, Mode::kPwrToPwm},
     };
 
-    using LcdDrawer = CustomLcdDrawer<15, 14, std::size(managers)>;
+    using LcdDrawer = CustomLcdDrawer<kI2cDefaultSclPin, kI2cDefaultSdaPin, std::size(managers)>;
     LcdDrawer lcd_drawer{kDefaultLcdWidth, kDefaultLcdHeight};
     lcd_drawer.SetContrast(kDefaultLcdContrast);
+    LcdDrawer::TempItemArray drawer_items = {
+        LcdDrawer::TempItem{managers[0].GetControlMode()},
+        LcdDrawer::TempItem{managers[1].GetControlMode()},
+    };
 
     log_info("main.entering.loop\n");
     for (auto next_interval = utility::kPoolIntervalMs;;
@@ -81,9 +85,16 @@ int main() {
             auto rpm = fan_manager.Next(watts);
             log_info("fan.pwm_gpio.%d.rpm.%d\n",
                      int(fan_manager.GetPwmGpioPin()), int(rpm));
+            auto &draw_item = drawer_items[i];
+            draw_item.rpm = rpm;
+            draw_item.target =
+                draw_item.mode != FanControlMode::kTempToRpm
+                    ? (fan_manager.GetPwmCycle() / 100)
+                    : fan_manager.GetTargetRpm();
         }
 
         rgb_led.Next();
+        lcd_drawer.DrawPwrAndItems(watts, drawer_items);
 
         auto consumed_time_ms = (time_us_64() - start_us) / 1000;
         log_debug("current iteration time cost: %dms\n", int(consumed_time_ms));
