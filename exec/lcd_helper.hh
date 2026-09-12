@@ -69,13 +69,11 @@ private:
     DISALLOW_MOVE(Ssd1306Device);
 };
 
-class XiaoRp2040Ssd1306Device : public Ssd1306Device {
-    constexpr static const uint8_t kI2cSclPin = 7;
-    constexpr static const uint8_t kI2cSdaPin = 6;
-
+template <uint8_t __SclPin, uint8_t __SdaPin>
+class CustomSsd1306Device : public Ssd1306Device {
 public:
-    explicit XiaoRp2040Ssd1306Device(uint16_t width, uint16_t height)
-        : Ssd1306Device(i2c1, kI2cSclPin, kI2cSdaPin, width, height) {}
+    explicit CustomSsd1306Device(uint16_t width, uint16_t height)
+        : Ssd1306Device(i2c1, __SclPin, __SdaPin, width, height) {}
 };
 
 template <class __DeviceType, size_t __ItemCount>
@@ -133,7 +131,10 @@ private:
     DISALLOW_MOVE(LcdDrawer);
 };
 
+template <uint8_t __SclPin, uint8_t __SdaPin, size_t __ItemCount>
+using CustomLcdDrawer = LcdDrawer<CustomSsd1306Device<__SclPin, __SdaPin>, __ItemCount>;
+
 template <size_t __ItemCount>
-using XiaoRp2040LcdDrawer = LcdDrawer<XiaoRp2040Ssd1306Device, __ItemCount>;
+using XiaoRp2040LcdDrawer = LcdDrawer<CustomSsd1306Device<7, 6>, __ItemCount>;
 
 }  // namespace utility
