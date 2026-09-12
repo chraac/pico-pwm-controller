@@ -26,7 +26,7 @@ constexpr const uint kWs2812LedPin = 16;
 
 constexpr const uint kDefaultTargetRpm = 1900;
 constexpr const uint16_t kDefaultLcdWidth = 128;
-constexpr const uint16_t kDefaultLcdHeight = 64;
+constexpr const uint16_t kDefaultLcdHeight = 32;
 constexpr const uint8_t kDefaultLcdContrast = 0x3F;
 
 // Current_LSB = kIna226MaxCurrentAmps / 32768 for the on-chip current/power
