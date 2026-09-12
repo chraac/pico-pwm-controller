@@ -20,6 +20,8 @@ extern "C" {
 namespace utility {
 
 class Ssd1306Device {
+    // 7-bit address (pico-sdk i2c API); 0x3C<<1=0x78 is the same device in
+    // 8-bit wire notation, which some module silkscreens print
     constexpr static const uint8_t kI2cAddr = 0x3C;
     constexpr static const uint32_t kI2cFreq = 400000;  // 400kHz
     constexpr static const uint8_t kDefaultContrast = 0x7F;
@@ -71,9 +73,16 @@ private:
 };
 
 template <uint8_t __SclPin, uint8_t __SdaPin>
-class CustomSsd1306Device : public Ssd1306Device {
+class CustomSsd1306Device0 : public Ssd1306Device {
 public:
-    explicit CustomSsd1306Device(uint16_t width, uint16_t height)
+    explicit CustomSsd1306Device0(uint16_t width, uint16_t height)
+        : Ssd1306Device(i2c0, __SclPin, __SdaPin, width, height) {}
+};
+
+template <uint8_t __SclPin, uint8_t __SdaPin>
+class CustomSsd1306Device1 : public Ssd1306Device {
+public:
+    explicit CustomSsd1306Device1(uint16_t width, uint16_t height)
         : Ssd1306Device(i2c1, __SclPin, __SdaPin, width, height) {}
 };
 
@@ -143,9 +152,12 @@ private:
 };
 
 template <uint8_t __SclPin, uint8_t __SdaPin, size_t __ItemCount>
-using CustomLcdDrawer = LcdDrawer<CustomSsd1306Device<__SclPin, __SdaPin>, __ItemCount>;
+using CustomLcdDrawer0 = LcdDrawer<CustomSsd1306Device0<__SclPin, __SdaPin>, __ItemCount>;
+
+template <uint8_t __SclPin, uint8_t __SdaPin, size_t __ItemCount>
+using CustomLcdDrawer1 = LcdDrawer<CustomSsd1306Device1<__SclPin, __SdaPin>, __ItemCount>;
 
 template <size_t __ItemCount>
-using XiaoRp2040LcdDrawer = LcdDrawer<CustomSsd1306Device<7, 6>, __ItemCount>;
+using XiaoRp2040LcdDrawer = LcdDrawer<CustomSsd1306Device1<7, 6>, __ItemCount>;
 
 }  // namespace utility

@@ -26,15 +26,15 @@ constexpr const uint kWs2812LedPin = 16;
 
 constexpr const uint kDefaultTargetRpm = 1900;
 constexpr const uint16_t kDefaultLcdWidth = 128;
-constexpr const uint16_t kDefaultLcdHeight = 32;
+constexpr const uint16_t kDefaultLcdHeight = 64;
 constexpr const uint8_t kDefaultLcdContrast = 0x3F;
 
 // Current_LSB = kIna226MaxCurrentAmps / 32768 for the on-chip current/power
 // registers, see docs/ina226_i2c.md §7b. Must satisfy:
 // kIna226MaxCurrentAmps * kShuntOhms (1 mΩ) <= 81.92 mV -> <= 81.92 A
 constexpr const float kIna226MaxCurrentAmps = 20.0f;
-constexpr const uint kI2cDefaultSclPin = 15;
-constexpr const uint kI2cDefaultSdaPin = 14;
+constexpr const uint kI2cDefaultSclPin = 1;
+constexpr const uint kI2cDefaultSdaPin = 0;
 
 }  // namespace
 
@@ -59,7 +59,7 @@ int main() {
         SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin, Mode::kPwrToPwm},
     };
 
-    using LcdDrawer = CustomLcdDrawer<kI2cDefaultSclPin, kI2cDefaultSdaPin, std::size(managers)>;
+    using LcdDrawer = CustomLcdDrawer0<kI2cDefaultSclPin, kI2cDefaultSdaPin, std::size(managers)>;
     LcdDrawer lcd_drawer{kDefaultLcdWidth, kDefaultLcdHeight};
     lcd_drawer.SetContrast(kDefaultLcdContrast);
     LcdDrawer::TempItemArray drawer_items = {
