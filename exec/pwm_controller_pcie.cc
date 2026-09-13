@@ -74,8 +74,10 @@ int main() {
 
     using Mode = SingleFanSpeedManager::ControlMode;
     SingleFanSpeedManager managers[] = {
-        SingleFanSpeedManager{kPwm0Pin, kFanSpd0Pin, Mode::kPwrToPwm},
-        SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin, Mode::kPwrToPwm},
+        SingleFanSpeedManager{kPwm0Pin, kFanSpd0Pin, Mode::kPwrToPwm,
+                              kFanType0Curves},
+        SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin, Mode::kPwrToPwm,
+                              kFanType1Curves},
     };
 
     using LcdDrawer = CustomLcdDrawer0<1, 0, std::size(managers)>;
