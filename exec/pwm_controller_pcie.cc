@@ -134,7 +134,7 @@ int main() {
         for (size_t i = 0; i < std::size(managers); ++i) {
             auto &fan_manager = managers[i];
             auto rpm = fan_manager.Next(smoothed_watts);
-            log_info("fan.pwm_gpio.%d.rpm.%d\n",
+            log_debug("fan.pwm_gpio.%d.rpm.%d\n",
                      int(fan_manager.GetPwmGpioPin()), int(rpm));
             auto &draw_item = drawer_items[i];
             draw_item.rpm = rpm;
