@@ -86,7 +86,11 @@ int main() {
     log_info("main.init.finished\n");
 
     Ws2812Helper rgb_led{kWs2812LedPin};
-    EmaSmoother pwr_smoother(0.25f, 0.05f, 5.0f);
+    // fast rise (~2s to settle) tracks load steps, slow fall (~20s) rides
+    // out burst dips and matches heatsink cooldown; ratios assume the
+    // kBoardPoolIntervalMs update period
+    EmaSmoother pwr_smoother(/*up_rate=*/0.4f, /*down_rate=*/0.06f,
+                             /*idle_val=*/5.0f);
     Ina226Device ina226{i2c1, kI2cDefaultSclPin, kI2cDefaultSdaPin};
     if (!ina226.Probe()) {
         log_info("ina226.probe.failed\n");
