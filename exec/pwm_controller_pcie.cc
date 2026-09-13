@@ -11,6 +11,7 @@
 #include "logger.hh"
 #include "rgb_led_helper.hh"
 #include "temp_helper.hh"
+#include "ema_smoother.hh"
 
 using namespace utility;
 
@@ -44,8 +45,8 @@ constexpr CurvePoint kPwrToPwmCurveFanType0[]{
 };
 
 constexpr CurvePoint kPwrToPwmCurveFanType1[]{
-    {5, 1500},  {10, 2000}, {30, 2600},  {50, 3100},  {70, 3600},
-    {80, 4400}, {90, 5500}, {110, 6800}, {120, 8100}, {145, 10000},
+    {5, 1500},  {10, 2000}, {30, 2600},  {40, 3100},  {50, 3600},
+    {60, 4400}, {70, 5500}, {80, 6800}, {90, 8100}, {100, 10000},
 };
 
 constexpr FanCurves kFanType0Curves{

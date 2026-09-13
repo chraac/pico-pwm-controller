@@ -3,7 +3,7 @@
 #include <cmath>  // Required for std::isnan
 
 namespace utility {
-class EmaSmoothing {
+class EmaSmoother {
 private:
     float smoothed_value;
     const float up_ratio;
@@ -15,9 +15,9 @@ public:
     // up_rate/down_rate must be in [0, 1]. idle_val is an optional lower
     // bound on the output (e.g. a quiet fan baseline); omit it to disable
     // the clamp.
-    // Examples: EmaSmoothing(0.25f, 0.05f)
-    //           EmaSmoothing(0.15f, 0.01f, 35.0f)
-    EmaSmoothing(float up_rate, float down_rate, float idle_val = -INFINITY)
+    // Examples: EmaSmoother(0.25f, 0.05f)
+    //           EmaSmoother(0.15f, 0.01f, 35.0f)
+    EmaSmoother(float up_rate, float down_rate, float idle_val = -INFINITY)
         : smoothed_value(NAN),
           up_ratio(up_rate),
           down_ratio(down_rate),
