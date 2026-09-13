@@ -4,6 +4,7 @@
 #include <pico/stdlib.h>
 
 #include <algorithm>
+#include <cmath>
 #include <iterator>
 
 #include "ema_smoother.hh"
@@ -61,21 +62,18 @@ constexpr FanCurves kFanType1Curves{
 constexpr float kLedGreenW = 20.0f;
 constexpr float kLedRedW = 90.0f;
 
-// full green at/below low_w, fading through off at the midpoint, full red
-// at/above high_w
+// blends green -> yellow -> red as watts rises from low_w to high_w; the
+// sqrt curves keep perceived brightness flat across the blend (WS2812 duty
+// cycle is linear in brightness)
 void SetPwrLedColor(Ws2812Helper &led, const float watts, const float low_w,
                     const float high_w) noexcept {
-    const float mid = (low_w + high_w) * 0.5f;
-    uint8_t red = 0;
-    uint8_t green = 0;
-    if (watts < mid) {
-        const float t = std::clamp((mid - watts) / (mid - low_w), 0.0f, 1.0f);
-        // squared: WS2812 brightness is linear in duty cycle, t*t fades evenly
-        green = static_cast<uint8_t>(255.0f * t * t);
-    } else {
-        const float t = std::clamp((watts - mid) / (high_w - mid), 0.0f, 1.0f);
-        red = static_cast<uint8_t>(255.0f * t * t);
-    }
+    const float t = std::clamp((watts - low_w) / (high_w - low_w), 0.0f, 1.0f);
+    const auto red = static_cast<uint8_t>(255.0f * std::sqrt(t));
+    const auto green = static_cast<uint8_t>(255.0f * std::sqrt(1.0f - t));
+    log_debug(
+        "SetPwrLedColor: watts=%.2f, low_w=%.2f, high_w=%.2f, red=%u, "
+        "green=%u\n",
+        watts, low_w, high_w, red, green);
     led.SetRgb(red, green, 0);
 }
 
