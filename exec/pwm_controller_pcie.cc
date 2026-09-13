@@ -5,17 +5,19 @@
 
 #include <iterator>
 
+#include "ema_smoother.hh"
 #include "fan_speed_manager.hh"
 #include "ina226_helper.hh"
 #include "lcd_helper.hh"
 #include "logger.hh"
 #include "rgb_led_helper.hh"
 #include "temp_helper.hh"
-#include "ema_smoother.hh"
 
 using namespace utility;
 
 namespace {
+
+constexpr const uint kBoardPoolIntervalMs = 500;
 
 constexpr const uint kPwm0Pin = 13;
 constexpr const uint kPwm1Pin = 11;
@@ -45,7 +47,7 @@ constexpr CurvePoint kPwrToPwmCurveFanType0[]{
 };
 
 constexpr CurvePoint kPwrToPwmCurveFanType1[]{
-    {5, 1500},  {10, 2000}, {30, 2600},  {40, 3100},  {50, 3600},
+    {5, 1500},  {10, 2000}, {30, 2600}, {40, 3100}, {50, 3600},
     {60, 4400}, {70, 5500}, {80, 6800}, {90, 8100}, {100, 10000},
 };
 
@@ -89,8 +91,7 @@ int main() {
     };
 
     log_info("main.entering.loop\n");
-    for (auto next_interval = utility::kPoolIntervalMs;;
-         sleep_ms(next_interval)) {
+    for (auto next_interval = kBoardPoolIntervalMs;; sleep_ms(next_interval)) {
         const auto start_us = time_us_64();
 
         const auto amps = ina226.GetCurrentAmps();
@@ -98,8 +99,10 @@ int main() {
         const auto volts = ina226.GetBusVolts();
         const auto smoothed_watts = pwr_smoother.Update(watts);
 
-        log_info("current amps: %.3fA, power: %.3fW, smoothed power: %.3fW, volts: %.3fV\n", amps,
-                 watts, smoothed_watts, volts);
+        log_info(
+            "current amps: %.3fA, power: %.3fW, smoothed power: %.3fW, volts: "
+            "%.3fV\n",
+            amps, watts, smoothed_watts, volts);
 
         static_assert(std::size(managers) == 2);
         for (size_t i = 0; i < std::size(managers); ++i) {
@@ -119,9 +122,8 @@ int main() {
 
         auto consumed_time_ms = (time_us_64() - start_us) / 1000;
         log_debug("current iteration time cost: %dms\n", int(consumed_time_ms));
-        next_interval =
-            utility::kPoolIntervalMs -
-            std::min<uint>(consumed_time_ms, utility::kPoolIntervalMs);
+        next_interval = kBoardPoolIntervalMs -
+                        std::min<uint>(consumed_time_ms, kBoardPoolIntervalMs);
     }
 
     return 0;
