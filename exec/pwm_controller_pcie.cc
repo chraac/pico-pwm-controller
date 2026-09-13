@@ -3,6 +3,7 @@
 #include <pico/runtime_init.h>
 #include <pico/stdlib.h>
 
+#include <algorithm>
 #include <iterator>
 
 #include "ema_smoother.hh"
@@ -55,6 +56,28 @@ constexpr FanCurves kFanType0Curves{
     kDefaultTempToPwmCurve, kPwrToPwmCurveFanType0, kDefaultTempToRpmCurve};
 constexpr FanCurves kFanType1Curves{
     kDefaultTempToPwmCurve, kPwrToPwmCurveFanType1, kDefaultTempToRpmCurve};
+
+// led color tracks power between these bounds, see SetPwrLedColor() below
+constexpr float kLedGreenW = 20.0f;
+constexpr float kLedRedW = 90.0f;
+
+// full green at/below low_w, fading through off at the midpoint, full red
+// at/above high_w
+void SetPwrLedColor(Ws2812Helper &led, const float watts, const float low_w,
+                    const float high_w) noexcept {
+    const float mid = (low_w + high_w) * 0.5f;
+    uint8_t red = 0;
+    uint8_t green = 0;
+    if (watts < mid) {
+        const float t = std::clamp((mid - watts) / (mid - low_w), 0.0f, 1.0f);
+        // squared: WS2812 brightness is linear in duty cycle, t*t fades evenly
+        green = static_cast<uint8_t>(255.0f * t * t);
+    } else {
+        const float t = std::clamp((watts - mid) / (high_w - mid), 0.0f, 1.0f);
+        red = static_cast<uint8_t>(255.0f * t * t);
+    }
+    led.SetRgb(red, green, 0);
+}
 
 }  // namespace
 
@@ -117,7 +140,7 @@ int main() {
                                    : fan_manager.GetTargetRpm();
         }
 
-        rgb_led.Next();
+        SetPwrLedColor(rgb_led, watts, kLedGreenW, kLedRedW);
         lcd_drawer.DrawPwrAndItems(watts, drawer_items);
 
         auto consumed_time_ms = (time_us_64() - start_us) / 1000;
