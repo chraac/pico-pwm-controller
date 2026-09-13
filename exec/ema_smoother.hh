@@ -15,13 +15,14 @@ public:
     // constant of one fixed update period. idle_val is an optional lower
     // bound on the output (e.g. a quiet fan baseline); omit it to disable
     // the clamp.
-    // Examples: EmaSmoother(0.25f, 0.05f)
+    // Examples: EmaSmoother(0.25f, 0.05f, 0.0f)
     //           EmaSmoother(0.15f, 0.01f, 35.0f)
-    EmaSmoother(float up_rate, float down_rate,
-                float idle_val = -INFINITY) noexcept
+    explicit EmaSmoother(float up_rate, float down_rate,
+                         float idle_val) noexcept
         : up_ratio_(up_rate),
           down_ratio_(down_rate),
-          idle_threshold_(idle_val) {}
+          idle_threshold_(idle_val),
+          smoothed_value_(idle_val) {}
 
     // Blends current_value into the running average and returns it
     float Update(float current_value) {
@@ -48,13 +49,13 @@ public:
     }
 
     // back to uninitialized state
-    void Reset() { smoothed_value_ = NAN; }
+    void Reset() { smoothed_value_ = idle_threshold_; }
 
 private:
     const float up_ratio_;        // blend ratio when rising
     const float down_ratio_;      // blend ratio when falling
     const float idle_threshold_;  // output lower bound
-    float smoothed_value_ = NAN;  // running average, NAN until first update
+    float smoothed_value_;        // running average, initialized to idle floor
 
     DISALLOW_COPY(EmaSmoother);
     DISALLOW_MOVE(EmaSmoother);

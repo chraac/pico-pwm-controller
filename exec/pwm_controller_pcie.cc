@@ -63,6 +63,7 @@ int main() {
     log_info("main.init.finished\n");
 
     Ws2812Helper rgb_led{kWs2812LedPin};
+    EmaSmoother pwr_smoother(0.25f, 0.05f, 5.0f);
     Ina226Device ina226{i2c1, kI2cDefaultSclPin, kI2cDefaultSdaPin};
     if (!ina226.Probe()) {
         log_info("ina226.probe.failed\n");
@@ -95,14 +96,15 @@ int main() {
         const auto amps = ina226.GetCurrentAmps();
         const auto watts = ina226.GetPowerWatts();
         const auto volts = ina226.GetBusVolts();
+        const auto smoothed_watts = pwr_smoother.Update(watts);
 
-        log_info("current amps: %.3fA, power: %.3fW, volts: %.3fV\n", amps,
-                 watts, volts);
+        log_info("current amps: %.3fA, power: %.3fW, smoothed power: %.3fW, volts: %.3fV\n", amps,
+                 watts, smoothed_watts, volts);
 
         static_assert(std::size(managers) == 2);
         for (size_t i = 0; i < std::size(managers); ++i) {
             auto &fan_manager = managers[i];
-            auto rpm = fan_manager.Next(watts);
+            auto rpm = fan_manager.Next(smoothed_watts);
             log_info("fan.pwm_gpio.%d.rpm.%d\n",
                      int(fan_manager.GetPwmGpioPin()), int(rpm));
             auto &draw_item = drawer_items[i];
