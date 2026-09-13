@@ -36,6 +36,25 @@ constexpr const float kIna226MaxCurrentAmps = 20.0f;
 constexpr const uint kI2cDefaultSclPin = 15;
 constexpr const uint kI2cDefaultSdaPin = 14;
 
+// fan power draw in watts (INA226) -> pwm, one table per fan type; pick the
+// set matching the attached fan below
+constexpr CurvePoint kPwrToPwmCurveFanType0[]{
+    {5, 1500}, {10, 2000}, {30, 2600}, {50, 3100}, {70, 3600},
+    {80, 4400}, {90, 5500}, {110, 6800}, {120, 8100}, {145, 10000},
+};
+
+constexpr CurvePoint kPwrToPwmCurveFanType1[]{
+    {5, 1500}, {10, 2000}, {30, 2600}, {50, 3100}, {70, 3600},
+    {80, 4400}, {90, 5500}, {110, 6800}, {120, 8100}, {145, 10000},
+};
+
+constexpr FanCurves kFanType0Curves{kDefaultTempToPwmCurve,
+                                     kPwrToPwmCurveFanType0,
+                                     kDefaultTempToRpmCurve};
+constexpr FanCurves kFanType1Curves{kDefaultTempToPwmCurve,
+                                     kPwrToPwmCurveFanType1,
+                                     kDefaultTempToRpmCurve};
+
 }  // namespace
 
 int main() {

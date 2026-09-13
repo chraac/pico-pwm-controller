@@ -14,13 +14,16 @@ constexpr const uint kPwmFreqKhz = 25;
 constexpr const uint8_t kPwmPinCount = 4;
 constexpr const uint kPoolIntervalMs = 400;
 
+struct FanCurves;
+
 class SingleFanSpeedManager {
 public:
     // alias kept so SingleFanSpeedManager::ControlMode keeps working
     using ControlMode = FanControlMode;
 
     explicit SingleFanSpeedManager(uint pwm_gpio_pin, uint spd_gpio_pin,
-                                   ControlMode mode) noexcept;
+                                   ControlMode mode,
+                                   const FanCurves &fan_curves) noexcept;
     uint Next(float input) noexcept;
     uint GetTargetRpm() const noexcept { return target_rpm_; }
     uint GetFanSpeedRpm() noexcept { return speed_helper_.GetFanSpeedRpm(); }
@@ -39,6 +42,7 @@ private:
     uint target_rpm_;
     uint rpm_tolerance_;
     const ControlMode mode_;
+    const FanCurves &fan_curves_;
 
     DISALLOW_COPY(SingleFanSpeedManager);
     DISALLOW_MOVE(SingleFanSpeedManager);

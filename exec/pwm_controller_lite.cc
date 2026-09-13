@@ -59,10 +59,14 @@ int main() {
 
     using Mode = SingleFanSpeedManager::ControlMode;
     SingleFanSpeedManager managers[] = {
-        SingleFanSpeedManager{kPwm0Pin, kFanSpd0Pin, Mode::kTempToPwm},
-        SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin, Mode::kTempToPwm},
-        SingleFanSpeedManager{kPwm2Pin, kFanSpd2Pin, Mode::kTempToPwm},
-        SingleFanSpeedManager{kPwm3Pin, kFanSpd3Pin, Mode::kTempToRpm},
+        SingleFanSpeedManager{kPwm0Pin, kFanSpd0Pin, Mode::kTempToPwm,
+                              kDefaultFanCurves},
+        SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin, Mode::kTempToPwm,
+                              kDefaultFanCurves},
+        SingleFanSpeedManager{kPwm2Pin, kFanSpd2Pin, Mode::kTempToPwm,
+                              kDefaultFanCurves},
+        SingleFanSpeedManager{kPwm3Pin, kFanSpd3Pin, Mode::kTempToRpm,
+                              kDefaultFanCurves},
     };
 
     AdcHelper temp_adc{kDefaultTempPin};

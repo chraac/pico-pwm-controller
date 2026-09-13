@@ -39,7 +39,8 @@ inside the band, the PID is skipped to avoid hunting.
 ### Temperature mode
 
 Fans in temperature mode use a linear-interpolated curve
-(`kLinearFanPwmCurve` in [temp_helper.hh](exec/temp_helper.hh)):
+(`kDefaultTempToPwmCurve` in [temp_helper.hh](exec/temp_helper.hh); power mode
+uses `kDefaultPwrToPwmCurve`):
 
 | Temperature | Duty cycle |
 | ----------- | ---------- |

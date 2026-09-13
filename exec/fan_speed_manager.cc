@@ -36,13 +36,15 @@ namespace utility {
 
 SingleFanSpeedManager::SingleFanSpeedManager(uint pwm_gpio_pin,
                                              uint spd_gpio_pin,
-                                             ControlMode mode)
+                                             ControlMode mode,
+                                             const FanCurves &fan_curves)
     : pwm_(pwm_gpio_pin, kPwmFreqKhz),
       pid_(kStartCycle, kDefaultCycleDenom, 1, kP, kI, kD),
       speed_helper_(spd_gpio_pin),
       target_rpm_(kTargetRpm),
       rpm_tolerance_(kRpmTolerance),
-      mode_(mode) {
+      mode_(mode),
+      fan_curves_(fan_curves) {
     pwm_.SetDutyCycle(kStartCycle);
 }
 
@@ -53,8 +55,8 @@ uint SingleFanSpeedManager::Next(float input) noexcept {
         case ControlMode::kPwrToPwm: {
             const auto cycle =
                 mode_ == ControlMode::kTempToPwm
-                    ? kLinearFanTempToPwmCurve.GetCurveValue(input)
-                    : kLinearFanPwrToPwmCurve.GetCurveValue(input);
+                    ? GetCurveValue(fan_curves_.temp_to_pwm, input)
+                    : GetCurveValue(fan_curves_.pwr_to_pwm, input);
             pwm_.SetDutyCycle(cycle);
             log_debug("pwm.%d.cycle.%d.input.%.2f\n", int(pwm_.GetGpioPin()),
                       int(cycle), input);
@@ -62,7 +64,7 @@ uint SingleFanSpeedManager::Next(float input) noexcept {
         }
         case ControlMode::kTempToRpm:
             // curve picks the rpm target, the pid below drives pwm to it
-            target_rpm_ = kLinearFanTempToRpmCurve.GetCurveValue(input);
+            target_rpm_ = GetCurveValue(fan_curves_.temp_to_rpm, input);
             break;
     }
 
