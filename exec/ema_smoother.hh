@@ -1,66 +1,63 @@
 #pragma once
 
-#include <cmath>  // Required for std::isnan
+#include <algorithm>
+#include <cmath>
+
+#include "base_types.hh"
 
 namespace utility {
-class EmaSmoother {
-private:
-    float smoothed_value;
-    const float up_ratio;
-    const float down_ratio;
-    const float idle_threshold;  // Fixed lower bound for quiet desktop idle
 
+// Exponential moving average with separate rise/fall rates and an optional
+// idle floor the output snaps to instead of slowly decaying towards it
+class EmaSmoother {
 public:
-    // Constructor initializes const members and sets initial value to NAN.
-    // up_rate/down_rate must be in [0, 1]. idle_val is an optional lower
+    // up_rate/down_rate must be in [0, 1] and encode the smoothing time
+    // constant of one fixed update period. idle_val is an optional lower
     // bound on the output (e.g. a quiet fan baseline); omit it to disable
     // the clamp.
     // Examples: EmaSmoother(0.25f, 0.05f)
     //           EmaSmoother(0.15f, 0.01f, 35.0f)
-    EmaSmoother(float up_rate, float down_rate, float idle_val = -INFINITY)
-        : smoothed_value(NAN),
-          up_ratio(up_rate),
-          down_ratio(down_rate),
-          idle_threshold(idle_val) {}
+    EmaSmoother(float up_rate, float down_rate,
+                float idle_val = -INFINITY) noexcept
+        : up_ratio_(up_rate),
+          down_ratio_(down_rate),
+          idle_threshold_(idle_val) {}
 
-    // Blends current_value into the running average and returns it.
-    // Assumes a fixed update period — the ratios encode the smoothing
-    // time constant of that period.
-    float update(float current_value) noexcept {
+    // Blends current_value into the running average and returns it
+    float Update(float current_value) {
         // NAN input (failed read): hold the last good value
         if (std::isnan(current_value)) {
-            return smoothed_value;
+            return smoothed_value_;
         }
 
-        // If NAN, snap instantly to the current value
-        if (std::isnan(smoothed_value)) {
-            smoothed_value = current_value;
-            // Respect the idle floor on the first sample too
-            if (smoothed_value < idle_threshold) {
-                smoothed_value = idle_threshold;
-            }
-            return smoothed_value;
+        // NAN state (first sample): snap instantly
+        if (std::isnan(smoothed_value_)) {
+            smoothed_value_ = std::max(current_value, idle_threshold_);
+            return smoothed_value_;
         }
 
-        // Choose ratio based on direction
-        float ratio = (current_value > smoothed_value) ? up_ratio : down_ratio;
+        // asymmetric ratio: fast rise, slow fall
+        const auto ratio =
+            (current_value > smoothed_value_) ? up_ratio_ : down_ratio_;
+        smoothed_value_ =
+            current_value * ratio + smoothed_value_ * (1.0f - ratio);
 
-        // Core EMA formula
-        smoothed_value =
-            (current_value * ratio) + (smoothed_value * (1.0f - ratio));
-
-        // Quiet Optimization: If the smoothed trend sinks below your idle
-        // threshold, snap directly to it so the fan drops to its quietest
-        // baseline instantly instead of lazily decaying for 20 seconds.
-        if (smoothed_value < idle_threshold) {
-            smoothed_value = idle_threshold;
-        }
-
-        return smoothed_value;
+        // snap to the idle floor instead of decaying towards it for seconds
+        smoothed_value_ = std::max(smoothed_value_, idle_threshold_);
+        return smoothed_value_;
     }
 
-    // Reset back to uninitialized state
-    void reset() noexcept { smoothed_value = NAN; }
+    // back to uninitialized state
+    void Reset() { smoothed_value_ = NAN; }
+
+private:
+    const float up_ratio_;        // blend ratio when rising
+    const float down_ratio_;      // blend ratio when falling
+    const float idle_threshold_;  // output lower bound
+    float smoothed_value_ = NAN;  // running average, NAN until first update
+
+    DISALLOW_COPY(EmaSmoother);
+    DISALLOW_MOVE(EmaSmoother);
 };
 
 }  // namespace utility
