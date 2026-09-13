@@ -48,8 +48,7 @@ private:
 class Ws2812Helper {
 public:
     explicit Ws2812Helper(const uint pin, const bool rgbw = true,
-                          PIO pio = pio0,
-                          const uint freq_hz = 800000) noexcept
+                          PIO pio = pio0, const uint freq_hz = 800000) noexcept
         : pio_(pio),
           sm_(pio_claim_unused_sm(pio_, true)),
           offset_(pio_add_program(pio_, &ws2812_program)) {
@@ -59,10 +58,10 @@ public:
 
     void SetRgb(const uint8_t red, const uint8_t green,
                 const uint8_t blue) noexcept {
-        // pixels take GRB on the wire, the white byte rides last (SK6812 RGBW)
-        const uint32_t grbw = (uint32_t(green) << 24) | (uint32_t(red) << 16) |
+        // pixels take rgb on the wire, the white byte rides last (SK6812 RGBW)
+        const uint32_t rgbw = (uint32_t(red) << 24) | (uint32_t(green) << 16) |
                               (uint32_t(blue) << 8);
-        pio_sm_put_blocking(pio_, sm_, grbw);
+        pio_sm_put_blocking(pio_, sm_, rgbw);
         current_value_ = (red ? 1 : 0) | (green ? 2 : 0) | (blue ? 4 : 0);
     }
 
