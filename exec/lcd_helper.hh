@@ -152,10 +152,12 @@ private:
 };
 
 template <uint8_t __SclPin, uint8_t __SdaPin, size_t __ItemCount>
-using CustomLcdDrawer0 = LcdDrawer<CustomSsd1306Device0<__SclPin, __SdaPin>, __ItemCount>;
+using CustomLcdDrawer0 =
+    LcdDrawer<CustomSsd1306Device0<__SclPin, __SdaPin>, __ItemCount>;
 
 template <uint8_t __SclPin, uint8_t __SdaPin, size_t __ItemCount>
-using CustomLcdDrawer1 = LcdDrawer<CustomSsd1306Device1<__SclPin, __SdaPin>, __ItemCount>;
+using CustomLcdDrawer1 =
+    LcdDrawer<CustomSsd1306Device1<__SclPin, __SdaPin>, __ItemCount>;
 
 template <size_t __ItemCount>
 using XiaoRp2040LcdDrawer = LcdDrawer<CustomSsd1306Device1<7, 6>, __ItemCount>;

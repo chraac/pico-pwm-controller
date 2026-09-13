@@ -115,7 +115,7 @@ constexpr CurvePoint kDefaultTempToRpmCurve[]{
 
 // fan power draw in watts (INA226) -> pwm
 constexpr CurvePoint kDefaultPwrToPwmCurve[]{
-    {5, 1500}, {10, 2000}, {30, 2600}, {50, 3100}, {70, 3600},
+    {5, 1500},  {10, 2000}, {30, 2600},  {50, 3100},  {70, 3600},
     {80, 4400}, {90, 5500}, {110, 6800}, {120, 8100}, {145, 10000},
 };
 

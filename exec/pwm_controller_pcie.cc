@@ -39,21 +39,19 @@ constexpr const uint kI2cDefaultSdaPin = 14;
 // fan power draw in watts (INA226) -> pwm, one table per fan type; pick the
 // set matching the attached fan below
 constexpr CurvePoint kPwrToPwmCurveFanType0[]{
-    {5, 1500}, {10, 2000}, {30, 2600}, {50, 3100}, {70, 3600},
+    {5, 1500},  {10, 2000}, {30, 2600},  {50, 3100},  {70, 3600},
     {80, 4400}, {90, 5500}, {110, 6800}, {120, 8100}, {145, 10000},
 };
 
 constexpr CurvePoint kPwrToPwmCurveFanType1[]{
-    {5, 1500}, {10, 2000}, {30, 2600}, {50, 3100}, {70, 3600},
+    {5, 1500},  {10, 2000}, {30, 2600},  {50, 3100},  {70, 3600},
     {80, 4400}, {90, 5500}, {110, 6800}, {120, 8100}, {145, 10000},
 };
 
-constexpr FanCurves kFanType0Curves{kDefaultTempToPwmCurve,
-                                     kPwrToPwmCurveFanType0,
-                                     kDefaultTempToRpmCurve};
-constexpr FanCurves kFanType1Curves{kDefaultTempToPwmCurve,
-                                     kPwrToPwmCurveFanType1,
-                                     kDefaultTempToRpmCurve};
+constexpr FanCurves kFanType0Curves{
+    kDefaultTempToPwmCurve, kPwrToPwmCurveFanType0, kDefaultTempToRpmCurve};
+constexpr FanCurves kFanType1Curves{
+    kDefaultTempToPwmCurve, kPwrToPwmCurveFanType1, kDefaultTempToRpmCurve};
 
 }  // namespace
 
@@ -108,10 +106,9 @@ int main() {
                      int(fan_manager.GetPwmGpioPin()), int(rpm));
             auto &draw_item = drawer_items[i];
             draw_item.rpm = rpm;
-            draw_item.target =
-                draw_item.mode != FanControlMode::kTempToRpm
-                    ? (fan_manager.GetPwmCycle() / 100)
-                    : fan_manager.GetTargetRpm();
+            draw_item.target = draw_item.mode != FanControlMode::kTempToRpm
+                                   ? (fan_manager.GetPwmCycle() / 100)
+                                   : fan_manager.GetTargetRpm();
         }
 
         rgb_led.Next();
