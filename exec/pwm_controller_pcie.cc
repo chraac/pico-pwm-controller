@@ -113,6 +113,7 @@ int main() {
         LcdDrawer::TempItem{managers[1].GetControlMode()},
     };
 
+    bool led_off = false;
     log_info("main.entering.loop\n");
     for (auto next_interval = kBoardPoolIntervalMs;; sleep_ms(next_interval)) {
         const auto start_us = time_us_64();
@@ -140,7 +141,14 @@ int main() {
                                    : fan_manager.GetTargetRpm();
         }
 
-        SetPwrLedColor(rgb_led, watts, kLedGreenW, kLedRedW);
+        if (led_off) {
+            rgb_led.Off();
+        } else {
+            SetPwrLedColor(rgb_led, watts, kLedGreenW, kLedRedW);
+        }
+
+        led_off = !led_off;
+
         lcd_drawer.DrawPwrAndItems(watts, drawer_items);
 
         auto consumed_time_ms = (time_us_64() - start_us) / 1000;
