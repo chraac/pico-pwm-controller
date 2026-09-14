@@ -105,15 +105,17 @@ public:
     void SetContrast(uint8_t val) noexcept { device_.SetContrast(val); }
 
     void DrawTempAndItems(float temp, const TempItemArray &items) noexcept {
-        DrawItemsAndFooter("Temp:%.2fdeg", temp, items);
+        DrawItemsAndFooter("Temp:%.2fdeg", temp, 0, items);
     }
 
-    void DrawPwrAndItems(float pwr, const TempItemArray &items) noexcept {
-        DrawItemsAndFooter("Pwr:%.2fW", pwr, items);
+    void DrawPwrAndItems(float volt, float pwr,
+                         const TempItemArray &items) noexcept {
+        DrawItemsAndFooter("Volt:%.2fV, Pwr:%.2fW", volt, pwr, items);
     }
 
 private:
-    void DrawItemsAndFooter(const char *footer_fmt, float footer_value,
+    void DrawItemsAndFooter(const char *footer_fmt, float footer_value1,
+                            float footer_value2,
                             const TempItemArray &items) noexcept {
         device_.Clear();
         char buf[128] = {};
@@ -123,7 +125,7 @@ private:
             y += DrawSpeed(i, items[i], 0, y);
         }
 
-        snprintf(buf, sizeof(buf), footer_fmt, footer_value);
+        snprintf(buf, sizeof(buf), footer_fmt, footer_value1, footer_value2);
         device_.DrawString(buf, 0, y);
 
         device_.EndDraw();

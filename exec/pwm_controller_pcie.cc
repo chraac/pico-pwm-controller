@@ -135,7 +135,7 @@ int main() {
             auto &fan_manager = managers[i];
             auto rpm = fan_manager.Next(smoothed_watts);
             log_debug("fan.pwm_gpio.%d.rpm.%d\n",
-                     int(fan_manager.GetPwmGpioPin()), int(rpm));
+                      int(fan_manager.GetPwmGpioPin()), int(rpm));
             auto &draw_item = drawer_items[i];
             draw_item.rpm = rpm;
             draw_item.target = draw_item.mode != FanControlMode::kTempToRpm
@@ -151,7 +151,7 @@ int main() {
 
         led_off = !led_off;
 
-        lcd_drawer.DrawPwrAndItems(watts, drawer_items);
+        lcd_drawer.DrawPwrAndItems(volts, watts, drawer_items);
 
         auto consumed_time_ms = (time_us_64() - start_us) / 1000;
         log_debug("current iteration time cost: %dms\n", int(consumed_time_ms));
