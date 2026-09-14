@@ -110,7 +110,7 @@ public:
 
     void DrawPwrAndItems(float volt, float pwr,
                          const TempItemArray &items) noexcept {
-        DrawItemsAndFooter("Volt:%.2fV, Pwr:%.2fW", volt, pwr, items);
+        DrawItemsAndFooter("V:%.2fV, P:%.2fW", volt, pwr, items);
     }
 
 private:
