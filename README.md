@@ -8,11 +8,14 @@ A PWM fan controller runs on raspberry-pico
 
 - Controls up to 4 independent 4-wire PWM fans (25 kHz PWM, following the
   [Noctua PWM specification](https://noctua.at/pub/media/wysiwyg/Noctua_PWM_specifications_white_paper.pdf))
-- Two control modes:
+- Three control modes:
   - **RPM mode** – closed-loop [PID](exec/pid.hh) control that holds each fan at a
     target RPM using the fan's tachometer signal
   - **Temperature mode** – drives the PWM duty cycle from an NTC thermistor
     reading through a piecewise-linear temperature curve
+  - **Power mode** (PCIe variant) – drives the PWM duty cycle from the fan's
+    power draw, measured by an INA226 shunt monitor, through a
+    piecewise-linear watts → duty curve
 - Fan speed (RPM) measurement from the tach signal: `rpm = freq[Hz] * 60 / 2`
 - SSD1306 128x64 I2C LCD showing temperature, fan RPM and duty cycle
 - RGB status LED
@@ -71,7 +74,8 @@ An NTC thermistor (default: 100kΩ, β=3950) is wired as a voltage divider with 
 Built and tested with the Seeed XIAO RP2040 (default) and XIAO RP2350 form
 factor; any RP2040/RP2350 board works as long as the pin map fits — pins are
 configured in [pwm_controller_lite.cc](exec/pwm_controller_lite.cc) /
-[pwm_controller.cc](exec/pwm_controller.cc).
+[pwm_controller.cc](exec/pwm_controller.cc) /
+[pwm_controller_pcie.cc](exec/pwm_controller_pcie.cc).
 
 ![pins](docs/pico_pwm_pins.png)
 
@@ -89,8 +93,11 @@ after the variant):
   multiplexer (select pins GP8–GP11) to a single input pin (GP13); fans are
   polled one at a time and each PWM group is PID-controlled on the maximum fan
   speed of its group.
-- **PCIe** – [pwm_controller_pcie.cc](exec/pwm_controller_pcie.cc): PCIe-style
-  fan card with INA226 power/voltage monitoring and LCD readout.
+- **PCIe** – [pwm_controller_pcie.cc](exec/pwm_controller_pcie.cc): 2-fan
+  PCIe-style fan card. Each fan's duty cycle is driven from its own power draw
+  (INA226 shunt monitor, per-fan-type watts → PWM curve). A 128x32 LCD shows
+  power, voltage and fan status, and a WS2812 RGB LED shifts green → red as
+  power draw rises from 20 W to 90 W.
 
 ### Pin mapping
 
@@ -109,6 +116,16 @@ PWM on GP3, GP2, GP26, GP28 and tach on GP4, GP1, GP27, GP29.
 
 Mux variant ([fan_speed_manager.cc](exec/fan_speed_manager.cc)): PWM on
 GP0, GP7, GP27, GP17; tach input on GP13; mux select bits on GP8–GP11.
+
+PCIe variant ([pwm_controller_pcie.cc](exec/pwm_controller_pcie.cc)):
+
+| Function    | Pin                  |
+| ----------- | -------------------- |
+| Fan PWM     | GP13, GP11           |
+| Fan tach    | GP12, GP10           |
+| INA226 I2C1 | SCL=GP15, SDA=GP14   |
+| LCD I2C0    | SCL=GP1, SDA=GP0     |
+| WS2812 LED  | GP16                 |
 
 ## Build Project
 
@@ -171,6 +188,7 @@ A simple simulation for tuning the PID constants is available in
 exec/            firmware sources
   pwm_controller_lite.cc   lite firmware entry point
   pwm_controller.cc        mux firmware entry point
+  pwm_controller_pcie.cc   pcie firmware entry point
   fan_speed_manager.*      fan control loop and PID wiring
   temp_helper.hh           thermistor + temperature curve
   frequency_counter.*      tach pulse counting
