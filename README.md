@@ -77,10 +77,10 @@ configured in [pwm_controller_lite.cc](exec/pwm_controller_lite.cc) /
 
 ### Firmware variants
 
-Two firmware variants are selected at build time with `BUILD_LITE` in the
-top-level [CMakeLists.txt](CMakeLists.txt):
+Three firmware variants are built as separate executables (`.uf2` files named
+after the variant):
 
-- **Lite (default)** – [pwm_controller_lite.cc](exec/pwm_controller_lite.cc):
+- **Lite** – [pwm_controller_lite.cc](exec/pwm_controller_lite.cc):
   4 independent fans, each with its own PWM + tach pin, plus LCD, RGB LED and
   temperature control. The first 3 fans run in temperature mode and the 4th in
   RPM mode.
@@ -89,6 +89,8 @@ top-level [CMakeLists.txt](CMakeLists.txt):
   multiplexer (select pins GP8–GP11) to a single input pin (GP13); fans are
   polled one at a time and each PWM group is PID-controlled on the maximum fan
   speed of its group.
+- **PCIe** – [pwm_controller_pcie.cc](exec/pwm_controller_pcie.cc): PCIe-style
+  fan card with INA226 power/voltage monitoring and LCD readout.
 
 ### Pin mapping
 
@@ -126,7 +128,8 @@ GP0, GP7, GP27, GP17; tach input on GP13; mux select bits on GP8–GP11.
     docker/docker-compose-compile.sh -rp2350
     ```
 
-3. Copy the build/release/pwm_controller.uf2 into RPI-RP2 drive
+3. Copy the wanted variant from build/release/ (`pwm_controller_lite.uf2`,
+   `pwm_controller.uf2` or `pwm_controller_pcie.uf2`) into the RPI-RP2 drive
 
 Both Debug and Release builds are produced under `build/debug/` and
 `build/release/` (`.uf2`, `.elf`, `.bin` and `.map` files).
@@ -148,7 +151,6 @@ Options are set in the top-level [CMakeLists.txt](CMakeLists.txt):
 
 | Option          | Default | Description                                        |
 | --------------- | ------- | -------------------------------------------------- |
-| `BUILD_LITE`    | `true`  | Build the lite firmware instead of the mux variant |
 | `BOARD_VERSION` | `"93"`  | Board revision, selects the lite pin map           |
 | `USB_STDIO`     | `true`  | Log over USB CDC instead of UART                   |
 
