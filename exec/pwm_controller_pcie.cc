@@ -29,7 +29,6 @@ constexpr const uint kFanSpd1Pin = 10;
 
 constexpr const uint kWs2812LedPin = 16;
 
-constexpr const uint kDefaultTargetRpm = 1900;
 constexpr const uint16_t kDefaultLcdWidth = 128;
 constexpr const uint16_t kDefaultLcdHeight = 32;
 constexpr const uint8_t kDefaultLcdContrast = 0x3F;
