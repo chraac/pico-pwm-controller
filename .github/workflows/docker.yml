@@ -33,6 +33,6 @@ jobs:
         run: |
           mkdir -p build/unit 
           cd build/unit 
-          cmake test -DCMAKE_BUILD_TYPE=Release 
+          cmake ../../test -DCMAKE_BUILD_TYPE=Release 
           make -j$(nproc)
           ctest --output-on-failure
