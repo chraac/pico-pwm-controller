@@ -1,9 +1,8 @@
 #pragma once
 
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
-#include <initializer_list>
-#include <map>
 
 #include "base_types.hh"
 
@@ -63,71 +62,67 @@ constexpr const ThermistorParams kNtc100k3950{
     100000,
 };
 
-template <class __CurveInterpolator>
-class TemperatureCurveCalculator {
-    using CurveInterpolator = __CurveInterpolator;
-    using TemperatureValueType = float;
-    using CurveValueType = uint32_t;
-    using CurveMap = std::map<CurveValueType, CurveValueType>;
+// A fan curve: points sorted by x, linearly interpolated between neighbors
+// and clamped below the first / above the last point. Tables are constexpr
+// and live in flash, no heap involved.
+struct CurvePoint {
+    uint32_t x;
+    uint32_t y;
+};
 
-public:
-    explicit TemperatureCurveCalculator(
-        std::initializer_list<CurveMap::value_type> init)
-        : temp_to_curve_value_(init) {}
+// non-owning view over a constexpr curve table
+struct CurveSpan {
+    template <size_t __PointCount>
+    constexpr CurveSpan(const CurvePoint (&points)[__PointCount])
+        : points(points), count(__PointCount) {}
 
-    CurveValueType GetCurveValue(TemperatureValueType temp) const {
-        auto r = temp_to_curve_value_.lower_bound(CurveValueType(temp));
-        if (r == temp_to_curve_value_.end()) {
-            r = std::prev(temp_to_curve_value_.end());
+    const CurvePoint *points;
+    size_t count;
+};
+
+constexpr uint32_t GetCurveValue(const CurveSpan &curve, float input) {
+    if (input <= float(curve.points[0].x)) {
+        return curve.points[0].y;
+    }
+    for (size_t i = 1; i < curve.count; ++i) {
+        if (input <= float(curve.points[i].x)) {
+            const auto &lo = curve.points[i - 1];
+            const auto &hi = curve.points[i];
+            return lo.y + float(hi.y - lo.y) * (input - float(lo.x)) /
+                              float(hi.x - lo.x);
         }
-
-        auto l = std::prev(r);
-        if (TemperatureValueType(r->first) == temp) {
-            l = r;
-        } else if (l == temp_to_curve_value_.end()) {
-            l = temp_to_curve_value_.begin();
-        }
-
-        return CurveInterpolator()(l->first, l->second, r->first, r->second,
-                                   temp);
     }
+    return curve.points[curve.count - 1].y;
+}
 
-private:
-    const CurveMap temp_to_curve_value_;
+// curve set of one fan type: the fan speed manager picks the curve matching
+// its control mode; boards pass the set matching the attached fan
+struct FanCurves {
+    CurveSpan temp_to_pwm;  // °C -> pwm cycle
+    CurveSpan pwr_to_pwm;   // watts (INA226) -> pwm cycle
+    CurveSpan temp_to_rpm;  // °C -> target rpm
 };
 
-struct LinearInterpolator {
-    uint32_t operator()(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1,
-                        float x) const {
-        return y0 + float(y1 - y0) * (x - float(x0)) / float(x1 - x0);
-    }
-};
-
-struct LowerBoundInterpolator {
-    uint32_t operator()(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1,
-                        float x) const {
-        (void)x0;
-        (void)x1;
-        (void)y1;
-        (void)x;
-        return y0;
-    }
-};
-
-using LinearTemperatureCurveCalculator =
-    TemperatureCurveCalculator<LinearInterpolator>;
-
-using LowerBoundTemperatureCurveCalculator =
-    TemperatureCurveCalculator<LowerBoundInterpolator>;
-
-const LinearTemperatureCurveCalculator kLinearFanPwmCurve{
+constexpr CurvePoint kDefaultTempToPwmCurve[]{
     {10, 1500}, {20, 2000}, {30, 2600}, {35, 3100}, {40, 3600},
     {45, 4400}, {50, 5500}, {55, 6800}, {60, 8100}, {65, 10000},
 };
 
-const LinearTemperatureCurveCalculator kLinearFanRpmCurve{
+constexpr CurvePoint kDefaultTempToRpmCurve[]{
     {20, 800},  {30, 1000}, {40, 1100}, {50, 1400},
     {60, 1600}, {70, 1800}, {80, 2000},
+};
+
+// fan power draw in watts (INA226) -> pwm
+constexpr CurvePoint kDefaultPwrToPwmCurve[]{
+    {5, 1500},  {10, 2000}, {30, 2600},  {50, 3100},  {70, 3600},
+    {80, 4400}, {90, 5500}, {110, 6800}, {120, 8100}, {145, 10000},
+};
+
+constexpr FanCurves kDefaultFanCurves{
+    kDefaultTempToPwmCurve,
+    kDefaultPwrToPwmCurve,
+    kDefaultTempToRpmCurve,
 };
 
 }  // namespace utility

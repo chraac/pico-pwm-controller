@@ -7,6 +7,7 @@
 
 #include "adc_helper.hh"
 #include "fan_speed_manager.hh"
+#include "ina226_helper.hh"
 #include "lcd_helper.hh"
 #include "logger.hh"
 #include "rgb_led_helper.hh"
@@ -42,7 +43,6 @@ constexpr const uint kRedPin = 17;
 constexpr const uint kGreenPin = 16;
 constexpr const uint kBluePin = 25;
 
-constexpr const uint kDefaultTargetRpm = 1900;
 constexpr const uint16_t kDefaultLcdWidth = 128;
 constexpr const uint16_t kDefaultLcdHeight = 64;
 constexpr const uint8_t kDefaultLcdContrast = 0x3F;
@@ -57,16 +57,17 @@ int main() {
 
     log_info("main.init.finished\n");
 
+    using Mode = SingleFanSpeedManager::ControlMode;
     SingleFanSpeedManager managers[] = {
-        SingleFanSpeedManager{kPwm0Pin, kFanSpd0Pin, true},
-        SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin, true},
-        SingleFanSpeedManager{kPwm2Pin, kFanSpd2Pin, true},
-        SingleFanSpeedManager{kPwm3Pin, kFanSpd3Pin, false},
+        SingleFanSpeedManager{kPwm0Pin, kFanSpd0Pin, Mode::kTempToPwm,
+                              kDefaultFanCurves},
+        SingleFanSpeedManager{kPwm1Pin, kFanSpd1Pin, Mode::kTempToPwm,
+                              kDefaultFanCurves},
+        SingleFanSpeedManager{kPwm2Pin, kFanSpd2Pin, Mode::kTempToPwm,
+                              kDefaultFanCurves},
+        SingleFanSpeedManager{kPwm3Pin, kFanSpd3Pin, Mode::kTempToRpm,
+                              kDefaultFanCurves},
     };
-
-    for (auto &fan_manager : managers) {
-        fan_manager.SetTargetRpm(kDefaultTargetRpm);
-    }
 
     AdcHelper temp_adc{kDefaultTempPin};
     RgbLedHelper rgb_led{kRedPin, kGreenPin, kBluePin};
@@ -75,10 +76,10 @@ int main() {
     LiteLcdDrawer lcd_drawer{kDefaultLcdWidth, kDefaultLcdHeight};
     lcd_drawer.SetContrast(kDefaultLcdContrast);
     LiteLcdDrawer::TempItemArray drawer_items = {
-        LiteLcdDrawer::TempItem{managers[0].IsControlByTemp()},
-        LiteLcdDrawer::TempItem{managers[1].IsControlByTemp()},
-        LiteLcdDrawer::TempItem{managers[2].IsControlByTemp()},
-        LiteLcdDrawer::TempItem{managers[3].IsControlByTemp()},
+        LiteLcdDrawer::TempItem{managers[0].GetControlMode()},
+        LiteLcdDrawer::TempItem{managers[1].GetControlMode()},
+        LiteLcdDrawer::TempItem{managers[2].GetControlMode()},
+        LiteLcdDrawer::TempItem{managers[3].GetControlMode()},
     };
 
     log_info("main.entering.loop\n");
@@ -98,9 +99,10 @@ int main() {
                      int(fan_manager.GetPwmGpioPin()), int(rpm));
             auto &draw_item = drawer_items[i];
             draw_item.rpm = rpm;
-            draw_item.target = draw_item.is_cycle
-                                   ? (fan_manager.GetPwmCycle() / 100)
-                                   : kDefaultTargetRpm;
+            draw_item.target =
+                draw_item.mode != FanControlMode::kTempToRpm
+                    ? (fan_manager.GetPwmCycle() / 100)
+                    : fan_manager.GetTargetRpm();
         }
 
         rgb_led.Next();

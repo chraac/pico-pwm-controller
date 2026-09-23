@@ -5,6 +5,7 @@
 #include <array>
 
 #include "base_types.hh"
+#include "fan_control_mode.hh"
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,6 +20,8 @@ extern "C" {
 namespace utility {
 
 class Ssd1306Device {
+    // 7-bit address (pico-sdk i2c API); 0x3C<<1=0x78 is the same device in
+    // 8-bit wire notation, which some module silkscreens print
     constexpr static const uint8_t kI2cAddr = 0x3C;
     constexpr static const uint32_t kI2cFreq = 400000;  // 400kHz
     constexpr static const uint8_t kDefaultContrast = 0x7F;
@@ -69,13 +72,18 @@ private:
     DISALLOW_MOVE(Ssd1306Device);
 };
 
-class XiaoRp2040Ssd1306Device : public Ssd1306Device {
-    constexpr static const uint8_t kI2cSclPin = 7;
-    constexpr static const uint8_t kI2cSdaPin = 6;
-
+template <uint8_t __SclPin, uint8_t __SdaPin>
+class CustomSsd1306Device0 : public Ssd1306Device {
 public:
-    explicit XiaoRp2040Ssd1306Device(uint16_t width, uint16_t height)
-        : Ssd1306Device(i2c1, kI2cSclPin, kI2cSdaPin, width, height) {}
+    explicit CustomSsd1306Device0(uint16_t width, uint16_t height)
+        : Ssd1306Device(i2c0, __SclPin, __SdaPin, width, height) {}
+};
+
+template <uint8_t __SclPin, uint8_t __SdaPin>
+class CustomSsd1306Device1 : public Ssd1306Device {
+public:
+    explicit CustomSsd1306Device1(uint16_t width, uint16_t height)
+        : Ssd1306Device(i2c1, __SclPin, __SdaPin, width, height) {}
 };
 
 template <class __DeviceType, size_t __ItemCount>
@@ -84,7 +92,7 @@ class LcdDrawer {
 
 public:
     struct TempItem {
-        bool is_cycle;
+        FanControlMode mode;
         uint32_t target;
         uint32_t rpm;
     };
@@ -97,6 +105,18 @@ public:
     void SetContrast(uint8_t val) noexcept { device_.SetContrast(val); }
 
     void DrawTempAndItems(float temp, const TempItemArray &items) noexcept {
+        DrawItemsAndFooter("Temp:%.2fdeg", temp, 0, items);
+    }
+
+    void DrawPwrAndItems(float volt, float pwr,
+                         const TempItemArray &items) noexcept {
+        DrawItemsAndFooter("V:%.2fV, P:%.2fW", volt, pwr, items);
+    }
+
+private:
+    void DrawItemsAndFooter(const char *footer_fmt, float footer_value1,
+                            float footer_value2,
+                            const TempItemArray &items) noexcept {
         device_.Clear();
         char buf[128] = {};
         uint16_t y = 0;
@@ -105,21 +125,21 @@ public:
             y += DrawSpeed(i, items[i], 0, y);
         }
 
-        snprintf(buf, sizeof(buf), "Temp:%.2fdeg", temp);
+        snprintf(buf, sizeof(buf), footer_fmt, footer_value1, footer_value2);
         device_.DrawString(buf, 0, y);
 
         device_.EndDraw();
     }
 
-private:
     uint16_t DrawSpeed(size_t index, const TempItem &item, uint16_t x,
                        uint16_t y) noexcept {
         char buf[128] = {};
-        if (item.is_cycle) {
-            snprintf(buf, sizeof(buf), "Spd%d: %d, Cyc: %d%%", (int)index,
+        if (item.mode == FanControlMode::kTempToRpm) {
+            snprintf(buf, sizeof(buf), "Spd%d: %d, Tag: %d", (int)index,
                      (int)item.rpm, (int)item.target);
         } else {
-            snprintf(buf, sizeof(buf), "Spd%d: %d, Tag: %d", (int)index,
+            // both pwm modes drive the duty cycle straight from their curve
+            snprintf(buf, sizeof(buf), "Spd%d: %d, Cyc: %d%%", (int)index,
                      (int)item.rpm, (int)item.target);
         }
 
@@ -133,7 +153,15 @@ private:
     DISALLOW_MOVE(LcdDrawer);
 };
 
+template <uint8_t __SclPin, uint8_t __SdaPin, size_t __ItemCount>
+using CustomLcdDrawer0 =
+    LcdDrawer<CustomSsd1306Device0<__SclPin, __SdaPin>, __ItemCount>;
+
+template <uint8_t __SclPin, uint8_t __SdaPin, size_t __ItemCount>
+using CustomLcdDrawer1 =
+    LcdDrawer<CustomSsd1306Device1<__SclPin, __SdaPin>, __ItemCount>;
+
 template <size_t __ItemCount>
-using XiaoRp2040LcdDrawer = LcdDrawer<XiaoRp2040Ssd1306Device, __ItemCount>;
+using XiaoRp2040LcdDrawer = LcdDrawer<CustomSsd1306Device1<7, 6>, __ItemCount>;
 
 }  // namespace utility
