@@ -199,4 +199,10 @@ docker/          docker-based build environment
 
 ## Running picture
 
-![pic](pic/pic.jpg)
+### pwm_controller_lite
+
+![pwm_controller_lite](pic/pwm_controller_lite.jpg)
+
+### pwm_controller_pcie8
+
+![pwm_controller_pcie8](pic/pwm_controller_pcie8.jpg)
