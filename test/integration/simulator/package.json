@@ -1,0 +1,11 @@
+{
+  "name": "pwm-controller-integration-simulator",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Vendored rp2040js simulator for pico-pwm-controller integration tests (offline: file: tarballs)",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "rp2040js": "file:vendor/rp2040js-1.3.4.tgz",
+    "uf2": "file:vendor/uf2-2.0.0.tgz"
+  }
+}
