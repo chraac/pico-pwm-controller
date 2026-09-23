@@ -94,8 +94,8 @@ after the variant):
   polled one at a time and each PWM group is PID-controlled on the maximum fan
   speed of its group.
 - **PCIe** – [pwm_controller_pcie.cc](exec/pwm_controller_pcie.cc): 2-fan
-  PCIe-style fan card. Each fan's duty cycle is driven from its own power draw
-  (INA226 shunt monitor, per-fan-type watts → PWM curve). A 128x32 LCD shows
+  PCIe-style fan card. Both fans' duty cycles are driven from the card's power
+  draw (INA226 shunt monitor, per-fan-type watts → PWM curve). A 128x32 LCD shows
   power, voltage and fan status, and a WS2812 RGB LED shifts green → red as
   power draw rises from 20 W to 90 W.
 
