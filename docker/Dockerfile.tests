@@ -1,10 +1,11 @@
 FROM node:20-bookworm-slim
 
 # Emulator test image: Node + the VENDORED rp2040js simulator (see
-# test/integration/simulator/). No registry access needed at build time.
+# test/integration/simulator/). Tarballs are extracted directly -- no npm,
+# no registry access at build time.
 WORKDIR /opt/tests
 COPY test/integration/simulator/ ./simulator/
-RUN cd simulator && npm install --offline --no-audit --no-fund
+RUN bash ./simulator/setup.sh
 
-# Smoke: node must run with the vendored deps only
-RUN node -e "require('./simulator/node_modules/rp2040js')" || true
+# Smoke: the simulator must load from the extracted packages alone
+RUN node -e "require('./simulator/node_modules/rp2040js'); require('./simulator/node_modules/uf2')"

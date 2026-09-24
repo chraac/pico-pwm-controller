@@ -47,16 +47,18 @@ if [[ ! -f "$FW_PATH" ]]; then
     echo "build it first:  docker/docker-compose-compile.sh" >&2
     exit 1
 fi
+FW_PATH=$(realpath "$FW_PATH")
 
 if ! command -v node > /dev/null 2>&1; then
     echo "error: node (v20+) not found in PATH" >&2
     exit 1
 fi
 
-# One-time offline setup from the vendored tarball (no registry access).
-if [[ ! -d "$_sim_dir/node_modules" ]]; then
+# One-time offline setup: extract the vendored tarballs into node_modules
+# (no npm / registry involved -- see simulator/setup.sh).
+if [[ ! -d "$_sim_dir/node_modules/rp2040js" ]]; then
     echo "setting up vendored simulator (offline)..."
-    (cd "$_sim_dir" && npm install --offline --no-audit --no-fund)
+    bash "$_sim_dir/setup.sh"
 fi
 
 cd "$_script_dir"
