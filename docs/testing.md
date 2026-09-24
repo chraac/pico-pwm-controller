@@ -2,7 +2,8 @@
 
 Two layers, both run in docker / CI (`.github/workflows/docker.yml`) and
 usable locally. No local toolchain needed — everything runs through the
-`chraac/pico-builder` image.
+`chraac/pico-builder` image. For the layout and design of what lives under
+`test/`, see [test/README.md](../test/README.md).
 
 ## Unit tests (host, GoogleTest)
 
