@@ -6,13 +6,14 @@ function createFakeSsd1306() {
     let byteCount = 0;
     let buf = [];
     return {
-        bus: 1, // shares i2c1 with the INA226 on the pcie board
+        bus: 0, // pcie main uses CustomLcdDrawer0<...> = CustomSsd1306Device0 = i2c0
         address: 0x3c,
         transactions: 0,
         get byteCount() {
             return byteCount;
         },
         writeByte(value) {
+            byteCount++;
             buf.push(value);
             return true; // ACK everything
         },

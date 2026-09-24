@@ -23,10 +23,10 @@ const REG = {
 const MAX_CURRENT_AMPS = 20.0;
 const CURRENT_LSB = MAX_CURRENT_AMPS / 32768;
 
-function createFakeIna226({ powerWatts = 0, busVolts = 12, shuntMilliVolts = 0 } = {}) {
+function createFakeIna226({ powerWatts = 0, busVolts = 12, shuntMilliVolts = 0, idOk = true } = {}) {
     const regs = new Map();
-    regs.set(REG.MANUFACTURER_ID, 0x5449); // 'TI'
-    regs.set(REG.DIE_ID, 0x2260);
+    regs.set(REG.MANUFACTURER_ID, idOk ? 0x5449 : 0x0000); // 'TI'
+    regs.set(REG.DIE_ID, idOk ? 0x2260 : 0x0000);
     const writes = [];
 
     const state = { powerWatts, busVolts, shuntMilliVolts };

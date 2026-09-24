@@ -79,21 +79,26 @@ function loadElf(mcu, buf) {
 // Wire the byte-level i2c slave hooks (verified against rp2040js
 // src/peripherals/i2c.ts): onStart/onConnect/onWriteByte/onReadByte/onStop,
 // each completing through the peripheral's complete*() methods.
-function attachI2cDevice(i2c, devices) {
+function attachI2cDevice(i2c, devices, name, debug) {
     let selected = null;
     i2c.onStart = () => i2c.completeStart();
     i2c.onConnect = (address) => {
         selected = devices.find((d) => d.address === address) ?? null;
+        if (debug) console.error(`[i2c${name}] connect 0x${address.toString(16)} -> ${selected ? 'ACK' : 'NACK'}`);
         if (selected?.startWrite) selected.startWrite();
         i2c.completeConnect(!!selected);
     };
     i2c.onWriteByte = (value) => {
+        if (debug) console.error(`[i2c${name}] write 0x${value.toString(16)}`);
         i2c.completeWrite(selected ? selected.writeByte(value) !== false : false);
     };
     i2c.onReadByte = (ack) => {
-        i2c.completeRead(selected ? selected.readByte() : 0xff);
+        const value = selected ? selected.readByte() : 0xff;
+        if (debug) console.error(`[i2c${name}] read -> 0x${value.toString(16)}`);
+        i2c.completeRead(value);
     };
     i2c.onStop = () => {
+        if (debug) console.error(`[i2c${name}] stop`);
         selected = null;
         i2c.completeStop();
     };
@@ -119,8 +124,12 @@ function createRunner({ fwPath, i2cDevices = [] } = {}) {
         if (!byBus.has(bus)) byBus.set(bus, []);
         byBus.get(bus).push(dev);
     }
-    for (const [bus, devices] of byBus) {
-        attachI2cDevice(mcu.i2c[bus], devices);
+    const debug = !!process.env.PWM_TEST_DEBUG;
+    // Hook BOTH buses even when empty: our hooks serve 0xff for unknown
+    // addresses (like a pull-up-only bus), while the rp2040js defaults
+    // wedge the SDK driver after an address NACK (read never completes).
+    for (const bus of [0, 1]) {
+        attachI2cDevice(mcu.i2c[bus], byBus.get(bus) ?? [], bus, debug);
     }
 
     // stdout capture: UART0 and USB CDC both feed the same line buffer

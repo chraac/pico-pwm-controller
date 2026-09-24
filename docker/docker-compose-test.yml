@@ -50,6 +50,9 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.tests
     image: chraac/pico-tests:latest
+    depends_on:
+      pico-builder-emu-fw:
+        condition: service_completed_successfully
     environment:
       - REPO_DIR=/pico-pwm-controller
       - OUTPUT_DIR=/output

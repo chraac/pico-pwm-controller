@@ -19,7 +19,12 @@ using namespace utility;
 
 namespace {
 
+#ifdef INTEGRATION_TEST
+// Emulator build (test/integration): short loop for fast scenarios
+constexpr const uint kBoardPoolIntervalMs = 100;
+#else
 constexpr const uint kBoardPoolIntervalMs = 500;
+#endif
 
 constexpr const uint kPwm0Pin = 13;
 constexpr const uint kPwm1Pin = 11;
@@ -79,8 +84,16 @@ void SetPwrLedColor(Ws2812Helper &led, const float watts, const float low_w,
 }  // namespace
 
 int main() {
-    stdio_usb_init();
+    // clocks first: matches runtime_init order, and stdio (uart or usb)
+    // needs the final clock tree for its divisor setup
     clocks_init();
+#ifdef UART_STDIO
+    // stdio over UART: deterministic to capture in the emulator (and fixes
+    // linking with USB_STDIO=false, when pico_stdio_usb is not linked)
+    stdio_uart_init();
+#else
+    stdio_usb_init();
+#endif
 
     log_info("main.init.finished\n");
 
@@ -115,6 +128,7 @@ int main() {
     };
 
     bool led_off = false;
+    int test_iter = 0;
     log_info("main.entering.loop\n");
     for (auto next_interval = kBoardPoolIntervalMs;; sleep_ms(next_interval)) {
         const auto start_us = time_us_64();
@@ -130,9 +144,11 @@ int main() {
             amps, watts, smoothed_watts, volts);
 
         static_assert(std::size(managers) == 2);
+        uint loop_rpm[std::size(managers)] = {};
         for (size_t i = 0; i < std::size(managers); ++i) {
             auto &fan_manager = managers[i];
             auto rpm = fan_manager.Next(smoothed_watts);
+            loop_rpm[i] = rpm;
             log_debug("fan.pwm_gpio.%d.rpm.%d\n",
                       int(fan_manager.GetPwmGpioPin()), int(rpm));
             auto &draw_item = drawer_items[i];
@@ -141,6 +157,14 @@ int main() {
                                    ? (fan_manager.GetPwmCycle() / 100)
                                    : fan_manager.GetTargetRpm();
         }
+
+#ifdef INTEGRATION_TEST
+        // machine-parsable state line for the emulator scenarios
+        log_info("TEST: it=%d w=%.3f sw=%.3f pwm0=%u rpm0=%u pwm1=%u rpm1=%u\n",
+                 test_iter++, watts, smoothed_watts,
+                 managers[0].GetPwmCycle(), loop_rpm[0],
+                 managers[1].GetPwmCycle(), loop_rpm[1]);
+#endif
 
         if (led_off) {
             rgb_led.Off();

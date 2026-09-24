@@ -1,3 +1,6 @@
-﻿build
+build
 build_pico
 .vscode
+build-test
+emu-fw
+test/integration/simulator/node_modules

@@ -182,6 +182,17 @@ with any serial terminal, e.g. `screen /dev/ttyACM0` or
 A simple simulation for tuning the PID constants is available in
 [exec/test/pid_simulator.py](exec/test/pid_simulator.py).
 
+## Testing
+
+Host unit tests (GoogleTest against a fake pico-sdk) and emulator
+integration tests (rp2040js) live under `test/` — see
+[docs/testing.md](docs/testing.md):
+
+```sh
+docker/docker-compose-test.sh unit          # unit tests
+docker/docker-compose-test.sh integration   # emulator scenarios
+```
+
 ## Project layout
 
 ```text
