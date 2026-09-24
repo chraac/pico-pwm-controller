@@ -63,9 +63,9 @@ services:
       - ${OUTPUT_DIR}:/output:ro
     command:
       - bash
-      - -c
-      - |
-        exec bash /pico-pwm-controller/test/integration/run.sh "$${FW_PATH:-/output/emu/pwm_controller_pcie_emu.elf}" --ci
+      - /pico-pwm-controller/test/integration/run.sh
+      - /output/emu/pwm_controller_pcie_emu.elf
+      - --ci
     restart: "no"
 
 volumes:
