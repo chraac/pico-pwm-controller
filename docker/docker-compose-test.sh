@@ -33,15 +33,22 @@ mkdir -p $_output_dir
 set -e
 
 run_unit() {
+    # sequential `compose run` (not `up --abort-on-container-exit`): each job
+    # is a batch container; run propagates its exit code without killing
+    # siblings when another service exits
     OUTPUT_DIR=$_output_dir docker compose -f docker-compose-test.yml \
-        up --build --abort-on-container-exit --exit-code-from pico-builder-unit-tests \
-        pico-builder-unit-tests
+        build pico-builder-unit-tests
+    OUTPUT_DIR=$_output_dir docker compose -f docker-compose-test.yml \
+        run --rm pico-builder-unit-tests
 }
 
 run_integration() {
     OUTPUT_DIR=$_output_dir docker compose -f docker-compose-test.yml \
-        up --build --abort-on-container-exit --exit-code-from pico-tests-integration \
-        pico-builder-emu-fw pico-tests-integration
+        build pico-tests-integration
+    OUTPUT_DIR=$_output_dir docker compose -f docker-compose-test.yml \
+        run --rm pico-builder-emu-fw
+    OUTPUT_DIR=$_output_dir docker compose -f docker-compose-test.yml \
+        run --rm pico-tests-integration
 }
 
 case $_cmd in
