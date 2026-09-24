@@ -10,11 +10,13 @@ set -euo pipefail
 
 _script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 _repo_dir=$(realpath "$_script_dir/../..")
-_sim_dir="$_script_dir/simulator"
+# The simulator package lives beside this script, unless overridden (the
+# docker test image bakes an extracted copy at /opt/tests/simulator -- the
+# repo mount there is read-only, so setup would fail).
+_sim_dir="${PWM_SIM_DIR:-$_script_dir/simulator}"
 
 FW_PATH=""
 MODE="--smoke"
-EXTRA_ARGS=()
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -22,7 +24,15 @@ while [[ $# -gt 0 ]]; do
         MODE="$1"
         shift
         ;;
+    -*)  # future flags
+        echo "error: unknown option: $1" >&2
+        exit 1
+        ;;
     *)
+        if [[ -n "$FW_PATH" ]]; then
+            echo "error: unexpected extra argument: $1 (only one firmware path)" >&2
+            exit 1
+        fi
         FW_PATH="$1"
         shift
         ;;

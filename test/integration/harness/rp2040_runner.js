@@ -152,7 +152,12 @@ function createRunner({ fwPath, i2cDevices = [] } = {}) {
         for (const byte of buffer) feedByte(byte);
     };
 
-    // boot: jump straight into the flash image (like the upstream demo)
+    // Boot into the flash image. Pico images begin with the 256-byte boot2
+    // stage as RAW CODE (its entry point is the flash base; the app vector
+    // table lives after it), so PC=0x10000000 enters boot2 correctly and it
+    // brings up XIP before jumping to the app -- same as the upstream
+    // emulator-run demo. (Do NOT jump through word[1] as a "reset vector":
+    // that is mid-boot2 code, and the image never boots.)
     mcu.core.PC = FLASH_BASE;
     simulator.execute();
 

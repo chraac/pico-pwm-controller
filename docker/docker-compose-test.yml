@@ -56,6 +56,8 @@ services:
     environment:
       - REPO_DIR=/pico-pwm-controller
       - OUTPUT_DIR=/output
+      # use the simulator deps baked into the image; the repo mount is :ro
+      - PWM_SIM_DIR=/opt/tests/simulator
     volumes:
       - ..:/pico-pwm-controller:ro
       - ${OUTPUT_DIR}:/output:ro
