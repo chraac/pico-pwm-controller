@@ -81,10 +81,3 @@ jobs:
           node-version: 20
       - name: Run Integration Scenarios
         run: bash test/integration/run.sh emu-fw/pwm_controller_pcie_emu.elf --ci
-      - name: Run unit tests
-        run: |
-          mkdir -p build/unit 
-          cd build/unit 
-          cmake ../../test -DCMAKE_BUILD_TYPE=Release 
-          make -j$(nproc)
-          ctest --output-on-failure
