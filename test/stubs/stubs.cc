@@ -180,7 +180,8 @@ void pwm_config_set_clkdiv_mode(pwm_config *, enum pwm_clkdiv_mode) {}
 void pwm_config_set_output_polarity(pwm_config *, bool, bool) {}
 void pwm_config_set_wrap(pwm_config *c, uint32_t wrap) { c->top = wrap; }
 
-uint pwm_gpio_to_slice_num(uint gpio) { return gpio / 2; }
+// RP2040: 8 PWM slices, slice number wraps every 16 GPIOs (SDK mapping)
+uint pwm_gpio_to_slice_num(uint gpio) { return (gpio >> 1) & 7; }
 uint pwm_gpio_to_channel(uint gpio) { return gpio & 1; }
 uint pwm_init(uint slice_num, pwm_config *c, bool start) {
     (void)start;
