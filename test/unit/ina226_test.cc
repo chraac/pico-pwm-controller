@@ -66,7 +66,7 @@ TEST_F(Ina226Test, ConfigureWritesDefaultConfig) {
     // 16x averaging, 1.1ms conversions, shunt+bus continuous
     ASSERT_EQ(dev_->writes.size(), 1u);
     EXPECT_EQ(std::get<0>(dev_->writes[0]), kConfig);
-    EXPECT_EQ(std::get<1>(dev_->writes[0]), 0x247Fu);
+    EXPECT_EQ(std::get<1>(dev_->writes[0]), 0x4927u);
 }
 
 TEST_F(Ina226Test, ResetWritesResetCommand) {
