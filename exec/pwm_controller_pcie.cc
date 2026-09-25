@@ -10,6 +10,7 @@
 #include "ema_smoother.hh"
 #include "fan_speed_manager.hh"
 #include "ina226_helper.hh"
+#include "integ_test.hh"
 #include "lcd_helper.hh"
 #include "logger.hh"
 #include "rgb_led_helper.hh"
@@ -19,12 +20,9 @@ using namespace utility;
 
 namespace {
 
-#ifdef INTEGRATION_TEST
-// Emulator build (test/integration): short loop for fast scenarios
-constexpr const uint kBoardPoolIntervalMs = 100;
-#else
-constexpr const uint kBoardPoolIntervalMs = 500;
-#endif
+// pcie board polls at 500 ms; the emulator build shortens this
+// (exec/integ_test.hh)
+constexpr const uint kBoardPoolIntervalMs = kIntegPoolIntervalMs;
 
 constexpr const uint kPwm0Pin = 13;
 constexpr const uint kPwm1Pin = 11;
@@ -128,7 +126,7 @@ int main() {
     };
 
     bool led_off = false;
-    int test_iter = 0;
+    [[maybe_unused]] int test_iter = 0;  // log_integ_test only, emu builds
     log_info("main.entering.loop\n");
     for (auto next_interval = kBoardPoolIntervalMs;; sleep_ms(next_interval)) {
         const auto start_us = time_us_64();
@@ -144,7 +142,7 @@ int main() {
             amps, watts, smoothed_watts, volts);
 
         static_assert(std::size(managers) == 2);
-        uint loop_rpm[std::size(managers)] = {};
+        [[maybe_unused]] uint loop_rpm[std::size(managers)] = {};  // log_integ_test
         for (size_t i = 0; i < std::size(managers); ++i) {
             auto &fan_manager = managers[i];
             auto rpm = fan_manager.Next(smoothed_watts);
@@ -158,13 +156,13 @@ int main() {
                                    : fan_manager.GetTargetRpm();
         }
 
-#ifdef INTEGRATION_TEST
-        // machine-parsable state line for the emulator scenarios
-        log_info("TEST: it=%d w=%.3f sw=%.3f pwm0=%u rpm0=%u pwm1=%u rpm1=%u\n",
-                 test_iter++, watts, smoothed_watts,
-                 managers[0].GetPwmCycle(), loop_rpm[0],
-                 managers[1].GetPwmCycle(), loop_rpm[1]);
-#endif
+        // int() casts: uint32_t is `unsigned long` on arm-none-eabi, so %u
+        // alone trips -Wformat (same convention as the log_debug line above)
+        log_integ_test(
+            "TEST: it=%d w=%.3f sw=%.3f pwm0=%d rpm0=%d pwm1=%d rpm1=%d\n",
+            test_iter++, watts, smoothed_watts,
+            int(managers[0].GetPwmCycle()), int(loop_rpm[0]),
+            int(managers[1].GetPwmCycle()), int(loop_rpm[1]));
 
         if (led_off) {
             rgb_led.Off();
