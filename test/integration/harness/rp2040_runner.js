@@ -15,15 +15,24 @@
 const fs = require('fs');
 const path = require('path');
 
-// Deps live in the sibling simulator/ package (vendored, offline). Node does
-// not look in sibling dirs, so resolve them explicitly.
+// Deps live in the simulator package (vendored, offline). Node does not look
+// in sibling dirs, so resolve them explicitly. PWM_SIM_DIR overrides for the
+// docker test image, where they are baked at /opt/tests/simulator and the
+// repo mount (with its own simulator/) is read-only.
+function resolveSim(relativePath) {
+    if (process.env.PWM_SIM_DIR) {
+        return path.join(process.env.PWM_SIM_DIR, relativePath);
+    }
+    return path.join(__dirname, '..', 'simulator', relativePath);
+}
+
 function requireSim(moduleName) {
-    return require(path.join(__dirname, '..', 'simulator', 'node_modules', moduleName));
+    return require(resolveSim(path.join('node_modules', moduleName)));
 }
 
 const { Simulator, USBCDC, ConsoleLogger, LogLevel } = requireSim('rp2040js');
 const { decodeBlock } = requireSim('uf2');
-const { bootromB1 } = require('../simulator/vendor/bootrom.js');
+const { bootromB1 } = require(resolveSim('vendor/bootrom.js'));
 
 const FLASH_BASE = 0x10000000;
 

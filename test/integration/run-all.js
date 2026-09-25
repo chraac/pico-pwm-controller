@@ -19,7 +19,8 @@ function assertEq(actual, expected, label) {
 }
 
 function assertNear(actual, expected, tolerance, label) {
-    if (Math.abs(actual - expected) > tolerance) {
+    // NaN (missing/garbled field) must fail, not pass the comparison
+    if (!Number.isFinite(actual) || Math.abs(actual - expected) > tolerance) {
         throw new Error(`${label}: expected ~${expected} (+-${tolerance}), got ${actual}`);
     }
 }
