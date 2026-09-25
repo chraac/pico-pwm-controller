@@ -30,6 +30,7 @@ protected:
     static constexpr uint8_t kCurrent = 0x04;
     static constexpr uint8_t kCalibration = 0x05;
     static constexpr uint8_t kMaskEnable = 0x06;
+    static constexpr uint8_t kDieId = 0xFF;
 };
 
 TEST_F(Ina226Test, ConstructorSetsUpBusAndPins) {
@@ -42,6 +43,13 @@ TEST_F(Ina226Test, ConstructorSetsUpBusAndPins) {
 }
 
 TEST_F(Ina226Test, ProbeSucceedsWithIds) {
+    auto device = make_device();
+    EXPECT_TRUE(device.Probe());
+}
+
+TEST_F(Ina226Test, ProbeAcceptsAlternateDieId) {
+    // 0x2260 or 0x2261 depending on assembly site (SBOS547C Table 7-1)
+    dev_->regs[kDieId] = 0x2261;
     auto device = make_device();
     EXPECT_TRUE(device.Probe());
 }
