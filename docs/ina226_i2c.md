@@ -16,13 +16,16 @@ GPIO6 (SDA) / GPIO7 (SCL) — the INA226 can hang on the same two wires.
 
 | INA226 pin | Connect to                    |
 | ---------- | ----------------------------- |
-| VS         | 3V3 (also fine: 5V, max 36V)  |
+| VS         | 3V3 (supply range 2.7–5.5 V)  |
 | GND        | GND (same ground as Pico)     |
 | SDA        | GPIO6 (i2c1 SDA) + pull-up    |
 | SCL        | GPIO7 (i2c1 SCL) + pull-up    |
 | A1 / A0    | GND (address 0x40), see below |
-| VBUS       | load supply rail to measure   |
+| VBUS       | load supply rail, 0–36 V      |
 | IN+ / IN−  | across the shunt resistor     |
+
+Note the 36 V rating applies to the VBUS pin and the IN+/IN− common-mode
+input only — the **VS supply pin is 2.7–5.5 V** (6 V absolute max).
 
 Shunt wiring: the measured current must flow **through** the shunt —
 put the shunt in the load's high-side (or low-side) path, `IN+` on the
@@ -32,10 +35,11 @@ supply side, `IN−` on the load side, and keep the layout kelvin-style
 ## 2. I2C addressing
 
 - 7-bit address range **0x40–0x4F** (16 addresses), set by A1/A0 pins
-  (each low/high/floating → 2 bits).
+  (each pin ties to GND, VS, SDA or SCL → 4 × 4 combinations, sampled on
+  every bus communication).
 - Most breakout modules default to **0x40** (A1 = A0 = GND).
-- Bus speed: standard 100 kHz / fast 400 kHz (the project already runs
-  `i2c1` at 400 kHz — fine).
+- Bus speed: fast mode up to 400 kHz, high-speed mode up to 2.94 MHz
+  (the project already runs `i2c1` at 400 kHz — fine).
 
 ## 3. Transaction format
 
@@ -83,12 +87,12 @@ uint16_t raw = (val[0] << 8) | val[1];
 | 0x06 | Mask/Enable (Alert) | R/W | 0x0000 | bit field, see §6                      |
 | 0x07 | Alert Limit         | R/W | 0x0000 | same LSB as the selected compared reg  |
 | 0xFE | Manufacturer ID     | R   | 0x5449 | ASCII "TI" — good probe for detection  |
-| 0xFF | Die ID              | R   | 0x2260 | fixed — good probe for detection       |
+| 0xFF | Die ID              | R   | 0x2260 | or 0x2261 (assembly site) — probe both |
 
 Quick sanity probe after wiring:
 
 ```c
-// read 0xFE → expect 0x5449, read 0xFF → expect 0x2260
+// read 0xFE → expect 0x5449, read 0xFF → expect 0x2260 or 0x2261
 ```
 
 ## 5. Configuration register (0x00), reset = 0x4127
@@ -101,7 +105,7 @@ Quick sanity probe after wiring:
 ```
 
 - **Bit 15 RST** — write 1 to reset all registers to defaults (self-clearing).
-- **Bits 14–12** — reserved (default reads `001`), leave as reset value.
+- **Bits 14–12** — reserved (default reads `100`), leave as reset value.
 - **Bits 11–9 AVG** — number of samples averaged:
   `000`=1, `001`=4, `010`=16, `011`=64, `100`=128, `101`=256, `110`=512, `111`=1024
 - **Bits 8–6 VBUSCT** — bus voltage conversion time:
@@ -120,8 +124,10 @@ Poll for conversion-ready instead of hard-coding delays (see §6 CVRF).
 Example — 16 averages, 1.1 ms both channels, continuous:
 
 ```
-cfg = (4 << 9) | (4 << 6) | (4 << 3) | 7  =  0x247F... check bits:
+cfg = (4 << 9) | (4 << 6) | (4 << 3) | 7  =  0x0927
      AVG=100(16), VBUSCT=100(1.1ms), VSHCT=100(1.1ms), MODE=111
+Keeping the reserved bits 14–12 at their reset value (100) gives 0x4927 —
+what the driver's kDefaultConfig uses.
 ```
 
 ## 6. Mask/Enable register (0x06)
@@ -143,7 +149,10 @@ Alert-function select + status flags:
 | 1   | APOL | alert pin polarity: 0 = active-low, 1 = active-high |
 | 0   | LEN  | 0 = transparent, 1 = latch alert until read         |
 
-Only **one** of SOL/SUL/BOL/BUL/POL/CNVR may be selected at a time.
+Only **one** of SOL/SUL/BOL/BUL/POL drives the Alert pin at a time —
+if several are set, the highest bit (SOL→POL) takes priority. CNVR may
+additionally be enabled alongside one of them. CVRF clears on reading
+0x06 **or** on writing the Configuration register (except power-down).
 Polling without the alert pin: read 0x06 and check bit 3 (CVRF).
 
 ## 7. Reading current
@@ -212,27 +221,28 @@ Implemented in [exec/ina226_helper.hh](../exec/ina226_helper.hh) —
 `utility::Ina226Device`, header-only, in the same style as
 `Ssd1306Device`. API summary:
 
-| Method                        | Notes                                        |
-| ----------------------------- | -------------------------------------------- |
-| ctor `(i2c, scl_pin, sda_pin)` | inits the bus + pins like `Ssd1306Device`   |
-| `kI2cDefaultSclPin/SdaPin`    | 7 / 6 - the shared LCD bus pins              |
-| `Probe()`                     | checks Mfg ID `0x5449` / Die ID `0x2260`     |
-| `Reset()` / `Configure(cfg)`  | write Config register, default `0x247F`      |
-| `GetBusVolts()`               | Bus V × 1.25 mV                              |
-| `GetShuntMilliVolts()`        | Shunt V (int16) × 2.5 µV                     |
-| `GetAmps()`                   | `V_shunt / 1 mΩ`, no calibration needed      |
-| `SetCalibration(max_current)` | programs Cal reg; **required** for the two below |
-| `GetCurrentAmps()`            | on-chip current reg 0x04                     |
-| `GetPowerWatts()`             | on-chip power reg 0x03                       |
-| `IsConversionReady()`         | Mask/Enable CVRF bit                         |
+| Method                         | Notes                                            |
+| ------------------------------ | ------------------------------------------------ |
+| ctor `(i2c, scl_pin, sda_pin)` | inits the bus + pins like `Ssd1306Device`        |
+| `XiaoRp2040Ina226Device`       | zero-arg subclass: `i2c1`, SCL 7 / SDA 6         |
+| `Probe()`                      | Mfg ID `0x5449` / Die `0x2260` or `0x2261`       |
+| `Reset()` / `Configure(cfg)`   | write Config register, default `0x4927`          |
+| `GetBusVolts()`                | Bus V × 1.25 mV                                  |
+| `GetShuntMilliVolts()`         | Shunt V (int16) × 2.5 µV                         |
+| `GetAmps()`                    | `V_shunt / 1 mΩ`, no calibration needed          |
+| `SetCalibration(max_current)`  | programs Cal reg; **required** for the two below |
+| `GetCurrentAmps()`             | on-chip current reg 0x04                         |
+| `GetPowerWatts()`              | on-chip power reg 0x03                           |
+| `IsConversionReady()`          | Mask/Enable CVRF bit                             |
 
 Usage alongside the existing LCD (same `i2c1` + GPIO6/7, same bus setup
 as `Ssd1306Device` - running it twice is safe):
 
 ```cpp
-// or: utility::XiaoRp2040Ina226Device ina;
-utility::Ina226Device ina(i2c1, utility::Ina226Device::kI2cDefaultSclPin,
-                          utility::Ina226Device::kI2cDefaultSdaPin);
+// i2c1, SCL 7 / SDA 6 — the shared LCD bus. For other pins use the
+// Ina226Device(i2c, scl, sda) ctor directly (pwm_controller_pcie.cc
+// passes its own kI2cDefaultSclPin/SdaPin = 15/14).
+utility::XiaoRp2040Ina226Device ina;
 if (!ina.Probe()) {
     // log/handle missing chip
 }

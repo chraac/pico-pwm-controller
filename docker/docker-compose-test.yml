@@ -1,0 +1,72 @@
+services:
+  pico-builder-unit-tests:
+    platform: linux/x86_64
+    image: chraac/pico-builder:latest
+    environment:
+      - REPO_DIR=/pico-pwm-controller
+      - REPO_BUILD_DIR=/pico-pwm-controller-build
+    volumes:
+      - ..:/pico-pwm-controller:ro
+      - pico-test-build:/pico-pwm-controller-build
+    command:
+      - bash
+      - -c
+      - |
+        set -e
+        mkdir -p $$REPO_BUILD_DIR/unit
+        cd $$REPO_BUILD_DIR/unit
+        cmake $$REPO_DIR/test -DCMAKE_BUILD_TYPE=Release
+        make -j$$(nproc)
+        ctest --output-on-failure
+    restart: "no"
+
+  pico-builder-emu-fw:
+    platform: linux/x86_64
+    image: chraac/pico-builder:latest
+    environment:
+      - REPO_DIR=/pico-pwm-controller
+      - REPO_BUILD_DIR=/pico-pwm-controller-build
+      - OUTPUT_DIR=/output
+    volumes:
+      - ..:/pico-pwm-controller:ro
+      - pico-test-build:/pico-pwm-controller-build
+      - ${OUTPUT_DIR}:/output:rw
+    command:
+      - bash
+      - -c
+      - |
+        set -e
+        mkdir -p $$REPO_BUILD_DIR/emu
+        cd $$REPO_BUILD_DIR/emu
+        cmake $$REPO_DIR -DPICO_BOARD=seeed_xiao_rp2040 -DINTEGRATION_TEST=ON -DCMAKE_BUILD_TYPE=Release
+        make -j$$(nproc) pwm_controller_pcie_emu
+        mkdir -p $$OUTPUT_DIR/emu
+        cp -f $$REPO_BUILD_DIR/emu/exec/pwm_controller_pcie_emu.elf $$OUTPUT_DIR/emu/
+    restart: "no"
+
+  pico-tests-integration:
+    platform: linux/x86_64
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.tests
+    image: chraac/pico-tests:latest
+    depends_on:
+      pico-builder-emu-fw:
+        condition: service_completed_successfully
+    environment:
+      - REPO_DIR=/pico-pwm-controller
+      - OUTPUT_DIR=/output
+      # use the simulator deps baked into the image; the repo mount is :ro
+      - PWM_SIM_DIR=/opt/tests/simulator
+    volumes:
+      - ..:/pico-pwm-controller:ro
+      - ${OUTPUT_DIR}:/output:ro
+    command:
+      - bash
+      - /pico-pwm-controller/test/integration/run.sh
+      - /output/emu/pwm_controller_pcie_emu.elf
+      - --ci
+    restart: "no"
+
+volumes:
+  pico-test-build:

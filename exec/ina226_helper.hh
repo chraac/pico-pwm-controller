@@ -14,11 +14,14 @@ class Ina226Device {
     constexpr static const uint8_t kI2cAddr = 0x40;
     constexpr static const uint32_t kI2cFreq = 400000;  // 400kHz
     constexpr static const float kShuntOhms = 0.001f;  // R001 (1 mΩ) shunt
-    // 16x averaging, 1.1ms both conversions, shunt+bus continuous (~35ms/update)
-    constexpr static const uint16_t kDefaultConfig = 0x247F;
+    // 0x4927 = reserved bits 14-12 at reset default (100), AVG=16,
+    // 1.1ms both conversions, shunt+bus continuous (~35ms/update)
+    constexpr static const uint16_t kDefaultConfig = 0x4927;
     constexpr static const uint16_t kResetCommand = 0x8000;
     constexpr static const uint16_t kManufacturerIdValue = 0x5449;  // 'TI'
-    constexpr static const uint16_t kDieIdValue = 0x2260;
+    // die id depends on country of assembly (SBOS547C, Table 7-1)
+    constexpr static const uint16_t kDieIdUsaOrJapan = 0x2260;
+    constexpr static const uint16_t kDieIdUsa = 0x2261;
     constexpr static const uint16_t kConversionReadyBit = 0x0008;  // CVRF
 
     enum Reg : uint8_t {
@@ -51,8 +54,9 @@ public:
 
     // true if a likely INA226 answers (shares the bus with Ssd1306Device)
     bool Probe() noexcept {
+        const uint16_t die_id = Read16(kDieId);
         return Read16(kManufacturerId) == kManufacturerIdValue &&
-               Read16(kDieId) == kDieIdValue;
+               (die_id == kDieIdUsaOrJapan || die_id == kDieIdUsa);
     }
 
     void Reset() noexcept { Write16(kConfig, kResetCommand); }

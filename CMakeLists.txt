@@ -39,8 +39,15 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1 -g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -Os")
 
-set(USB_STDIO true)
+# Cache option so -DUSB_STDIO=false (emulator build) actually takes effect:
+# a plain set() here would shadow the cache variable passed on the command line
+set(USB_STDIO true CACHE BOOL "Enable stdio over USB (false = UART)")
 set(BOARD_VERSION "93")
+
+# Emulator test firmware (test/integration): adds a pwm_controller_pcie_emu
+# target with UART stdio + a structured TEST: log line per loop iteration.
+# Pass-through only; normal builds are unchanged.
+option(INTEGRATION_TEST "Build emulator test firmware" OFF)
 
 if(PICO_SDK_VERSION_STRING VERSION_LESS "1.3.0")
     message(FATAL_ERROR "Raspberry Pi Pico SDK version 1.3.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")

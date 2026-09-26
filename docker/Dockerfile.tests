@@ -1,0 +1,11 @@
+FROM node:20-bookworm-slim
+
+# Emulator test image: Node + the VENDORED rp2040js simulator (see
+# test/integration/simulator/). Tarballs are extracted directly -- no npm,
+# no registry access at build time.
+WORKDIR /opt/tests
+COPY test/integration/simulator/ ./simulator/
+RUN bash ./simulator/setup.sh
+
+# Smoke: the simulator must load from the extracted packages alone
+RUN node -e "require('./simulator/node_modules/rp2040js'); require('./simulator/node_modules/uf2')"

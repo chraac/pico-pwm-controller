@@ -10,6 +10,7 @@
 #include "ema_smoother.hh"
 #include "fan_speed_manager.hh"
 #include "ina226_helper.hh"
+#include "integ_test.hh"
 #include "lcd_helper.hh"
 #include "logger.hh"
 #include "rgb_led_helper.hh"
@@ -19,7 +20,9 @@ using namespace utility;
 
 namespace {
 
-constexpr const uint kBoardPoolIntervalMs = 500;
+// pcie board polls at 500 ms; the emulator build shortens this
+// (exec/integ_test.hh)
+constexpr const uint kBoardPoolIntervalMs = kIntegPoolIntervalMs;
 
 constexpr const uint kPwm0Pin = 13;
 constexpr const uint kPwm1Pin = 11;
@@ -79,8 +82,16 @@ void SetPwrLedColor(Ws2812Helper &led, const float watts, const float low_w,
 }  // namespace
 
 int main() {
-    stdio_usb_init();
+    // clocks first: matches runtime_init order, and stdio (uart or usb)
+    // needs the final clock tree for its divisor setup
     clocks_init();
+#ifdef UART_STDIO
+    // stdio over UART: deterministic to capture in the emulator (and fixes
+    // linking with USB_STDIO=false, when pico_stdio_usb is not linked)
+    stdio_uart_init();
+#else
+    stdio_usb_init();
+#endif
 
     log_info("main.init.finished\n");
 
@@ -115,6 +126,7 @@ int main() {
     };
 
     bool led_off = false;
+    [[maybe_unused]] int test_iter = 0;  // log_integ_test only, emu builds
     log_info("main.entering.loop\n");
     for (auto next_interval = kBoardPoolIntervalMs;; sleep_ms(next_interval)) {
         const auto start_us = time_us_64();
@@ -130,9 +142,11 @@ int main() {
             amps, watts, smoothed_watts, volts);
 
         static_assert(std::size(managers) == 2);
+        [[maybe_unused]] uint loop_rpm[std::size(managers)] = {};  // log_integ_test
         for (size_t i = 0; i < std::size(managers); ++i) {
             auto &fan_manager = managers[i];
             auto rpm = fan_manager.Next(smoothed_watts);
+            loop_rpm[i] = rpm;
             log_debug("fan.pwm_gpio.%d.rpm.%d\n",
                       int(fan_manager.GetPwmGpioPin()), int(rpm));
             auto &draw_item = drawer_items[i];
@@ -141,6 +155,14 @@ int main() {
                                    ? (fan_manager.GetPwmCycle() / 100)
                                    : fan_manager.GetTargetRpm();
         }
+
+        // int() casts: uint32_t is `unsigned long` on arm-none-eabi, so %u
+        // alone trips -Wformat (same convention as the log_debug line above)
+        log_integ_test(
+            "TEST: it=%d w=%.3f sw=%.3f pwm0=%d rpm0=%d pwm1=%d rpm1=%d\n",
+            test_iter++, watts, smoothed_watts,
+            int(managers[0].GetPwmCycle()), int(loop_rpm[0]),
+            int(managers[1].GetPwmCycle()), int(loop_rpm[1]));
 
         if (led_off) {
             rgb_led.Off();
