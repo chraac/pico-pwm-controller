@@ -97,7 +97,9 @@ after the variant):
   PCIe-style fan card. Both fans' duty cycles are driven from the card's power
   draw (INA226 shunt monitor, per-fan-type watts → PWM curve). A 128x32 LCD shows
   power, voltage and fan status, and a WS2812 RGB LED shifts green → red as
-  power draw rises from 20 W to 90 W.
+  power draw rises from 20 W to 90 W. The INA226 is probed at boot over I2C
+  (manufacturer + die ID; both die-ID variants are accepted) — a bare-metal
+  register reference lives in [docs/ina226_i2c.md](docs/ina226_i2c.md).
 
 ### Pin mapping
 
@@ -166,10 +168,14 @@ make -j
 
 Options are set in the top-level [CMakeLists.txt](CMakeLists.txt):
 
-| Option          | Default | Description                                        |
-| --------------- | ------- | -------------------------------------------------- |
-| `BOARD_VERSION` | `"93"`  | Board revision, selects the lite pin map           |
-| `USB_STDIO`     | `true`  | Log over USB CDC instead of UART                   |
+| Option             | Default | Description                                    |
+| ------------------ | ------- | ---------------------------------------------- |
+| `BOARD_VERSION`    | `"93"`  | Board revision, selects the lite pin map       |
+| `USB_STDIO`        | `true`  | Log over USB CDC instead of UART               |
+| `INTEGRATION_TEST` | `OFF`   | Build the emulator test firmware (see Testing) |
+
+`USB_STDIO` is a cache option, so `-DUSB_STDIO=false` on the cmake command
+line takes effect (the emulator test build uses it to switch to UART).
 
 ## Logs
 
@@ -193,6 +199,12 @@ docker/docker-compose-test.sh unit          # unit tests
 docker/docker-compose-test.sh integration   # emulator scenarios
 ```
 
+The emulator scenarios boot a real firmware image built with
+`-DINTEGRATION_TEST=ON` (`pwm_controller_pcie_emu`): UART stdio, a 100 ms
+control loop and a machine-parsable `TEST:` state line per iteration that the
+scenarios assert on — all the build-specific knobs live in
+[exec/integ_test.hh](exec/integ_test.hh), so normal builds are unchanged.
+
 ## Project layout
 
 ```text
@@ -202,8 +214,10 @@ exec/            firmware sources
   pwm_controller_pcie.cc   pcie firmware entry point
   fan_speed_manager.*      fan control loop and PID wiring
   temp_helper.hh           thermistor + temperature curve
+  ina226_helper.hh         INA226 power monitor driver
   frequency_counter.*      tach pulse counting
   lcd_helper.hh            SSD1306 LCD drawing
+  integ_test.hh            emulator-build knobs (INTEGRATION_TEST)
 thirdparty/      dependencies (pico-ssd1306)
 docker/          docker-based build environment
 ```
