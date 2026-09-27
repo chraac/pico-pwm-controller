@@ -71,13 +71,19 @@ An NTC thermistor (default: 100kΩ, β=3950) is wired as a voltage divider with 
 
 ### Supported boards
 
-Built and tested with the Seeed XIAO RP2040 (default) and XIAO RP2350 form
-factor; any RP2040/RP2350 board works as long as the pin map fits — pins are
-configured in [pwm_controller_lite.cc](exec/pwm_controller_lite.cc) /
+Built and tested with the Seeed
+[XIAO RP2040](https://wiki.seeedstudio.com/XIAO-RP2040/) (default) and XIAO
+RP2350 form factor (Lite and multi-fan variants); the PCIe variant uses the
+Waveshare [RP2040-Zero](https://www.waveshare.net/wiki/RP2040-Zero). Any
+RP2040/RP2350
+board works as long as the pin map fits — pins are configured in
+[pwm_controller_lite.cc](exec/pwm_controller_lite.cc) /
 [pwm_controller.cc](exec/pwm_controller.cc) /
 [pwm_controller_pcie.cc](exec/pwm_controller_pcie.cc).
 
-![pins](docs/pico_pwm_pins.png)
+| Pico | Seeed XIAO RP2040 | Waveshare RP2040-Zero |
+| --- | --- | --- |
+| ![pins](docs/pico_pwm_pins.png) | ![XIAO RP2040 front pinout](pic/XIAO_RP2040_front_pinout.png) | ![Waveshare RP2040-Zero board](pic/RP2040-Zero.jpg) |
 
 ### Firmware variants
 
