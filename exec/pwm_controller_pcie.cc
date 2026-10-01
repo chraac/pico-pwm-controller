@@ -32,7 +32,7 @@ constexpr const uint kFanSpd1Pin = 10;
 
 constexpr const uint kWs2812LedPin = 16;
 // power-indicator dimmer: linear in current, ~half as bright to the eye
-constexpr const uint8_t kWs2812Brightness = 0x40;
+constexpr const uint8_t kWs2812Brightness = 0x20;
 
 constexpr const uint16_t kDefaultLcdWidth = 128;
 constexpr const uint16_t kDefaultLcdHeight = 32;
