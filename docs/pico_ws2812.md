@@ -49,7 +49,8 @@ whose channels arrive in **RGB(W)** order — verified on hardware; the
 initial GRB packing (and the old `RP2040_Zero_Test.c` scratch program)
 showed red/green swapped on this part.
 
-`Ws2812Helper::SetRgb` packs the 32-bit FIFO word as:
+`Ws2812Helper` packs the 32-bit FIFO word in `Write()` (shared by
+`SetRgb`/`SetWhite`/`SetBrightness`) as:
 
 ```text
   bit 31        23        15         7        0
@@ -57,8 +58,9 @@ showed red/green swapped on this part.
 ```
 
 ```cpp
-const uint32_t rgbw = (uint32_t(red) << 24) | (uint32_t(green) << 16) |
-                      (uint32_t(blue) << 8);
+const uint32_t rgbw = (uint32_t(Scale(red_)) << 24) |
+                      (uint32_t(Scale(green_)) << 16) |
+                      (uint32_t(Scale(blue_)) << 8) | Scale(white_);
 pio_sm_put_blocking(pio_, sm_, rgbw);
 ```
 
@@ -111,6 +113,7 @@ tree; the targets also link `hardware_pio`.
 | `Ws2812Helper{pin, rgbw=true, pio=pio0, freq=800000}` | claims an SM, loads the program, blanks the pixel |
 | `SetRgb(r, g, b)` | one RGB frame; also updates `current_value_` |
 | `SetWhite(w)` | white-channel frame (RGBW parts only, §2) |
+| `SetBrightness(b)` | 0–255 global dimmer applied to every channel of every frame — the pixel has no brightness register, so channels are scaled on the way out; re-emits the last colour. Linear in current: 0x40 ≈ half the perceived brightness |
 | `SetRed/SetGreen/SetBlue/Off` | conveniences over `SetRgb` |
 | `Next()` | steps the 8 on/off RGB combos, like `RgbLedHelper::Next()`; continues from the last manually set colour |
 
@@ -128,7 +131,9 @@ channel values are passed through `std::sqrt(t)` deliberately: LED duty is
 linear in *current*, but perceived brightness is roughly √duty — without
 the curve the blend looks like it jumps to yellow almost immediately.
 The loop runs every `kBoardPoolIntervalMs` = 500 ms, which also satisfies
-the latch gap for free (§1).
+the latch gap for free (§1). The firmware also caps the pixel with
+`rgb_led.SetBrightness(kWs2812Brightness)` (`0x40`, set once at startup) —
+the blend curves pick the *colour*, the brightness scale picks the *max*.
 
 `RgbLedHelper` (three discrete GPIO pins) remains for the lite board;
 the two classes are drop-in similar (`Next()`, `SetRed()`…) on purpose.

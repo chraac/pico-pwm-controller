@@ -31,6 +31,8 @@ constexpr const uint kFanSpd0Pin = 12;
 constexpr const uint kFanSpd1Pin = 10;
 
 constexpr const uint kWs2812LedPin = 16;
+// power-indicator dimmer: linear in current, ~half as bright to the eye
+constexpr const uint8_t kWs2812Brightness = 0x40;
 
 constexpr const uint16_t kDefaultLcdWidth = 128;
 constexpr const uint16_t kDefaultLcdHeight = 32;
@@ -96,6 +98,7 @@ int main() {
     log_info("main.init.finished\n");
 
     Ws2812Helper rgb_led{kWs2812LedPin};
+    rgb_led.SetBrightness(kWs2812Brightness);
     // fast rise (~2s to settle) tracks load steps, slow fall (~20s) rides
     // out burst dips and matches heatsink cooldown; ratios assume the
     // kBoardPoolIntervalMs update period

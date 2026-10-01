@@ -56,17 +56,28 @@ public:
         SetRgb(0, 0, 0);
     }
 
+    // global dimmer, 0..0xff: the pixel has no brightness register, so every
+    // channel of every frame is scaled on the way out. Linear in LED current,
+    // so perceived brightness tracks ~sqrt (0x40 reads about half as bright,
+    // see docs/pico_ws2812.md §4). Re-emits the last colour.
+    void SetBrightness(const uint8_t brightness) noexcept {
+        brightness_ = brightness;
+        Write();
+    }
+
     void SetRgb(const uint8_t red, const uint8_t green,
                 const uint8_t blue) noexcept {
-        // pixels take rgb on the wire, the white byte rides last (SK6812 RGBW)
-        const uint32_t rgbw = (uint32_t(red) << 24) | (uint32_t(green) << 16) |
-                              (uint32_t(blue) << 8);
-        pio_sm_put_blocking(pio_, sm_, rgbw);
-        current_value_ = (red ? 1 : 0) | (green ? 2 : 0) | (blue ? 4 : 0);
+        red_ = red;
+        green_ = green;
+        blue_ = blue;
+        white_ = 0;
+        Write();
     }
 
     void SetWhite(const uint8_t white) noexcept {
-        pio_sm_put_blocking(pio_, sm_, white);
+        red_ = green_ = blue_ = 0;
+        white_ = white;
+        Write();
     }
 
     void SetRed() noexcept { SetRgb(0xff, 0, 0); }
@@ -82,9 +93,32 @@ public:
     }
 
 private:
+    void Write() noexcept {
+        // pixels take rgb on the wire, the white byte rides last (SK6812 RGBW)
+        const uint32_t rgbw = (uint32_t(Scale(red_)) << 24) |
+                              (uint32_t(Scale(green_)) << 16) |
+                              (uint32_t(Scale(blue_)) << 8) | Scale(white_);
+        pio_sm_put_blocking(pio_, sm_, rgbw);
+        current_value_ = (red_ ? 1 : 0) | (green_ ? 2 : 0) | (blue_ ? 4 : 0);
+    }
+
+    // rounded 0..brightness_ rescale; identity at brightness_ == 0xff
+    static uint8_t Scale(const uint8_t value, const uint8_t brightness) noexcept {
+        return static_cast<uint8_t>((uint32_t(value) * brightness + 127) / 255);
+    }
+
+    uint8_t Scale(const uint8_t value) const noexcept {
+        return Scale(value, brightness_);
+    }
+
     PIO pio_;
     uint sm_;
     uint offset_;
+    uint8_t red_ = 0;
+    uint8_t green_ = 0;
+    uint8_t blue_ = 0;
+    uint8_t white_ = 0;
+    uint8_t brightness_ = 0xff;
     uint8_t current_value_ = 0;
 
     DISALLOW_COPY(Ws2812Helper);
