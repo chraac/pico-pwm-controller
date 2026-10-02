@@ -47,20 +47,20 @@ constexpr const uint kI2cDefaultSdaPin = 14;
 
 // fan power draw in watts (INA226) -> pwm, one table per fan type; pick the
 // set matching the attached fan below
-constexpr CurvePoint kPwrToPwmCurveFanType0[]{
-    {5, 1500},  {10, 2000}, {30, 2600},  {50, 3100},  {70, 3600},
-    {80, 4400}, {90, 5500}, {110, 6800}, {120, 8100}, {145, 10000},
+constexpr CurvePoint kPwrToPwmCurveFanType260W[]{
+    {30, 1500},  {60, 2000}, {90, 2600},  {120, 3100},  {150, 3600},
+    {180, 4400}, {210, 5500}, {240, 6800}, {250, 8100}, {260, 10000},
 };
 
-constexpr CurvePoint kPwrToPwmCurveFanType1[]{
+constexpr CurvePoint kPwrToPwmCurveFanType100W[]{
     {5, 1500},  {10, 2000}, {30, 2600}, {40, 3100}, {50, 3600},
     {60, 4400}, {70, 5500}, {80, 6800}, {90, 8100}, {100, 10000},
 };
 
 constexpr FanCurves kFanType0Curves{
-    kDefaultTempToPwmCurve, kPwrToPwmCurveFanType0, kDefaultTempToRpmCurve};
+    kDefaultTempToPwmCurve, kPwrToPwmCurveFanType100W, kDefaultTempToRpmCurve};
 constexpr FanCurves kFanType1Curves{
-    kDefaultTempToPwmCurve, kPwrToPwmCurveFanType1, kDefaultTempToRpmCurve};
+    kDefaultTempToPwmCurve, kPwrToPwmCurveFanType260W, kDefaultTempToRpmCurve};
 
 // led color tracks power between these bounds, see SetPwrLedColor() below
 constexpr float kLedGreenW = 20.0f;
