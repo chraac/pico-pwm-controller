@@ -52,6 +52,11 @@ constexpr CurvePoint kPwrToPwmCurveFanType260W[]{
     {180, 4400}, {210, 5500}, {240, 6800}, {250, 8100}, {260, 10000},
 };
 
+constexpr CurvePoint kPwrToPwmCurveFanType170W[]{
+    {5, 1500},  {10, 2000}, {40, 2600}, {70, 3100}, {100, 3600},
+    {130, 4400}, {140, 5500}, {150, 6800}, {160, 8100}, {170, 10000},
+};
+
 constexpr CurvePoint kPwrToPwmCurveFanType100W[]{
     {5, 1500},  {10, 2000}, {30, 2600}, {40, 3100}, {50, 3600},
     {60, 4400}, {70, 5500}, {80, 6800}, {90, 8100}, {100, 10000},
@@ -60,7 +65,7 @@ constexpr CurvePoint kPwrToPwmCurveFanType100W[]{
 constexpr FanCurves kFanType0Curves{
     kDefaultTempToPwmCurve, kPwrToPwmCurveFanType100W, kDefaultTempToRpmCurve};
 constexpr FanCurves kFanType1Curves{
-    kDefaultTempToPwmCurve, kPwrToPwmCurveFanType260W, kDefaultTempToRpmCurve};
+    kDefaultTempToPwmCurve, kPwrToPwmCurveFanType170W, kDefaultTempToRpmCurve};
 
 // led color tracks power between these bounds, see SetPwrLedColor() below
 constexpr float kLedGreenW = 20.0f;
