@@ -48,13 +48,13 @@ constexpr const uint kI2cDefaultSdaPin = 14;
 // fan power draw in watts (INA226) -> pwm, one table per fan type; pick the
 // set matching the attached fan below
 constexpr CurvePoint kPwrToPwmCurveFanType260W[]{
-    {30, 1500},  {60, 2000}, {90, 2600},  {120, 3100},  {150, 3600},
+    {30, 1500},  {60, 2000},  {90, 2600},  {120, 3100}, {150, 3600},
     {180, 4400}, {210, 5500}, {240, 6800}, {250, 8100}, {260, 10000},
 };
 
-constexpr CurvePoint kPwrToPwmCurveFanType170W[]{
-    {5, 1500},  {10, 2000}, {40, 2600}, {70, 3100}, {100, 3600},
-    {130, 4400}, {140, 5500}, {150, 6800}, {160, 8100}, {170, 10000},
+constexpr CurvePoint kPwrToPwmCurveFanType200W[]{
+    {40, 1500},  {58, 1728},  {83, 2266},  {102, 2849}, {118, 3431},
+    {142, 4597}, {160, 5500}, {177, 6613}, {192, 7890}, {200, 10000},
 };
 
 constexpr CurvePoint kPwrToPwmCurveFanType100W[]{
@@ -65,7 +65,7 @@ constexpr CurvePoint kPwrToPwmCurveFanType100W[]{
 constexpr FanCurves kFanType0Curves{
     kDefaultTempToPwmCurve, kPwrToPwmCurveFanType100W, kDefaultTempToRpmCurve};
 constexpr FanCurves kFanType1Curves{
-    kDefaultTempToPwmCurve, kPwrToPwmCurveFanType170W, kDefaultTempToRpmCurve};
+    kDefaultTempToPwmCurve, kPwrToPwmCurveFanType200W, kDefaultTempToRpmCurve};
 
 // led color tracks power between these bounds, see SetPwrLedColor() below
 constexpr float kLedGreenW = 20.0f;
@@ -150,7 +150,8 @@ int main() {
             amps, watts, smoothed_watts, volts);
 
         static_assert(std::size(managers) == 2);
-        [[maybe_unused]] uint loop_rpm[std::size(managers)] = {};  // log_integ_test
+        [[maybe_unused]] uint loop_rpm[std::size(managers)] =
+            {};  // log_integ_test
         for (size_t i = 0; i < std::size(managers); ++i) {
             auto &fan_manager = managers[i];
             auto rpm = fan_manager.Next(smoothed_watts);
@@ -168,9 +169,8 @@ int main() {
         // alone trips -Wformat (same convention as the log_debug line above)
         log_integ_test(
             "TEST: it=%d w=%.3f sw=%.3f pwm0=%d rpm0=%d pwm1=%d rpm1=%d\n",
-            test_iter++, watts, smoothed_watts,
-            int(managers[0].GetPwmCycle()), int(loop_rpm[0]),
-            int(managers[1].GetPwmCycle()), int(loop_rpm[1]));
+            test_iter++, watts, smoothed_watts, int(managers[0].GetPwmCycle()),
+            int(loop_rpm[0]), int(managers[1].GetPwmCycle()), int(loop_rpm[1]));
 
         if (led_off) {
             rgb_led.Off();
