@@ -62,15 +62,22 @@ constexpr CurvePoint kPwrToPwmCurveFanType170WSunonPFC0321B3[]{
     {137, 4171}, {149, 5358}, {157, 6501}, {164, 8070}, {170, 10000},
 };
 
+constexpr CurvePoint kPwrToPwmCurveFanType170WSunonMFC0251V1[]{
+    {50, 3200},  {85, 3400},  {109, 3700}, {128, 4100}, {140, 4500},
+    {147, 5000}, {152, 5600}, {157, 6500}, {164, 8050}, {170, 10000},
+};
+
 constexpr CurvePoint kPwrToPwmCurveFanType100W[]{
     {5, 1500},  {10, 2000}, {30, 2600}, {40, 3100}, {50, 3600},
     {60, 4400}, {70, 5500}, {80, 6800}, {90, 8100}, {100, 10000},
 };
 
-constexpr FanCurves kFanType0Curves{
-    kDefaultTempToPwmCurve, kPwrToPwmCurveFanType170WSunonPFC0321B3, kDefaultTempToRpmCurve};
-constexpr FanCurves kFanType1Curves{
-    kDefaultTempToPwmCurve, kPwrToPwmCurveFanType200W, kDefaultTempToRpmCurve};
+constexpr FanCurves kFanType0Curves{kDefaultTempToPwmCurve,
+                                    kPwrToPwmCurveFanType170WSunonPFC0321B3,
+                                    kDefaultTempToRpmCurve};
+constexpr FanCurves kFanType1Curves{kDefaultTempToPwmCurve,
+                                    kPwrToPwmCurveFanType170WSunonMFC0251V1,
+                                    kDefaultTempToRpmCurve};
 
 // led color tracks power between these bounds, see SetPwrLedColor() below
 constexpr float kLedGreenW = 20.0f;
