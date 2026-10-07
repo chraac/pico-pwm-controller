@@ -63,7 +63,7 @@ constexpr CurvePoint kPwrToPwmCurveFanType170WSunonPFC0321B3[]{
 };
 
 constexpr CurvePoint kPwrToPwmCurveFanType170WSunonMFC0251V1[]{
-    {50, 3500},  {78, 3700},  {100, 3900}, {120, 4200}, {133, 4600},
+    {45, 3500},  {70, 3678},  {100, 3900}, {120, 4200}, {133, 4600},
     {145, 5067}, {152, 5600}, {157, 6500}, {164, 8050}, {170, 10000},
 };
 
