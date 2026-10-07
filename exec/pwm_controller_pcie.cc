@@ -57,7 +57,7 @@ constexpr CurvePoint kPwrToPwmCurveFanType200W[]{
     {142, 4597}, {160, 5500}, {177, 6613}, {192, 7890}, {200, 10000},
 };
 
-constexpr CurvePoint kPwrToPwmCurveFanType170W[]{
+constexpr CurvePoint kPwrToPwmCurveFanType170WSunonPFC0321B3[]{
     {40, 1500},  {58, 1728},  {84, 2221},  {103, 2602}, {122, 3252},
     {137, 4171}, {149, 5358}, {157, 6501}, {164, 8070}, {170, 10000},
 };
@@ -68,7 +68,7 @@ constexpr CurvePoint kPwrToPwmCurveFanType100W[]{
 };
 
 constexpr FanCurves kFanType0Curves{
-    kDefaultTempToPwmCurve, kPwrToPwmCurveFanType100W, kDefaultTempToRpmCurve};
+    kDefaultTempToPwmCurve, kPwrToPwmCurveFanType170WSunonPFC0321B3, kDefaultTempToRpmCurve};
 constexpr FanCurves kFanType1Curves{
     kDefaultTempToPwmCurve, kPwrToPwmCurveFanType200W, kDefaultTempToRpmCurve};
 
