@@ -47,12 +47,12 @@ constexpr const uint kI2cDefaultSdaPin = 14;
 
 // fan power draw in watts (INA226) -> pwm, one table per fan type; pick the
 // set matching the attached fan below
-constexpr CurvePoint kPwrToPwmCurveFanType260W[]{
+constexpr CurvePoint kPwrToPwmCurveFanType260WSunonPFC0321B3[]{
     {30, 1500},  {60, 2000},  {90, 2600},  {120, 3100}, {150, 3600},
     {180, 4400}, {210, 5500}, {240, 6800}, {250, 8100}, {260, 10000},
 };
 
-constexpr CurvePoint kPwrToPwmCurveFanType200W[]{
+constexpr CurvePoint kPwrToPwmCurveFanType200WSunonPFC0321B3[]{
     {40, 1500},  {58, 1728},  {83, 2266},  {102, 2849}, {118, 3431},
     {142, 4597}, {160, 5500}, {177, 6613}, {192, 7890}, {200, 10000},
 };
@@ -67,7 +67,7 @@ constexpr CurvePoint kPwrToPwmCurveFanType170WSunonMFC0251V1[]{
     {145, 5067}, {152, 5600}, {157, 6500}, {164, 8050}, {170, 10000},
 };
 
-constexpr CurvePoint kPwrToPwmCurveFanType100W[]{
+constexpr CurvePoint kPwrToPwmCurveFanType100WSunonPFC0321B3[]{
     {5, 1500},  {10, 2000}, {30, 2600}, {40, 3100}, {50, 3600},
     {60, 4400}, {70, 5500}, {80, 6800}, {90, 8100}, {100, 10000},
 };
