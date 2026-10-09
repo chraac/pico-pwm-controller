@@ -73,8 +73,8 @@ constexpr CurvePoint kPwrToPwmCurveFanType100WSunonPFC0321B3[]{
 };
 
 constexpr CurvePoint kPwrToPwmCurveFanType213WW6800[]{
-    {50, 2000},  {85, 2154},  {112, 2333}, {124, 2737}, {133, 3163},
-    {142, 3924}, {148, 4664}, {155, 6031}, {163, 7958},
+    {48, 2558},  {69, 2782},  {99, 3140},  {121, 3521}, {138, 3947},
+    {148, 4709}, {154, 5717}, {159, 6770}, {164, 8025}, {169, 9347},
 };
 
 constexpr FanCurves kFanType0Curves{kDefaultTempToPwmCurve,
