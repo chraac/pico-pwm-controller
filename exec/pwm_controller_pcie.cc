@@ -72,11 +72,16 @@ constexpr CurvePoint kPwrToPwmCurveFanType100WSunonPFC0321B3[]{
     {60, 4400}, {70, 5500}, {80, 6800}, {90, 8100}, {100, 10000},
 };
 
+constexpr CurvePoint kPwrToPwmCurveFanType213WW6800[]{
+    {45, 1500},  {70, 1600},  {100, 1900}, {118, 2356},
+    {131, 2916}, {140, 3633}, {148, 4664}, {155, 6031},
+};
+
 constexpr FanCurves kFanType0Curves{kDefaultTempToPwmCurve,
-                                    kPwrToPwmCurveFanType170WSunonPFC0321B3,
+                                    kPwrToPwmCurveFanType170WSunonMFC0251V1,
                                     kDefaultTempToRpmCurve};
 constexpr FanCurves kFanType1Curves{kDefaultTempToPwmCurve,
-                                    kPwrToPwmCurveFanType170WSunonMFC0251V1,
+                                    kPwrToPwmCurveFanType213WW6800,
                                     kDefaultTempToRpmCurve};
 
 // led color tracks power between these bounds, see SetPwrLedColor() below
